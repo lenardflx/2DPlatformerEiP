@@ -1,46 +1,57 @@
 import pygame
-from game.collision import check_collision
+
 
 class Entity:
     def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.velocity_x = 0
-        self.velocity_y = 0
+        self.rect = pygame.Rect(x, y, width, height)
+        self.velocity = pygame.Vector2(0, 0)
         self.on_ground = False
 
-    def move_horizontal(self, level, speed):
-        if speed > 0 and check_collision(self, level, dx=speed) != "solid":
-            self.x += speed
-        elif speed < 0 and check_collision(self, level, dx=speed) != "solid":
-            self.x += speed
-
-    def move_vertical(self, level, dt):
-        if not self.on_ground:
-            self.velocity_y += level.gravity * dt
-
-        collision = check_collision(self, level, dy=self.velocity_y)
-
-        if collision == "solid":
-            if self.velocity_y > 0:
-                self.velocity_y = 0
-                self.on_ground = True
-            elif self.velocity_y < 0:
-                self.velocity_y = 0
-        elif collision == "death":
-            print("tot")
-            self.x, self.y = 50, 50
-            self.velocity_y = 0
-            self.on_ground = False
-        else:
-            self.on_ground = False
-
-        self.y += self.velocity_y
-
     def update(self, level, dt):
-        self.move_vertical(level, dt)
+        self.velocity.y += level.gravity * dt
+        self.move(level)
 
-    def render(self, screen, color=(255, 255, 255)):
-        pygame.draw.rect(screen, color, (self.x, self.y, self.width, self.height))
+    def move(self, level):
+        self.rect.x += self.velocity.x
+        self.handle_horizontal_collisions(level)
+        self.on_ground = False
+        self.rect.y += self.velocity.y
+        self.handle_vertical_collisions(level)
+
+    def handle_vertical_collisions(self, level):
+        future_rect = self.rect.move(0, self.velocity.y)
+        x_left, x_right = self.rect.left // level.scale, (self.rect.right - 1) // level.scale
+        y_tile = future_rect.bottom // level.scale if self.velocity.y > 0 else future_rect.top // level.scale
+
+        for x in range(x_left, x_right + 1):
+            if 0 <= x < len(level.tile_collisions) and 0 <= y_tile < len(level.tile_collisions[0]):
+                if level.tile_collisions[x][y_tile] == "solid":
+                    if self.velocity.y > 0:
+                        self.rect.bottom = y_tile * level.scale
+                        self.on_ground = True
+                    else:
+                        self.rect.top = (y_tile + 1) * level.scale
+                    self.velocity.y = 0
+                    return
+        self.on_ground = False
+
+    def handle_horizontal_collisions(self, level):
+        future_rect = self.rect.move(self.velocity.x, 0)
+        x_tile = future_rect.right // level.scale if self.velocity.x > 0 else future_rect.left // level.scale
+        y_top, y_bottom = (self.rect.top + 1) // level.scale, (self.rect.bottom - 1) // level.scale
+
+        for y in range(y_top, y_bottom + 1):
+            if 0 <= x_tile < len(level.tile_collisions) and 0 <= y < len(level.tile_collisions[0]):
+                if level.tile_collisions[x_tile][y] == "solid":
+                    if self.velocity.x > 0:
+                        self.rect.right = x_tile * level.scale
+                    else:
+                        self.rect.left = (x_tile + 1) * level.scale
+                    self.velocity.x = 0
+                    return
+
+    def render(self, screen):
+        pygame.draw.rect(screen, (255, 0, 0), self.rect)
+
+    def eliminate(self):
+        print("eliminated")

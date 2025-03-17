@@ -12,7 +12,7 @@ class Level:
         self.scale: int = get_game_data("level_scale")
         self.tile_textures, self.collision_types = self.load_tiles()
         self.gravity = 3
-        self.tiles = self.process_blueprint()
+        self.tiles, self.tile_collisions = self.process_blueprint()
 
         self.height = len(self.tiles[0]) * self.scale
         self.width = len(self.tiles) * self.scale
@@ -32,21 +32,27 @@ class Level:
         pixel_array = pygame.PixelArray(self.blueprint)
 
         tiles = []
+        collisions = []
+
         for x in range(w):
-            row = []
+            row_tiles = []
+            row_collisions = []
             for y in range(h):
                 color = self.blueprint.unmap_rgb(pixel_array[x, y])
                 color_key = f"{color[0]},{color[1]},{color[2]}" if color[3] == 255 else None
-                row.append(self.tile_textures.get(color_key, None))
 
-            tiles.append(row)
+                row_tiles.append(self.tile_textures.get(color_key, None))
+                row_collisions.append(self.collision_types.get(color_key, "air"))
 
-        return tiles
+            tiles.append(row_tiles)
+            collisions.append(row_collisions)
 
+        del pixel_array
+        return tiles, collisions
 
     def render(self, screen):
         for x, row in enumerate(self.tiles):
             for y, tile in enumerate(row):
-                if tile:
-                    print(tile)
-                    screen.blit(pygame.transform.scale(tile, (self.scale, self.scale)), (x * self.scale, y * self.scale))
+                if isinstance(tile, pygame.Surface):
+                    screen.blit(pygame.transform.scale(tile, (self.scale, self.scale)),
+                                (x * self.scale, y * self.scale))

@@ -8,32 +8,52 @@ class GameEngine:
     def __init__(self):
         pygame.init()
 
-        self.screen_size = get_game_data("screen_size")
+        self.native_size = get_game_data("screen_size")
         self.fps = get_game_data("fps")
 
-        self.screen = pygame.display.set_mode(self.screen_size)
+        self.screen = pygame.display.set_mode(self.native_size, pygame.RESIZABLE)
         pygame.display.set_caption(get_game_data("game_title"))
 
         self.clock = pygame.time.Clock()
-        self.player = Player(50, 50)
+        w, h = get_game_data("player_size")
+        s = get_game_data("player_scale")
+        self.player = Player(50, 50, w, h, s)
         self.background = Background()
         self.level = Level(0)
 
         self.is_running = True
+        self.scaled_surface = pygame.Surface(self.native_size)
 
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_running = False
+            elif event.type == pygame.VIDEORESIZE:
+                self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
     def render(self):
-        self.screen.fill((0, 0, 0))
-        self.background.render(self.screen)
-        self.level.render(self.screen)
-        self.player.render(self.screen, (255, 0, 255))
+        self.scaled_surface.fill((0, 0, 0))
+        self.background.render(self.scaled_surface)
+        self.level.render(self.scaled_surface)
+        self.player.render(self.scaled_surface)
+
+        screen_width, screen_height = self.screen.get_size()
+        scale_x = screen_width / self.native_size[0]
+        scale_y = screen_height / self.native_size[1]
+        scale = min(scale_x, scale_y)
+
+        new_width = int(self.native_size[0] * scale)
+        new_height = int(self.native_size[1] * scale)
+
+        scaled_surface = pygame.transform.scale(self.scaled_surface, (new_width, new_height))
+        x_offset = (screen_width - new_width) // 2
+        y_offset = (screen_height - new_height) // 2
+
+        self.screen.fill((0, 0, 255))
+        self.screen.blit(scaled_surface, (x_offset, y_offset))
 
     def update(self):
-        self.player.update(self.level, 1/self.fps)
+        self.player.update(self.level, 1 / self.fps)
 
     def run(self):
         while self.is_running:
