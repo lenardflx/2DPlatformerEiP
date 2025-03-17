@@ -1,0 +1,9 @@
+{
+  "screen_size": [640,480],
+  "fps": 60,
+  "game_title": "Sigmaboy",
+  "level_path": "assets/levels/levels.json",
+  "level_scale": 16,
+  "tile_path": "assets/tiles/textures.json",
+  "tile_scale": 0
+}
