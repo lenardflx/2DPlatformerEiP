@@ -18,7 +18,7 @@ class Level:
         self.width = len(self.tiles) * self.scale
 
     def load_tiles(self):
-        with open("assets/tiles/textures.json") as f:
+        with open("assets/tiles/tiles.json") as f:
             loc = json.load(f)
         textures = {}
         collision_types = {}
@@ -36,8 +36,8 @@ class Level:
             row = []
             for y in range(h):
                 color = self.blueprint.unmap_rgb(pixel_array[x, y])
-                code = f"{color[0]},{color[1]},{color[2]}" if color[3] != 0 else None
-                row.append(self.tile_textures.get(code, None))
+                color_key = f"{color[0]},{color[1]},{color[2]}" if color[3] == 255 else None
+                row.append(self.tile_textures.get(color_key, None))
 
             tiles.append(row)
 
@@ -48,4 +48,5 @@ class Level:
         for x, row in enumerate(self.tiles):
             for y, tile in enumerate(row):
                 if tile:
+                    print(tile)
                     screen.blit(pygame.transform.scale(tile, (self.scale, self.scale)), (x * self.scale, y * self.scale))
