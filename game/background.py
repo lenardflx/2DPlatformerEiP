@@ -11,5 +11,5 @@ class Background:
                                             (self.image.get_width() * self.scale,
                                              self.image.get_height() * self.scale))
 
-    def render(self, screen):
+    def render(self, screen, camera=None):
         screen.blit(self.image, (0, 0))

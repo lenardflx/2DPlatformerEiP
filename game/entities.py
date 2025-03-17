@@ -50,8 +50,9 @@ class Entity:
                     self.velocity.x = 0
                     return
 
-    def render(self, screen):
-        pygame.draw.rect(screen, (255, 0, 0), self.rect)
+
+    def render(self, screen, camera):
+        pygame.draw.rect(screen, (255, 0, 0), camera.apply(self))
 
     def eliminate(self):
         print("eliminated")

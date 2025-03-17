@@ -50,9 +50,10 @@ class Level:
         del pixel_array
         return tiles, collisions
 
-    def render(self, screen):
+    def render(self, screen, camera):
         for x, row in enumerate(self.tiles):
             for y, tile in enumerate(row):
-                if isinstance(tile, pygame.Surface):
+                if tile:
+                    tile_rect = pygame.Rect(x * self.scale, y * self.scale, self.scale, self.scale)
                     screen.blit(pygame.transform.scale(tile, (self.scale, self.scale)),
-                                (x * self.scale, y * self.scale))
+                                camera.apply(tile_rect))

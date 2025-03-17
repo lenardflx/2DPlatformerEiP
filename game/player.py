@@ -65,11 +65,13 @@ class Player(Entity):
             self.sprite_index = (self.sprite_index + 1) % len(self.sprites[self.state])
             self.time_accumulator = 0
 
-    def render(self, screen):
+    def render(self, screen, camera):
         sprite = self.sprites[self.state][self.sprite_index]
+
         if not self.facing_right:
             sprite = pygame.transform.flip(sprite, True, False)
-        screen.blit(sprite, (self.rect.x, self.rect.y))
+
+        screen.blit(sprite, camera.apply(self))
 
     def eliminate(self):
         print("Player eliminated")
