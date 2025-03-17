@@ -12,38 +12,32 @@ class Entity:
         self.on_ground = False
 
     def move_horizontal(self, level, speed):
-        collision = check_collision(self, level, dx=speed)
-        if collision == "border left":
-            self.x = 0
-        elif collision == "border right":
-            self.x = level.scale * (len(level.tiles) - 1) - self.width
-        elif collision != "solid":
+        if speed > 0 and check_collision(self, level, dx=speed) != "solid":
+            self.x += speed
+        elif speed < 0 and check_collision(self, level, dx=speed) != "solid":
             self.x += speed
 
     def move_vertical(self, level, dt):
         if not self.on_ground:
-            self.velocity_y = self.velocity_y + level.gravity * dt
+            self.velocity_y += level.gravity * dt
 
-        collision = check_collision(self, level, dx=dt)
+        collision = check_collision(self, level, dy=self.velocity_y)
+
         if collision == "solid":
-            self.velocity_y = 0
-            self.on_ground = True
-        elif collision == "border top":
+            if self.velocity_y > 0:
+                self.velocity_y = 0
+                self.on_ground = True
+            elif self.velocity_y < 0:
+                self.velocity_y = 0
+        elif collision == "death":
+            print("tot")
+            self.x, self.y = 50, 50
             self.velocity_y = 0
             self.on_ground = False
-            self.y = 0
-        elif collision == "border bottom":
-            self.velocity_y = 0
-            self.on_ground = True
-            self.y = level.height - self.height
         else:
             self.on_ground = False
 
-
-        if check_collision(self, level, dy=-self.height) == "solid" and self.velocity_y < 0:
-            self.velocity_y = 0
-
-        #self.y += self.velocity_y
+        self.y += self.velocity_y
 
     def update(self, level, dt):
         self.move_vertical(level, dt)
