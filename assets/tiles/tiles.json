@@ -22,5 +22,71 @@
     "collision_type": "trigger",
     "type": "pressure_plate",
     "metadata": {"activation_time": 100}
+  },
+  "120,50,0": {
+    "texture": "wood_middle.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "120,0,0": {
+    "texture": "wood_ground.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "120,120,0": {
+    "texture": "leaves_connect.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "120,255,0": {
+    "texture": "leaves_b_l.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+    "120,255,120": {
+    "texture": "leaves_b_r.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "120,255,200": {
+    "texture": "leaves_m_r.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "200,255,200": {
+    "texture": "leaves_m_t.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "220,255,220": {
+    "texture": "leaves_m_l.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "90,255,90": {
+    "texture": "leaves_t_l.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "90,255,120": {
+    "texture": "leaves_t_r.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "0,255,0": {
+    "texture": "leaves_c.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
   }
 }

@@ -10,6 +10,8 @@ from game.menu import Menu, MenuOptions
 from game.player import Player
 from game.enemy import Enemy
 from core.controls import Controls
+from game.enemies.enemy import Enemy
+from game.user_interface import UI
 
 class GameEngine:
     def __init__(self):
@@ -29,7 +31,7 @@ class GameEngine:
         self.level = Level(self.current_level)
 
         self.player = self.load_player()
-        self.enemy = Enemy(400, 400, w2, h2, s2)
+        self.enemy = Enemy(400, 400, w2, h2, s2, self.player)
 
         with open("assets/background/background.json") as f:
             data = json.load(f)
@@ -45,6 +47,7 @@ class GameEngine:
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
         self.controls = Controls()  #   das könnte Mist sein
+        self.ui = UI(self.screen)
 
     def load_player(self):
         w, h = get_game_data("player_size")
@@ -64,6 +67,8 @@ class GameEngine:
                 self.is_running = False
             elif event.type == pygame.VIDEORESIZE:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+            self.ui.handle_events(event, self)
 
     def render(self):
         self.scaled_surface.fill((0, 0, 0))
@@ -85,6 +90,8 @@ class GameEngine:
 
         self.screen.fill((0, 0, 255))
         self.screen.blit(scaled_surface, (x_offset, y_offset))
+
+        self.ui.render(x_offset, y_offset, new_width, new_height)
 
     def update(self):
         self.player.update(self.level, 1 / self.fps)
