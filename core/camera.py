@@ -18,9 +18,9 @@ class Camera:
         self.camera.x = max(0, min(self.camera.x, self.level_width - self.width))
         self.camera.y = max(0, min(self.camera.y, self.level_height - self.height))
 
-    def apply(self, target):
+    def apply(self, target, speed=1):
         if isinstance(target, pygame.Rect):
-            return target.move(-self.camera.x, -self.camera.y)
+            return target.move(-self.camera.x*speed, -self.camera.y)
         elif hasattr(target, "rect"):
-            return target.rect.move(-self.camera.x, -self.camera.y)
+            return target.rect.move(-self.camera.x*speed, -self.camera.y)
         return target
