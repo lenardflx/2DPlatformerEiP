@@ -48,6 +48,7 @@ class GameEngine:
 
         self.controls = Controls()  #   das könnte Mist sein
         self.ui = UI(self.screen)
+        self.controls = self.player.controls
 
     def load_player(self):
         w, h = get_game_data("player_size")
