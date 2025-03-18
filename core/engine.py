@@ -9,6 +9,8 @@ from game.levels import Level
 from game.menu import Menu
 from game.player import Player
 from game.enemy import Enemy
+from game.user_interface import UI
+
 
 class GameEngine:
     def __init__(self):
@@ -43,6 +45,8 @@ class GameEngine:
         self.scaled_surface = pygame.Surface(self.native_size)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
+        self.ui = UI(self.screen)
+
     def load_player(self):
         w, h = get_game_data("player_size")
         s = get_game_data("player_scale")
@@ -61,6 +65,8 @@ class GameEngine:
                 self.is_running = False
             elif event.type == pygame.VIDEORESIZE:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+            self.ui.handle_events(event, self)
 
     def render(self):
         self.scaled_surface.fill((0, 0, 0))
@@ -82,6 +88,8 @@ class GameEngine:
 
         self.screen.fill((0, 0, 255))
         self.screen.blit(scaled_surface, (x_offset, y_offset))
+
+        self.ui.render(x_offset, y_offset, new_width, new_height)
 
     def update(self):
         self.player.update(self.level, 1 / self.fps)

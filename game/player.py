@@ -16,6 +16,7 @@ class Player(Entity):
         self.facing_right = True
 
         self.controls = Controls()
+        self.coins = 0
 
     jump_count = 0
     maxjump = 12
