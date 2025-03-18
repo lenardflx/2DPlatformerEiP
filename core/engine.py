@@ -9,6 +9,7 @@ from game.levels import Level
 from game.menu import Menu
 from game.player import Player
 from game.enemy import Enemy
+from core.controls import Controls
 
 class GameEngine:
     def __init__(self):
@@ -42,6 +43,8 @@ class GameEngine:
 
         self.scaled_surface = pygame.Surface(self.native_size)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
+
+        self.controls = Controls()  #   das könnte Mist sein
 
     def load_player(self):
         w, h = get_game_data("player_size")
@@ -97,6 +100,8 @@ class GameEngine:
             if self.is_menu:
                 self.menu.handle_events(self)
                 self.menu.render(self.screen)
+            elif self.controls.is_action_active("menu"):    # Das könnte Mist sein
+                self.menu.open_menu(0,self)                              # das könnte MIst
             else:
                 self.handle_events()
                 self.update()
