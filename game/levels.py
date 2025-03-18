@@ -10,9 +10,8 @@ class Level:
             loc = json.load(f)
             self.blueprint = pygame.image.load(os.path.join("assets/levels",loc[str(level_number)])).convert_alpha()
         self.scale: int = get_game_data("level_scale")
-        self.tiles_data = self.load_tiles()
+        self.tile_textures, self.collision_types = self.load_tiles()
         self.gravity = 9.81
-        
         self.tiles, self.tile_collisions = self.process_blueprint()
         self.spawn = (100,400)
 
@@ -70,4 +69,5 @@ class Level:
             for y, tile in enumerate(row):
                 if tile:
                     tile_rect = pygame.Rect(x * self.scale, y * self.scale, self.scale, self.scale)
-                    screen.blit(pygame.transform.scale(tile.texture, (self.scale, self.scale)), camera.apply(tile_rect))
+                    screen.blit(pygame.transform.scale(tile, (self.scale, self.scale)),
+                                camera.apply(tile_rect))

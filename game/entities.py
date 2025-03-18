@@ -6,8 +6,11 @@ class Entity:
         self.rect = pygame.Rect(x, y, width, height)
         self.velocity = pygame.Vector2(0, 0)
         self.on_ground = False
+        #hit gibt an ob mit etwas kollidiert wurde
+        self.hit = False
 
     def update(self, level, dt):
+        self.hit = False
         self.velocity.y += level.gravity * dt
         self.move(level)
 
@@ -48,6 +51,7 @@ class Entity:
                     else:
                         self.rect.left = (x_tile + 1) * level.scale
                     self.velocity.x = 0
+                    self.hit = True
                     return
 
 
@@ -56,3 +60,11 @@ class Entity:
 
     def eliminate(self):
         print("eliminated")
+
+    def render(self, screen, camera):
+        sprite = self.sprites[self.state][self.sprite_index]
+
+        if not self.facing_right:
+            sprite = pygame.transform.flip(sprite, True, False)
+
+        screen.blit(sprite, camera.apply(self))

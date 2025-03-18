@@ -7,6 +7,7 @@ from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
 from game.player import Player
+from game.enemy import Enemy
 
 class GameEngine:
     def __init__(self):
@@ -19,15 +20,14 @@ class GameEngine:
         pygame.display.set_caption(get_game_data("game_title"))
 
         self.clock = pygame.time.Clock()
-
-        with open("assets/background/background.json") as f:
-            data = json.load(f)
-        self.backgrounds = [Background(d) for d in data[::-1]]
-
-        self.current_level = 0
-        self.level = Level(self.current_level)
-
-        self.player = self.load_player()
+        w, h = get_game_data("player_size")
+        s = get_game_data("player_scale")
+        w2, h2 = get_game_data("enemy_size")
+        s2 = get_game_data("enemy_scale")
+        self.player = Player(50, 50, w, h, s)
+        self.enemy = Enemy(400, 400, w2, h2, s2)
+        self.background = Background()
+        self.level = Level(0)
 
         self.is_running = True
         self.scaled_surface = pygame.Surface(self.native_size)
@@ -58,6 +58,7 @@ class GameEngine:
             background.render(self.scaled_surface, self.camera)
         self.level.render(self.scaled_surface, self.camera)
         self.player.render(self.scaled_surface, self.camera)
+        self.enemy.render(self.scaled_surface, self.camera)
 
         screen_width, screen_height = self.screen.get_size()
         scale_x = screen_width / self.native_size[0]
@@ -74,6 +75,7 @@ class GameEngine:
 
     def update(self):
         self.player.update(self.level, 1 / self.fps)
+        self.enemy.update(self.level, 1 / self.fps)
         self.level.check_touch(self.player, self)
         self.camera.follow(self.player)
 

@@ -5,5 +5,7 @@
   "level_scale": 16,
   "background_scale": 8,
   "player_size": [12,16],
-  "player_scale": 1
+  "player_scale": 1,
+  "enemy_size": [12,16],
+  "enemy_scale": 1
 }
