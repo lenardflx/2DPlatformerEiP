@@ -13,7 +13,7 @@ class Level:
         self.tiles_data = self.load_tiles()
         self.gravity = 9.81
         self.tiles, self.tile_collisions = self.process_blueprint()
-        self.spawn = (100,400)
+        self.spawn = (100,100)
 
         self.height = len(self.tiles[0]) * self.scale
         self.width = len(self.tiles) * self.scale
