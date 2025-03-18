@@ -88,7 +88,11 @@ class Enemy(Entity):
                 self.velocity.x = -self.speed * dt
         
     def jump(self, dt):
-        self.velocity.y = -200 * dt
+        if self.velocity.x > 0:
+            self.velocity.x += 0.1 * self.speed
+        elif self.velocity.x < 0:
+            self.velocity.x -= 0.1 * self.speed
+        self.velocity.y = -50 * dt
         
             
     def eliminate(self):

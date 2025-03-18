@@ -24,7 +24,7 @@ class GameEngine:
         s2 = get_game_data("enemy_scale")
 
         self.player = Player(50, 50, w, h, s)
-        self.enemy = Enemy(400, 300, w2, h2, s2)
+        self.enemy = Enemy(400, 400, w2, h2, s2)
         self.background = Background()
         self.level = Level(0)
 
