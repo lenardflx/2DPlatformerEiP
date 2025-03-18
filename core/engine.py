@@ -6,7 +6,7 @@ from core.camera import Camera
 from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
-from game.menu import Menu
+from game.menu import Menu, MenuOptions
 from game.player import Player
 from game.enemies.enemy import Enemy
 from game.user_interface import UI
@@ -46,6 +46,7 @@ class GameEngine:
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
         self.ui = UI(self.screen)
+        self.controls = self.player.controls
 
     def load_player(self):
         w, h = get_game_data("player_size")
@@ -105,6 +106,8 @@ class GameEngine:
             if self.is_menu:
                 self.menu.handle_events(self)
                 self.menu.render(self.screen)
+            elif self.controls.is_action_active("menu"):    # Das könnte Mist sein
+                self.menu.open_menu(MenuOptions.PAUSE,self)                             # das könnte MIst
             else:
                 self.handle_events()
                 self.update()
