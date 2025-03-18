@@ -40,8 +40,6 @@ class Enemy(Entity):
 
         if self.on_ground and self.has_jumped:
             self.has_jumped = False
-            print(self.velocity.y)
-
 
         super().update(level, dt)
 
