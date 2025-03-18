@@ -6,8 +6,11 @@ from core.camera import Camera
 from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
+from game.menu import Menu
 from game.player import Player
 from game.enemies.enemy import Enemy
+from game.user_interface import UI
+
 
 class GameEngine:
     def __init__(self):
@@ -20,8 +23,6 @@ class GameEngine:
         pygame.display.set_caption(get_game_data("game_title"))
 
         self.clock = pygame.time.Clock()
-        w, h = get_game_data("player_size")
-        s = get_game_data("player_scale")
         w2, h2 = get_game_data("enemy_size")
         s2 = get_game_data("enemy_scale")
 
@@ -37,8 +38,14 @@ class GameEngine:
         self.backgrounds = [Background(d) for d in data[::-1]]
 
         self.is_running = True
+        self.is_menu = True
+
+        self.menu = Menu()
+
         self.scaled_surface = pygame.Surface(self.native_size)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
+
+        self.ui = UI(self.screen)
 
     def load_player(self):
         w, h = get_game_data("player_size")
@@ -58,6 +65,8 @@ class GameEngine:
                 self.is_running = False
             elif event.type == pygame.VIDEORESIZE:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+            self.ui.handle_events(event, self)
 
     def render(self):
         self.scaled_surface.fill((0, 0, 0))
@@ -80,6 +89,8 @@ class GameEngine:
         self.screen.fill((0, 0, 255))
         self.screen.blit(scaled_surface, (x_offset, y_offset))
 
+        self.ui.render(x_offset, y_offset, new_width, new_height)
+
     def update(self):
         self.player.update(self.level, 1 / self.fps)
         self.enemy.update(self.level, 1 / self.fps)
@@ -87,11 +98,17 @@ class GameEngine:
         self.camera.follow(self.player)
 
     def run(self):
+        w, h = pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]
+        self.menu.update_layout(w,h)
         while self.is_running:
             self.clock.tick(self.fps)
-            self.handle_events()
-            self.update()
-            self.render()
+            if self.is_menu:
+                self.menu.handle_events(self)
+                self.menu.render(self.screen)
+            else:
+                self.handle_events()
+                self.update()
+                self.render()
             pygame.display.flip()
 
         pygame.quit()

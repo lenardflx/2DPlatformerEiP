@@ -15,6 +15,7 @@ class Player(Entity):
         self.time_accumulator = 0
         self.facing_right = True
         self.controls = Controls()
+        self.coins = 0
 
     jump_count = 0
     health = 100
