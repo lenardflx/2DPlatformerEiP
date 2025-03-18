@@ -54,10 +54,6 @@ class Entity:
                     self.hit = True
                     return
 
-
-    def render(self, screen, camera):
-        pygame.draw.rect(screen, (255, 0, 0), camera.apply(self))
-
     def eliminate(self):
         print("eliminated")
 

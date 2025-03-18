@@ -7,7 +7,7 @@ from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
 from game.player import Player
-from game.enemy import Enemy
+from game.enemies.enemy import Enemy
 
 class GameEngine:
     def __init__(self):
@@ -29,7 +29,7 @@ class GameEngine:
         self.level = Level(self.current_level)
 
         self.player = self.load_player()
-        self.enemy = Enemy(400, 400, w2, h2, s2)
+        self.enemy = Enemy(400, 400, w2, h2, s2, self.player)
 
         with open("assets/background/background.json") as f:
             data = json.load(f)
