@@ -14,12 +14,13 @@ class Player(Entity):
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
-
         self.controls = Controls()
         self.coins = 0
 
     jump_count = 0
+    health = 100
     maxjump = 12
+    hitstun = 0
 
     def load_sprites(self):
         with open("assets/characters/player.json") as f:
@@ -33,11 +34,16 @@ class Player(Entity):
         }
 
     def update(self, level, dt):
-        global count
+
+        if self.health <= 0:
+            self.eliminate()
 
         keys = pygame.key.get_pressed()
         self.velocity.x = 0
         new_state = "idle"
+
+        if self.hitstun > 0:
+            self.hitstun -= 1
 
         left = self.controls.is_action_active("move_left")
         right = self.controls.is_action_active("move_right")
@@ -92,5 +98,22 @@ class Player(Entity):
             self.sprite_index = (self.sprite_index + 1) % len(self.sprites[self.state])
             self.time_accumulator = 0
 
+    def get_hit(self, enemy):
+        if self.hitstun == 0:
+            self.health -= enemy.damage
+            self.hitstun = 120
+
+    
+
+    def render(self, screen, camera):
+        if self.hitstun % 4 in (0, 1):
+            sprite = self.sprites[self.state][self.sprite_index]
+
+            if not self.facing_right:
+                sprite = pygame.transform.flip(sprite, True, False)
+
+            screen.blit(sprite, camera.apply(self))
+
+
     def eliminate(self):
-        print("Player eliminated")
+        print("DEATHSCREEN")

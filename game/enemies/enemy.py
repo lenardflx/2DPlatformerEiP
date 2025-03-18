@@ -3,19 +3,21 @@ import os
 import pygame
 from game.entities import Entity
 
-count = 0
-
 class Enemy(Entity):
-    def __init__(self, x, y, width, height, scale):
+    def __init__(self, x, y, width, height, scale, player):
         super().__init__(x, y, width * scale, height * scale)
         self.sprites = self.load_sprites()
         self.state = "idle"
         self.sprite_index = 0
-        self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
-        self.speed = 40
         self.has_jumped = True
+        self.player = player
+
+    speed = 40
+    animation_speed = 0.1
+    damage = 40
+
 
     def load_sprites(self):
         with open("assets/characters/player.json") as f:
@@ -30,6 +32,7 @@ class Enemy(Entity):
 
     def update(self, level, dt):
         new_state = "idle"
+        self.hit_detection()
 
         if self.state == "idle":
             self.walk_up_and_down(level, dt)
@@ -66,7 +69,6 @@ class Enemy(Entity):
             self.time_accumulator = 0
 
     def walk_up_and_down(self, level, dt):
-            
         if self.facing_right:
             if self.rect.right > level.width:
                 self.rect.left = 0
@@ -91,5 +93,10 @@ class Enemy(Entity):
             self.velocity.x -= 0.1 * self.speed
         self.velocity.y = -50 * dt
 
+    def hit_detection(self):
+        if(self.rect.colliderect(self.player.rect)):
+            self.player.get_hit(self)
+        
+            
     def eliminate(self):
-        print("Player eliminated")
+        print("Enemy eliminated")
