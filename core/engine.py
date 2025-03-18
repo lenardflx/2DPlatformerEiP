@@ -8,7 +8,6 @@ from game.background import Background
 from game.levels import Level
 from game.menu import Menu, MenuOptions
 from game.player import Player
-from game.enemy import Enemy
 from core.controls import Controls
 from game.enemies.enemy import Enemy
 from game.user_interface import UI
