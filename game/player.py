@@ -54,8 +54,6 @@ class Player(Entity):
         if (not self.on_ground) and count < self.maxjump:
             count += 1
 
-        print(count)
-
         if self.on_ground and count != 0:
             count = 0
 
