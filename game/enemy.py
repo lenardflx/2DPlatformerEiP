@@ -90,7 +90,6 @@ class Enemy(Entity):
         elif self.velocity.x < 0:
             self.velocity.x -= 0.1 * self.speed
         self.velocity.y = -50 * dt
-        
-            
+
     def eliminate(self):
         print("Player eliminated")

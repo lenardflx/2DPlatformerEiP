@@ -22,5 +22,17 @@
     "collision_type": "trigger",
     "type": "pressure_plate",
     "metadata": {"activation_time": 100}
+  },
+  "0,255,0": {
+    "texture": "leaves.png",
+    "collision_type": "decorative",
+    "type": "block",
+    "metadata": {}
+  },
+  "120,50,0": {
+    "texture": "wood.png",
+    "collision_type": "solid",
+    "type": "block",
+    "metadata": {}
   }
 }
