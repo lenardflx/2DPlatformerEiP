@@ -11,7 +11,8 @@ class Level:
             self.blueprint = pygame.image.load(os.path.join("assets/levels",loc[str(level_number)])).convert_alpha()
         self.scale: int = get_game_data("level_scale")
         self.tiles_data = self.load_tiles()
-        self.gravity = 3
+        self.gravity = 9.81
+        
         self.tiles, self.tile_collisions = self.process_blueprint()
         self.spawn = (100,400)
 

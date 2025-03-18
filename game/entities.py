@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import pygame
 
 
@@ -56,3 +57,5 @@ class Entity:
 
     def eliminate(self):
         print("eliminated")
+=======
+>>>>>>> parent of 0b19077 (initial commit)

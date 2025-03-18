@@ -3,6 +3,8 @@ import os
 import pygame
 from game.entities import Entity
 
+count = 0
+
 class Player(Entity):
     def __init__(self, x, y, width, height, scale):
         super().__init__(x, y, width * scale, height * scale)
@@ -12,6 +14,7 @@ class Player(Entity):
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
+    maxjump = 12
 
     def load_sprites(self):
         with open("assets/characters/player.json") as f:
@@ -25,6 +28,8 @@ class Player(Entity):
         }
 
     def update(self, level, dt):
+        global count
+
         keys = pygame.key.get_pressed()
         self.velocity.x = 0
         new_state = "idle"
@@ -33,13 +38,26 @@ class Player(Entity):
             self.velocity.x = -100 * dt
             new_state = "run"
             self.facing_right = False
-        if keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT]:
             self.velocity.x = 100 * dt
             new_state = "run"
             self.facing_right = True
-        if keys[pygame.K_SPACE] and self.on_ground:
-            self.velocity.y = -200 * dt
-            new_state = "jump"
+        
+        #Jump higher or lower
+        if keys[pygame.K_SPACE]:
+            if self.on_ground or count < self.maxjump:
+                self.velocity.y = -100 * dt
+                new_state = "jump"
+        elif not self.on_ground:
+            count = self.maxjump
+            
+        if (not self.on_ground) and count < self.maxjump:
+            count += 1
+
+        print(count)
+
+        if self.on_ground and count != 0:
+            count = 0
 
         super().update(level, dt)
 
