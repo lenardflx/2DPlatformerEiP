@@ -15,9 +15,15 @@ class Menu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 engine.is_running = False
+            elif event.type == pygame.VIDEORESIZE:
+                self.update_layout(event.w, event.h)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.start_button_rect.collidepoint(event.pos):
                     engine.is_menu = False
+
+    def update_layout(self, screen_width, screen_height):
+        button_spacing = 80
+        self.start_button_rect.center = (screen_width // 2, screen_height // 2 - button_spacing)
 
     def render(self, screen):
         screen.fill((30, 30, 30))

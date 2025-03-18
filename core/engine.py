@@ -90,6 +90,8 @@ class GameEngine:
         self.camera.follow(self.player)
 
     def run(self):
+        w, h = pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]
+        self.menu.update_layout(w,h)
         while self.is_running:
             self.clock.tick(self.fps)
             if self.is_menu:
