@@ -18,6 +18,7 @@ class GameEngine:
 
         self.native_size = get_game_data("screen_size")
         self.fps = get_game_data("fps")
+        self.controls = Controls()
 
         self.screen = pygame.display.set_mode(self.native_size, pygame.RESIZABLE)
         pygame.display.set_caption(get_game_data("game_title"))
@@ -45,15 +46,13 @@ class GameEngine:
         self.scaled_surface = pygame.Surface(self.native_size)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
-        self.controls = Controls()  #   das könnte Mist sein
         self.ui = UI(self.screen)
-        self.controls = self.player.controls
 
     def load_player(self):
         w, h = get_game_data("player_size")
         s = get_game_data("player_scale")
         x,y = self.level.spawn
-        return Player(x, y, w, h, s)
+        return Player(x, y, w, h, s, self.controls)
 
     def load_next_level(self):
         self.current_level += 1
@@ -100,19 +99,32 @@ class GameEngine:
         self.camera.follow(self.player)
 
     def run(self):
-        w, h = pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]
-        self.menu.update_layout(w,h)
+        w, h = pygame.display.get_window_size()
+        self.menu.update_layout(w, h)
+
+        menu_toggle_cooldown = False
+
         while self.is_running:
             self.clock.tick(self.fps)
+
+            if self.controls.is_action_active("menu"):
+                if not menu_toggle_cooldown:
+                    if self.is_menu and self.menu.active_type != MenuOptions.START:
+                        self.is_menu = False
+                    elif not self.is_menu:
+                        self.menu.open_menu(MenuOptions.PAUSE, self)
+                    menu_toggle_cooldown = True
+            else:
+                menu_toggle_cooldown = False
+
             if self.is_menu:
                 self.menu.handle_events(self)
                 self.menu.render(self.screen)
-            elif self.controls.is_action_active("menu"):    # Das könnte Mist sein
-                self.menu.open_menu(MenuOptions.PAUSE,self)                             # das könnte MIst
             else:
                 self.handle_events()
                 self.update()
                 self.render()
+
             pygame.display.flip()
 
         pygame.quit()
