@@ -11,7 +11,7 @@ class Level:
             self.blueprint = pygame.image.load(os.path.join("assets/levels",loc[str(level_number)])).convert_alpha()
         self.scale: int = get_game_data("level_scale")
         self.tile_textures, self.collision_types = self.load_tiles()
-        self.gravity = 3
+        self.gravity = 9.81
         self.tiles, self.tile_collisions = self.process_blueprint()
 
         self.height = len(self.tiles[0]) * self.scale
