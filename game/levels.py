@@ -56,4 +56,4 @@ class Level:
                 if tile:
                     tile_rect = pygame.Rect(x * self.scale, y * self.scale, self.scale, self.scale)
                     screen.blit(pygame.transform.scale(tile, (self.scale, self.scale)),
-                                camera.apply(tile_rect))
+                        camera.apply(tile_rect))

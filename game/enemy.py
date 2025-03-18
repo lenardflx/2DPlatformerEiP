@@ -5,7 +5,7 @@ from game.entities import Entity
 
 count = 0
 
-class Player(Entity):
+class Enemy(Entity):
     def __init__(self, x, y, width, height, scale):
         super().__init__(x, y, width * scale, height * scale)
         self.sprites = self.load_sprites()
@@ -14,7 +14,8 @@ class Player(Entity):
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
-    maxjump = 12
+        self.speed = 40
+        self.has_jumped = True
 
     def load_sprites(self):
         with open("assets/characters/player.json") as f:
@@ -28,34 +29,19 @@ class Player(Entity):
         }
 
     def update(self, level, dt):
-        global count
-
-        keys = pygame.key.get_pressed()
-        self.velocity.x = 0
         new_state = "idle"
 
-        if keys[pygame.K_LEFT]:
-            self.velocity.x = -100 * dt
-            new_state = "run"
-            self.facing_right = False
-        elif keys[pygame.K_RIGHT]:
-            self.velocity.x = 100 * dt
-            new_state = "run"
-            self.facing_right = True
-        
-        #Jump higher or lower
-        if keys[pygame.K_SPACE]:
-            if self.on_ground or count < self.maxjump:
-                self.velocity.y = -100 * dt
-                new_state = "jump"
-        elif not self.on_ground:
-            count = self.maxjump
-            
-        if (not self.on_ground) and count < self.maxjump:
-            count += 1
+        if self.state == "idle":
+            self.walk_up_and_down(level, dt)
 
-        if self.on_ground and count != 0:
-            count = 0
+        if self.velocity.y > 0 and (not self.has_jumped):
+            self.jump(dt)
+            self.has_jumped = True
+
+        if self.on_ground and self.has_jumped:
+            self.has_jumped = False
+            print(self.velocity.y)
+
 
         super().update(level, dt)
 
@@ -81,5 +67,29 @@ class Player(Entity):
             self.sprite_index = (self.sprite_index + 1) % len(self.sprites[self.state])
             self.time_accumulator = 0
 
+    def walk_up_and_down(self, level, dt):
+            
+        if self.facing_right:
+            if self.rect.right > level.width:
+                self.rect.left = 0
+                self.facing_right = False
+            elif self.hit == True:
+                self.facing_right = False
+            else:
+                self.velocity.x = self.speed * dt
+
+        else:
+            if self.rect.left < 0:
+                self.rect.left = 0
+                self.facing_right = True
+            elif self.hit == True:
+                self.facing_right = True
+            else:
+                self.velocity.x = -self.speed * dt
+        
+    def jump(self, dt):
+        self.velocity.y = -200 * dt
+        
+            
     def eliminate(self):
         print("Player eliminated")

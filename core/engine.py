@@ -5,6 +5,7 @@ from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
 from game.player import Player
+from game.enemy import Enemy
 
 class GameEngine:
     def __init__(self):
@@ -19,7 +20,11 @@ class GameEngine:
         self.clock = pygame.time.Clock()
         w, h = get_game_data("player_size")
         s = get_game_data("player_scale")
+        w2, h2 = get_game_data("enemy_size")
+        s2 = get_game_data("enemy_scale")
+
         self.player = Player(50, 50, w, h, s)
+        self.enemy = Enemy(400, 300, w2, h2, s2)
         self.background = Background()
         self.level = Level(0)
 
@@ -39,6 +44,7 @@ class GameEngine:
         self.background.render(self.scaled_surface, self.camera)
         self.level.render(self.scaled_surface, self.camera)
         self.player.render(self.scaled_surface, self.camera)
+        self.enemy.render(self.scaled_surface, self.camera)
         screen_width, screen_height = self.screen.get_size()
         scale_x = screen_width / self.native_size[0]
         scale_y = screen_height / self.native_size[1]
@@ -53,6 +59,7 @@ class GameEngine:
 
     def update(self):
         self.player.update(self.level, 1 / self.fps)
+        self.enemy.update(self.level, 1 / self.fps)
         self.camera.follow(self.player)
 
     def run(self):
