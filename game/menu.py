@@ -2,13 +2,17 @@ import json
 import os
 import pygame
 
+class MenuOptions:
+    START = 0
+    PAUSE = 1
+    DEATH = 2
+
 class Menu:
     def __init__(self):
         with open("assets/menu/menu.json") as f:
             menu_data = json.load(f)
 
-        self.types = ["start", "pause"]          # das könnte mist sein
-        self.active_type = self.types[0]              # das könnte mist sein
+        self.active_type = MenuOptions.START
 
         self.start_button = pygame.image.load(os.path.join("assets/menu", menu_data["start_button"])).convert_alpha()
         self.start_button_rect = self.start_button.get_rect()
@@ -42,5 +46,5 @@ class Menu:
         screen.blit(self.quit_button, self.quit_button_rect)
 
     def open_menu(self, menu_type,engine):
-        self.active_type=self.types[menu_type]
+        self.active_type=menu_type
         engine.is_menu=True

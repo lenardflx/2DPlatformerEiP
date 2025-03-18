@@ -6,7 +6,7 @@ from core.camera import Camera
 from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
-from game.menu import Menu
+from game.menu import Menu, MenuOptions
 from game.player import Player
 from game.enemy import Enemy
 from core.controls import Controls
@@ -101,7 +101,7 @@ class GameEngine:
                 self.menu.handle_events(self)
                 self.menu.render(self.screen)
             elif self.controls.is_action_active("menu"):    # Das könnte Mist sein
-                self.menu.open_menu(0,self)                              # das könnte MIst
+                self.menu.open_menu(MenuOptions.PAUSE,self)                             # das könnte MIst
             else:
                 self.handle_events()
                 self.update()
