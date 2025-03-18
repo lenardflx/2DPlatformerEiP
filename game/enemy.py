@@ -75,7 +75,6 @@ class Enemy(Entity):
                 self.facing_right = False
             else:
                 self.velocity.x = self.speed * dt
-
         else:
             if self.rect.left < 0:
                 self.rect.left = 0
