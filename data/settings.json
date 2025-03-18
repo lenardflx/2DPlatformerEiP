@@ -1,0 +1,7 @@
+{
+    "controls": {
+        "move_left": ["LEFT", "a"],
+        "move_right": ["RIGHT", "d"],
+        "jump": ["SPACE", "w"]
+    }
+}

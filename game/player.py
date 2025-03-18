@@ -1,6 +1,8 @@
 import json
 import os
 import pygame
+
+from core.controls import Controls
 from game.entities import Entity
 
 class Player(Entity):
@@ -12,6 +14,8 @@ class Player(Entity):
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
+
+        self.controls = Controls()
 
     jump_count = 0
     maxjump = 12
@@ -34,17 +38,23 @@ class Player(Entity):
         self.velocity.x = 0
         new_state = "idle"
 
-        if keys[pygame.K_LEFT]:
+        left = self.controls.is_action_active("move_left")
+        right = self.controls.is_action_active("move_right")
+
+        if left and right:
+            self.velocity.x = 0
+            new_state = "idle"
+        elif left:
             self.velocity.x = -100 * dt
             new_state = "run"
             self.facing_right = False
-        elif keys[pygame.K_RIGHT]:
+        elif right:
             self.velocity.x = 100 * dt
             new_state = "run"
             self.facing_right = True
         
         #Jump higher or lower
-        if keys[pygame.K_SPACE]:
+        if self.controls.is_action_active("jump"):
             if self.on_ground or self.jump_count < self.maxjump:
                 self.velocity.y = -100 * dt
                 new_state = "jump"

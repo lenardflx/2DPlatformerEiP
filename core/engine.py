@@ -24,10 +24,17 @@ class GameEngine:
         s = get_game_data("player_scale")
         w2, h2 = get_game_data("enemy_size")
         s2 = get_game_data("enemy_scale")
-        self.player = Player(50, 50, w, h, s)
+
+        self.current_level = 0
+        self.level = Level(self.current_level)
+
+        self.player = self.load_player()
         self.enemy = Enemy(400, 400, w2, h2, s2)
-        self.background = Background()
-        self.level = Level(0)
+
+        with open("assets/background/background.json") as f:
+            data = json.load(f)
+
+        self.backgrounds = [Background(d) for d in data[::-1]]
 
         self.is_running = True
         self.scaled_surface = pygame.Surface(self.native_size)
