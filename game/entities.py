@@ -36,6 +36,9 @@ class Entity:
                         self.rect.top = (y_tile + 1) * level.scale
                     self.velocity.y = 0
                     return
+                elif level.tile_collisions[x][y_tile] == "damage":
+                    self.spikes = True
+                    return
         self.on_ground = False
 
     def handle_horizontal_collisions(self, level):

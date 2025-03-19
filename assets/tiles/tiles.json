@@ -13,7 +13,7 @@
   },
   "255,0,0": {
     "texture": "spikes.png",
-    "collision_type": "death",
+    "collision_type": "damage",
     "type": "block",
     "metadata": {}
   },

@@ -16,7 +16,8 @@ class Player(Entity):
         self.facing_right = True
         self.controls = controls
         self.coins = 0
-
+    
+    spikes = False
     jump_count = 0
     health = 100
     maxjump = 12
@@ -34,6 +35,11 @@ class Player(Entity):
         }
 
     def update(self, level, dt):
+
+        if self.spikes:
+            self.spikes = False
+            self.get_hit(45, 60)
+            self.velocity.y = -5
 
         if self.health <= 0:
             self.eliminate()
@@ -98,10 +104,10 @@ class Player(Entity):
             self.sprite_index = (self.sprite_index + 1) % len(self.sprites[self.state])
             self.time_accumulator = 0
 
-    def get_hit(self, enemy):
+    def get_hit(self, damage, duration):
         if self.hitstun == 0:
-            self.health -= enemy.damage
-            self.hitstun = 120
+            self.health -= damage
+            self.hitstun = duration
 
     
 

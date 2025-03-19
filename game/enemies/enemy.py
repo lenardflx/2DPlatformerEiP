@@ -95,7 +95,7 @@ class Enemy(Entity):
 
     def hit_detection(self):
         if(self.rect.colliderect(self.player.rect)):
-            self.player.get_hit(self)
+            self.player.get_hit(self.damage, 60)
         
             
     def eliminate(self):
