@@ -17,7 +17,6 @@ class Controls:
                 for action, keys in data["controls"].items()
             }
 
-
     def is_action_active(self, action):
         keys = pygame.key.get_pressed()
         return any(keys[key] for key in self.controls.get(action, []))

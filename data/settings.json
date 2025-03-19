@@ -3,6 +3,7 @@
         "move_left": ["LEFT", "a"],
         "move_right": ["RIGHT", "d"],
         "jump": ["SPACE", "w"],
-        "menu": ["ESCAPE"]
+        "menu": ["ESCAPE"],
+        "gravity_inverse": ["g"]
     }
 }

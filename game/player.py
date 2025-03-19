@@ -1,120 +1,78 @@
 import json
 import os
 import pygame
-
 from core.controls import Controls
 from game.entities import Entity
 
 class Player(Entity):
     def __init__(self, x, y, width, height, scale, controls):
         super().__init__(x, y, width * scale, height * scale)
-        self.sprites = self.load_sprites()
-        self.state = "idle"
-        self.max_health = 6
-        self.health = 6
-        self.sprite_index = 0
-        self.animation_speed = 0.1
-        self.time_accumulator = 0
-        self.facing_right = True
         self.controls = controls
-        self.jump_count = 0
-        self.coins = 0
-        self.maxjump = 12
-        self.hitstun = 0
 
-    def load_sprites(self):
-        with open("assets/characters/player.json") as f:
-            data = json.load(f)
-        return {
-            state: [pygame.transform.scale(
-                        pygame.image.load(os.path.join("assets/characters", path)).convert_alpha(),
-                        (self.rect.width, self.rect.height)
-                    ) for path in paths]
-            for state, paths in data.items()
-        }
+        # Player attributes
+        self.max_health = 6
+        self.health = self.max_health
+        self.coins = 0
+        self.speed = 120
+        self.jump_strength = -200
+        self.jump_cut_multiplier = 0.2
+        self.hitstun = 0
+        self.is_jumping = False
+
+        self.load_sprites("assets/characters/player.png", "assets/characters/player.json")
 
     def update(self, level, dt):
-
-        if self.spikes:
-            self.spikes = False
-            self.get_hit(2, 30)
-            self.velocity.y = -4
-
-        if self.health == 0:
+        """Handles player movement, physics, and animations."""
+        if self.health <= 0:
             self.eliminate()
-
-        keys = pygame.key.get_pressed()
-        self.velocity.x = 0
-        new_state = "idle"
+            return
 
         if self.hitstun > 0:
             self.hitstun -= 1
 
+        # Reset movement
+        self.velocity.x = 0
+        new_state = "idle"
+
+        # Handle movement
         left = self.controls.is_action_active("move_left")
         right = self.controls.is_action_active("move_right")
 
         if left and right:
-            self.velocity.x = 0
             new_state = "idle"
         elif left:
-            self.velocity.x = -100 * dt
-            new_state = "run"
+            self.velocity.x = -self.speed * dt
             self.facing_right = False
-        elif right:
-            self.velocity.x = 100 * dt
             new_state = "run"
+        elif right:
+            self.velocity.x = self.speed * dt
             self.facing_right = True
+            new_state = "run"
 
-        if self.controls.is_action_active("jump"):
-            if self.on_ground or self.jump_count < self.maxjump:
-                self.velocity.y = -100 * dt
-                new_state = "jump"
-        elif not self.on_ground:
-            self.jump_count = self.maxjump
-            
-        if (not self.on_ground) and self.jump_count < self.maxjump:
-            self.jump_count += 1
+        # Handle jumping (hold jump for higher jumps)
+        jump_pressed = self.controls.is_action_active("jump")
+        jump_direction = -1 if self.is_flipped else 1  # ✅ Flip jump direction when gravity is flipped
 
-        if self.on_ground and self.jump_count != 0:
-            self.jump_count = 0
-
-        super().update(level, dt)
-
-        if self.rect.left < 0:
-            self.rect.left = 0
-            self.velocity.x = 0
-        if self.rect.right > level.width:
-            self.rect.right = level.width
-            self.velocity.x = 0
-
-        self.update_animation(new_state, dt)
-
-    def update_animation(self, new_state, dt):
-        if new_state != "jump" and not self.on_ground:
+        if jump_pressed and self.on_ground:
+            self.velocity.y = self.jump_strength * dt * jump_direction  # ✅ Jump in correct direction
+            self.is_jumping = True
             new_state = "jump"
 
-        if new_state != self.state:
-            self.state = new_state
-            self.sprite_index = 0
+        elif not jump_pressed and self.is_jumping:
+            if (not self.is_flipped and self.velocity.y < 0) or (self.is_flipped and self.velocity.y > 0):
+                self.velocity.y *= self.jump_cut_multiplier  # ✅ Jump cut-off works in both gravity states
+            self.is_jumping = False
 
-        self.time_accumulator += dt
-        if self.time_accumulator >= self.animation_speed:
-            self.sprite_index = (self.sprite_index + 1) % len(self.sprites[self.state])
-            self.time_accumulator = 0
+        # Reset jump state when landing
+        if self.on_ground:
+            self.is_jumping = False
 
-    def get_hit(self, damage, duration):
+        super().update(level, dt)  # Apply physics and collision
+        self.state = new_state  # Update state for animation
+
+    def get_hit(self, damage, duration, knockback=0):
+        """Handles player damage and knockback."""
         if self.hitstun == 0:
             self.health -= damage
             self.hitstun = duration
-
-    def render(self, screen, camera):
-        if self.hitstun % 4 in (0, 1):
-            sprite = self.sprites[self.state][self.sprite_index]
-
-            if not self.facing_right:
-                sprite = pygame.transform.flip(sprite, True, False)
-
-            screen.blit(sprite, camera.apply(self))
-
-    def eliminate(self):
-        print("DEATHSCREEN")
+            self.velocity.x += knockback if not self.facing_right else -knockback

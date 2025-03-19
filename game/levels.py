@@ -1,78 +1,100 @@
 import json
-import os.path
 import pygame
-from core.game_data import get_game_data
-from game.tiles import BLOCK_TYPES, Block
+import os
+from game.tiles import TILE_CLASSES, Tile
+from game.enemies.enemy_registry import ENEMY_CLASSES
 
-class Level:
+class Level(pygame.sprite.LayeredUpdates):
     def __init__(self, level_number):
-        with open("assets/levels/levels.json") as f:
-            loc = json.load(f)
-            self.blueprint = pygame.image.load(os.path.join("assets/levels",loc[str(level_number)])).convert_alpha()
-        self.scale: int = get_game_data("level_scale")
-        self.tiles_data = self.load_tiles()
-        self.gravity = 9.81
-        self.tiles, self.tile_collisions = self.process_blueprint()
-        self.spawn = (100,100)
+        super().__init__()
 
-        self.height = len(self.tiles[0]) * self.scale
-        self.width = len(self.tiles) * self.scale
-
-    def load_tiles(self):
+        # Load tile metadata
         with open("assets/tiles/tiles.json") as f:
-            loc = json.load(f)
+            self.tile_data = json.load(f)
 
-        tile_data = {}
-        for color, path in loc.items():
-            block_class = BLOCK_TYPES.get(path.get("type","block"), Block)
-            tile_data[color] = block_class(path["texture"], path["collision_type"], path.get("metadata",{}))
+        self.tile_size = self.tile_data["tile_size"]  # Get tile size
+        self.tile_set = pygame.image.load("assets/tiles/tile_set.png").convert_alpha()
 
-        return tile_data
+        self.tiles = pygame.sprite.Group()
+        self.updating_tiles = pygame.sprite.Group()  # Holds all tiles that require updates
+        self.enemy_data = []
+        self.spawn = (0, 0)
 
-    def process_blueprint(self):
-        w, h = self.blueprint.get_size()
-        pixel_array = pygame.PixelArray(self.blueprint)
-        tiles = []
-        collisions = []
+        self.gravity = 9.8
 
-        for x in range(w):
-            row_tiles = []
-            row_collisions = []
-            for y in range(h):
-                color = self.blueprint.unmap_rgb(pixel_array[x, y])
-                color_key = f"{color[0]},{color[1]},{color[2]}" if color[3] == 255 else None
+        # Initialize level size (FIXED)
+        self.width = 0
+        self.height = 0
 
-                tile_class = self.tiles_data.get(color_key, None)
-                row_tiles.append(tile_class)
-                row_collisions.append(tile_class.collision_type if tile_class else "air")
+        self.load_level(level_number)
 
-            tiles.append(row_tiles)
-            collisions.append(row_collisions)
+    def load_level(self, level_number):
+        """Loads level structure from assets/levels/level_<id>.json"""
+        level_path = f"assets/levels/level_{level_number}.json"
+        if not os.path.exists(level_path):
+            raise FileNotFoundError(f"Level file {level_path} not found!")
 
-        del pixel_array
-        return tiles, collisions
+        with open(level_path) as f:
+            level_data = json.load(f)
 
-    def check_touch(self, player, engine):
-        if not player.on_ground:
-            return
-        tile_x = player.rect.centerx // self.scale
-        tile_y = player.rect.centery // self.scale
+        # Convert spawn position from tile units to pixels
+        self.spawn = (level_data["spawn"][0] * self.tile_size, level_data["spawn"][1] * self.tile_size)
 
-        if 0 <= tile_x < len(self.tiles) and 0 <= tile_y < len(self.tiles[0]):
-            block = self.tiles[tile_x][tile_y]
-            if block and hasattr(block, "on_touch"):
-                block.on_touch(engine)
+        # Store raw enemy data
+        self.enemy_data = level_data.get("enemies", [])
+
+        # Load tiles and calculate level width/height (FIXED)
+        for y, row in enumerate(level_data["tiles"]):
+            for x, tile_id in enumerate(row):
+                if tile_id == 0:  # Ignore Tile ID 0 (empty space)
+                    continue
+                if str(tile_id) in self.tile_data["tiles"]:
+                    tile_info = self.tile_data["tiles"][str(tile_id)]
+                    tile_class = TILE_CLASSES.get(tile_info["type"], Tile)  # Select correct class
+                    tile = tile_class(x * self.tile_size, y * self.tile_size, tile_info, self.tile_set)
+
+                    self.tiles.add(tile)
+                    self.add(tile)
+
+                    # Add updating tiles
+                    if tile.update_required:
+                        self.updating_tiles.add(tile)
+
+                # Track the level width & height dynamically
+                self.width = max(self.width, (x + 1) * self.tile_size)
+                self.height = max(self.height, (y + 1) * self.tile_size)
+
+    def get_solid_tiles_near(self, entity, radius=2):
+        """Returns a list of solid tiles near the given entity for collision checking."""
+        nearby_tiles = []
+        ex, ey = entity.rect.center  # Get entity position
+        tile_x, tile_y = ex // self.tile_size, ey // self.tile_size  # Convert to tile coordinates
+
+        for y in range(tile_y - radius, tile_y + radius + 1):
+            for x in range(tile_x - radius, tile_x + radius + 1):
+                if 0 <= x < (self.width // self.tile_size) and 0 <= y < (self.height // self.tile_size):
+                    for tile in self.tiles:
+                        if tile.rect.colliderect(
+                                pygame.Rect(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size)):
+                            if getattr(tile, "solid", False):  # Ensure the tile is solid
+                                nearby_tiles.append(tile)
+
+        return nearby_tiles
+
+    def check_touch(self, entity, engine):
+        """Checks if the entity is touching an interactive tile (e.g., exits, pressure plates)."""
+        for tile in self.get_solid_tiles_near(entity):
+            if hasattr(tile, "on_touch"):  # If the tile has a special interaction
+                tile.on_touch(engine)  # Trigger the tile's interaction
+
+    def check_collision(self, entity):
+        """Checks for collision with solid tiles."""
+        return pygame.sprite.spritecollide(entity, self.tiles, False, lambda e, t: t.solid)
+
+    def update(self):
+        """Updates only tiles that require updating"""
+        self.updating_tiles.update()
 
     def render(self, screen, camera):
-        cam_x, cam_y, cam_w, cam_h = camera.get_viewport()
-
-        start_x = max(0, cam_x // self.scale)
-        end_x = min(len(self.tiles), (cam_x + cam_w) // self.scale + 1)
-        start_y = max(0, cam_y // self.scale)
-        end_y = min(len(self.tiles[0]), (cam_y + cam_h) // self.scale + 1)
-
-        for x in range(start_x, end_x):
-            for y in range(start_y, end_y):
-                tile = self.tiles[x][y]
-                if tile and camera.is_visible(x * self.scale, y * self.scale, self.scale, self.scale):
-                    tile.render(screen, camera, x, y, self.scale)
+        """Renders the level tiles within camera view."""
+        self.tiles.draw(screen)
