@@ -1,4 +1,6 @@
 {
   "start_button": "start.png",
-  "quit_button": "quit.png"
+  "quit_button": "quit.png",
+  "button_image": "menu_button.png",
+  "button_hover_image": "menu_button_hovered.png"
 }

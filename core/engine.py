@@ -101,7 +101,6 @@ class GameEngine:
 
     def run(self):
         w, h = pygame.display.get_window_size()
-        self.menu.update_layout(w, h)
 
         menu_toggle_cooldown = False
 
