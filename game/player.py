@@ -17,12 +17,12 @@ class Player(Entity):
         self.controls = controls
         self.coins = 0
     
-    jump_count = 0
-    health = 6
-    coins = 0
-    max_health = 6
-    maxjump = 12
-    hitstun = 0
+        self.jump_count = 0
+        self.health = 6
+        self.coins = 0
+        self.max_health = 6
+        self.maxjump = 12
+        self.hitstun = 0
 
     def load_sprites(self):
         with open("assets/characters/player.json") as f:
@@ -36,7 +36,6 @@ class Player(Entity):
         }
 
     def update(self, level, dt):
-
         if self.spikes:
             self.spikes = False
             self.get_hit(2, 30)
@@ -66,8 +65,7 @@ class Player(Entity):
             self.velocity.x = 100 * dt
             new_state = "run"
             self.facing_right = True
-        
-        #Jump higher or lower
+
         if self.controls.is_action_active("jump"):
             if self.on_ground or self.jump_count < self.maxjump:
                 self.velocity.y = -100 * dt

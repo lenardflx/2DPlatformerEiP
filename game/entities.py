@@ -3,12 +3,11 @@ import pygame
 
 class Entity:
     def __init__(self, x, y, width, height):
+        self.spikes = False
         self.rect = pygame.Rect(x, y, width, height)
         self.velocity = pygame.Vector2(0, 0)
         self.on_ground = False
-        #hit gibt an ob mit etwas kollidiert wurde
         self.hit = False
-    spikes = False
 
     def update(self, level, dt):
         self.hit = False
@@ -18,6 +17,7 @@ class Entity:
     def move(self, level):
         self.rect.x += self.velocity.x
         self.handle_horizontal_collisions(level)
+
         self.on_ground = False
         self.rect.y += self.velocity.y
         self.handle_vertical_collisions(level)
@@ -28,18 +28,31 @@ class Entity:
         y_tile = future_rect.bottom // level.scale if self.velocity.y > 0 else future_rect.top // level.scale
 
         for x in range(x_left, x_right + 1):
-            if 0 <= x < len(level.tile_collisions) and 0 <= y_tile < len(level.tile_collisions[0]):
-                if level.tile_collisions[x][y_tile] == "solid":
-                    if self.velocity.y > 0:
-                        self.rect.bottom = y_tile * level.scale
-                        self.on_ground = True
-                    else:
-                        self.rect.top = (y_tile + 1) * level.scale
-                    self.velocity.y = 0
-                    return
-                elif level.tile_collisions[x][y_tile] == "damage":
-                    self.spikes = True
-                    return
+            if 0 <= x < len(level.tiles) and 0 <= y_tile < len(level.tiles[0]):
+                block = level.tiles[x][y_tile]
+                if block:
+                    block_hitbox = block.get_hitbox(x * level.scale, y_tile * level.scale, level.scale)
+
+                    if block.collision_type == "solid":
+                        if self.velocity.y > 0 and future_rect.colliderect(block_hitbox):
+                            self.rect.bottom = block_hitbox.top
+                            self.velocity.y = 0
+                            self.on_ground = True
+                            return
+                        elif self.velocity.y < 0 and future_rect.colliderect(block_hitbox):
+                            self.rect.top = block_hitbox.bottom
+                            self.velocity.y = 0
+                            return
+
+                    elif block.collision_type == "moving_platform" and self.velocity.y > 0:
+                        if self.rect.bottom <= block_hitbox.top <= future_rect.bottom:
+                            self.rect.bottom = block_hitbox.top
+                            self.velocity.y = 0
+                            self.on_ground = True
+                            return
+                    elif block.collision_type == "damage":
+                        self.spikes = True
+                        return
         self.on_ground = False
 
     def handle_horizontal_collisions(self, level):
@@ -48,15 +61,22 @@ class Entity:
         y_top, y_bottom = (self.rect.top + 1) // level.scale, (self.rect.bottom - 1) // level.scale
 
         for y in range(y_top, y_bottom + 1):
-            if 0 <= x_tile < len(level.tile_collisions) and 0 <= y < len(level.tile_collisions[0]):
-                if level.tile_collisions[x_tile][y] == "solid":
-                    if self.velocity.x > 0:
-                        self.rect.right = x_tile * level.scale
-                    else:
-                        self.rect.left = (x_tile + 1) * level.scale
-                    self.velocity.x = 0
-                    self.hit = True
-                    return
+            if 0 <= x_tile < len(level.tiles) and 0 <= y < len(level.tiles[0]):
+                block = level.tiles[x_tile][y]
+                if block:
+                    block_hitbox = block.get_hitbox(x_tile * level.scale, y * level.scale, level.scale)
+
+                    if block.collision_type == "solid":
+                        if self.velocity.x > 0 and future_rect.colliderect(block_hitbox):
+                            self.rect.right = block_hitbox.left
+                            self.velocity.x = 0
+                            self.hit = True
+                            return
+                        elif self.velocity.x < 0 and future_rect.colliderect(block_hitbox):
+                            self.rect.left = block_hitbox.right
+                            self.velocity.x = 0
+                            self.hit = True
+                            return
 
     def eliminate(self):
         print("eliminated")

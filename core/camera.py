@@ -20,7 +20,15 @@ class Camera:
 
     def apply(self, target, speed=1):
         if isinstance(target, pygame.Rect):
-            return target.move(-self.camera.x*speed, -self.camera.y)
+            return target.move(-self.camera.x * speed, -self.camera.y)
         elif hasattr(target, "rect"):
-            return target.rect.move(-self.camera.x*speed, -self.camera.y)
+            return target.rect.move(-self.camera.x * speed, -self.camera.y)
         return target
+
+    def get_viewport(self):
+        return self.camera.x, self.camera.y, self.width, self.height
+
+    def is_visible(self, x, y, w, h):
+        viewport_rect = pygame.Rect(self.camera.x, self.camera.y, self.width, self.height)
+        object_rect = pygame.Rect(x, y, w, h)
+        return viewport_rect.colliderect(object_rect)

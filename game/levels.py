@@ -64,9 +64,15 @@ class Level:
                 block.on_touch(engine)
 
     def render(self, screen, camera):
-        for x, row in enumerate(self.tiles):
-            for y, tile in enumerate(row):
-                if tile:
-                    tile_rect = pygame.Rect(x * self.scale, y * self.scale, self.scale, self.scale)
-                    screen.blit(pygame.transform.scale(tile.texture, (self.scale, self.scale)),
-                                camera.apply(tile_rect))
+        cam_x, cam_y, cam_w, cam_h = camera.get_viewport()
+
+        start_x = max(0, cam_x // self.scale)
+        end_x = min(len(self.tiles), (cam_x + cam_w) // self.scale + 1)
+        start_y = max(0, cam_y // self.scale)
+        end_y = min(len(self.tiles[0]), (cam_y + cam_h) // self.scale + 1)
+
+        for x in range(start_x, end_x):
+            for y in range(start_y, end_y):
+                tile = self.tiles[x][y]
+                if tile and camera.is_visible(x * self.scale, y * self.scale, self.scale, self.scale):
+                    tile.render(screen, camera, x, y, self.scale)

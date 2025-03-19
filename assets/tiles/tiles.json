@@ -88,5 +88,16 @@
     "collision_type": "decorative",
     "type": "block",
     "metadata": {}
+  },
+    "200,100,100": {
+    "texture": "plattform.png",
+    "collision_type": "solid",
+    "type": "moving_platform",
+    "metadata": {
+      "hitbox_width": 1.0,
+      "hitbox_height": 0.4375,
+      "hitbox_offset_x": 0.0,
+      "hitbox_offset_y": 0.5625
+    }
   }
 }
