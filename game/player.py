@@ -6,7 +6,7 @@ from core.controls import Controls
 from game.entities import Entity
 
 class Player(Entity):
-    def __init__(self, x, y, width, height, scale):
+    def __init__(self, x, y, width, height, scale, controls):
         super().__init__(x, y, width * scale, height * scale)
         self.sprites = self.load_sprites()
         self.state = "idle"
@@ -14,7 +14,7 @@ class Player(Entity):
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
-        self.controls = Controls()
+        self.controls = controls
         self.coins = 0
 
     jump_count = 0

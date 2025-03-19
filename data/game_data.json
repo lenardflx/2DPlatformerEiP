@@ -3,7 +3,7 @@
   "fps": 60,
   "game_title": "Sigmaboy",
   "level_scale": 16,
-  "background_scale": 8,
+  "background_scale": 4,
   "player_size": [12,16],
   "player_scale": 1,
   "enemy_size": [12,16],

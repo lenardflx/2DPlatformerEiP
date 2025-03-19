@@ -6,11 +6,11 @@ from core.camera import Camera
 from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
-from game.menu import Menu
+from game.menu import Menu, MenuOptions
 from game.player import Player
+from core.controls import Controls
 from game.enemies.enemy import Enemy
 from game.user_interface import UI
-
 
 class GameEngine:
     def __init__(self):
@@ -18,6 +18,7 @@ class GameEngine:
 
         self.native_size = get_game_data("screen_size")
         self.fps = get_game_data("fps")
+        self.controls = Controls()
 
         self.screen = pygame.display.set_mode(self.native_size, pygame.RESIZABLE)
         pygame.display.set_caption(get_game_data("game_title"))
@@ -51,7 +52,7 @@ class GameEngine:
         w, h = get_game_data("player_size")
         s = get_game_data("player_scale")
         x,y = self.level.spawn
-        return Player(x, y, w, h, s)
+        return Player(x, y, w, h, s, self.controls)
 
     def load_next_level(self):
         self.current_level += 1
@@ -98,10 +99,24 @@ class GameEngine:
         self.camera.follow(self.player)
 
     def run(self):
-        w, h = pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]
-        self.menu.update_layout(w,h)
+        w, h = pygame.display.get_window_size()
+        self.menu.update_layout(w, h)
+
+        menu_toggle_cooldown = False
+
         while self.is_running:
             self.clock.tick(self.fps)
+
+            if self.controls.is_action_active("menu"):
+                if not menu_toggle_cooldown:
+                    if self.is_menu and self.menu.active_type != MenuOptions.START:
+                        self.is_menu = False
+                    elif not self.is_menu:
+                        self.menu.open_menu(MenuOptions.PAUSE, self)
+                    menu_toggle_cooldown = True
+            else:
+                menu_toggle_cooldown = False
+
             if self.is_menu:
                 self.menu.handle_events(self)
                 self.menu.render(self.screen)
@@ -109,6 +124,7 @@ class GameEngine:
                 self.handle_events()
                 self.update()
                 self.render()
+
             pygame.display.flip()
 
         pygame.quit()
