@@ -31,7 +31,7 @@ class GameEngine:
         self.level = Level(self.current_level)
 
         self.player = self.load_player()
-        self.enemy = Enemy(400, 400, w2, h2, s2, self.player)
+        self.enemy = Enemy(200, 400, w2, h2, s2, self.player)
 
         with open("assets/background/background.json") as f:
             data = json.load(f)

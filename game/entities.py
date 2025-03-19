@@ -1,5 +1,5 @@
 import pygame
-
+import game.player as player
 
 class Entity:
     def __init__(self, x, y, width, height):
@@ -8,6 +8,8 @@ class Entity:
         self.velocity = pygame.Vector2(0, 0)
         self.on_ground = False
         self.hit = False
+        self.drop = False
+        self.obstacle = False
 
     def update(self, level, dt):
         self.hit = False
@@ -15,21 +17,23 @@ class Entity:
         self.move(level)
 
     def move(self, level):
-        self.rect.x += self.velocity.x
-        self.handle_horizontal_collisions(level)
-
         self.on_ground = False
         self.rect.y += self.velocity.y
         self.handle_vertical_collisions(level)
+
+        self.rect.x += self.velocity.x
+        self.handle_horizontal_collisions(level)
+
 
     def handle_vertical_collisions(self, level):
         future_rect = self.rect.move(0, self.velocity.y)
         x_left, x_right = self.rect.left // level.scale, (self.rect.right - 1) // level.scale
         y_tile = future_rect.bottom // level.scale if self.velocity.y > 0 else future_rect.top // level.scale
-
+    
         for x in range(x_left, x_right + 1):
             if 0 <= x < len(level.tiles) and 0 <= y_tile < len(level.tiles[0]):
                 block = level.tiles[x][y_tile]
+
                 if block:
                     block_hitbox = block.get_hitbox(x * level.scale, y_tile * level.scale, level.scale)
 
@@ -63,7 +67,12 @@ class Entity:
         for y in range(y_top, y_bottom + 1):
             if 0 <= x_tile < len(level.tiles) and 0 <= y < len(level.tiles[0]):
                 block = level.tiles[x_tile][y]
+                
+                if self.on_ground:
+                    self.detect_jump_opportunity(level, x_tile, y)
+
                 if block:
+
                     block_hitbox = block.get_hitbox(x_tile * level.scale, y * level.scale, level.scale)
 
                     if block.collision_type == "solid":
@@ -80,6 +89,14 @@ class Entity:
 
     def eliminate(self):
         print("eliminated")
+
+    def detect_jump_opportunity(self, level, x, y):
+        if self.facing_right:
+            self.drop = not level.tiles[x + 1][y + 1]
+            self.obstacle = (level.tiles[x + 1][y] and not level.tiles[x + 1][y - 1])
+        else:
+            self.drop = not level.tiles[x - 1][y + 1]
+            self.obstacle = (level.tiles[x - 1][y] and not level.tiles[x - 1][y - 1])
 
     def render(self, screen, camera):
         sprite = self.sprites[self.state][self.sprite_index]

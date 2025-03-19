@@ -13,10 +13,9 @@ class Enemy(Entity):
         self.facing_right = True
         self.has_jumped = True
         self.player = player
-
-    speed = 40
-    animation_speed = 0.1
-    damage = 1
+        self.speed = 40
+        self.animation_speed = 0.1
+        self.damage = 1
 
 
     def load_sprites(self):
@@ -37,8 +36,12 @@ class Enemy(Entity):
         if self.state == "idle":
             self.walk_up_and_down(level, dt)
 
-        if self.velocity.y > 0 and (not self.has_jumped):
-            self.jump(dt)
+        if self.drop and (not self.has_jumped):
+            self.jump(dt, 0.1 * self.speed, 40)
+            self.has_jumped = True
+
+        if self.obstacle and (not self.has_jumped):
+            self.jump(dt, 0, 160)
             self.has_jumped = True
 
         if self.on_ground and self.has_jumped:
@@ -86,12 +89,12 @@ class Enemy(Entity):
             else:
                 self.velocity.x = -self.speed * dt
         
-    def jump(self, dt):
+    def jump(self, dt, x_vel, y_vel):
         if self.velocity.x > 0:
-            self.velocity.x += 0.1 * self.speed
+            self.velocity.x += x_vel
         elif self.velocity.x < 0:
-            self.velocity.x -= 0.1 * self.speed
-        self.velocity.y = -50 * dt
+            self.velocity.x -= x_vel
+        self.velocity.y = -y_vel * dt
 
     def hit_detection(self):
         if(self.rect.colliderect(self.player.rect)):

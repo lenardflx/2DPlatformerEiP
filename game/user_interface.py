@@ -27,7 +27,7 @@ class UI:
         self.coin_icon = pygame.transform.scale(self.coin_icon, (self.coin_size, self.coin_size))
         self.pause_icon = pygame.transform.scale(self.pause_icon, (self.pause_size, self.pause_size))
 
-        self.health = 4
+        self.health = 6
         self.max_health = 6
         self.coins = 0
 

@@ -10,17 +10,15 @@ class Player(Entity):
         super().__init__(x, y, width * scale, height * scale)
         self.sprites = self.load_sprites()
         self.state = "idle"
+        self.max_health = 6
+        self.health = 6
         self.sprite_index = 0
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.facing_right = True
         self.controls = controls
-        self.coins = 0
-    
         self.jump_count = 0
-        self.health = 6
         self.coins = 0
-        self.max_health = 6
         self.maxjump = 12
         self.hitstun = 0
 
@@ -36,12 +34,13 @@ class Player(Entity):
         }
 
     def update(self, level, dt):
+
         if self.spikes:
             self.spikes = False
             self.get_hit(2, 30)
             self.velocity.y = -4
 
-        if self.health <= 0:
+        if self.health == 0:
             self.eliminate()
 
         keys = pygame.key.get_pressed()
