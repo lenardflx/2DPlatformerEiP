@@ -19,7 +19,8 @@ class Player(Entity):
     
     spikes = False
     jump_count = 0
-    health = 100
+    health = 6
+    max_health = 6
     maxjump = 12
     hitstun = 0
 
@@ -38,7 +39,7 @@ class Player(Entity):
 
         if self.spikes:
             self.spikes = False
-            self.get_hit(45, 60)
+            self.get_hit(2, 60)
             self.velocity.y = -5
 
         if self.health <= 0:
@@ -109,8 +110,6 @@ class Player(Entity):
             self.health -= damage
             self.hitstun = duration
 
-    
-
     def render(self, screen, camera):
         if self.hitstun % 4 in (0, 1):
             sprite = self.sprites[self.state][self.sprite_index]
@@ -119,7 +118,6 @@ class Player(Entity):
                 sprite = pygame.transform.flip(sprite, True, False)
 
             screen.blit(sprite, camera.apply(self))
-
 
     def eliminate(self):
         print("DEATHSCREEN")

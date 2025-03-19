@@ -95,6 +95,7 @@ class GameEngine:
     def update(self):
         self.player.update(self.level, 1 / self.fps)
         self.enemy.update(self.level, 1 / self.fps)
+        self.ui.update(self.player)
         self.level.check_touch(self.player, self)
         self.camera.follow(self.player)
 

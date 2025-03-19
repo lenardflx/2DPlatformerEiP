@@ -16,7 +16,7 @@ class Enemy(Entity):
 
     speed = 40
     animation_speed = 0.1
-    damage = 40
+    damage = 1
 
 
     def load_sprites(self):
