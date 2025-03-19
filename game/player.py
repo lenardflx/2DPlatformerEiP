@@ -14,8 +14,10 @@ class Player(Entity):
         self.health = self.max_health
         self.coins = 0
         self.speed = 120
-        self.jump_strength = -200
-        self.jump_cut_multiplier = 0.2
+        self.jump_strength = -100  # Base jump force
+        self.jump_hold_force = -20  # Additional force while holding jump
+        self.max_jump_countdown = 6  # Maximum frames to hold jump
+        self.jump_countdown = self.max_jump_countdown
         self.hitstun = 0
         self.is_jumping = False
 
@@ -51,17 +53,18 @@ class Player(Entity):
 
         # Handle jumping (hold jump for higher jumps)
         jump_pressed = self.controls.is_action_active("jump")
-        jump_direction = -1 if self.is_flipped else 1  # ✅ Flip jump direction when gravity is flipped
+        jump_direction = -1 if self.is_flipped else 1  # Flip jump when gravity is inverted
 
-        if jump_pressed and self.on_ground:
-            self.velocity.y = self.jump_strength * dt * jump_direction  # ✅ Jump in correct direction
-            self.is_jumping = True
-            new_state = "jump"
-
-        elif not jump_pressed and self.is_jumping:
-            if (not self.is_flipped and self.velocity.y < 0) or (self.is_flipped and self.velocity.y > 0):
-                self.velocity.y *= self.jump_cut_multiplier  # ✅ Jump cut-off works in both gravity states
-            self.is_jumping = False
+        if jump_pressed:
+            if self.on_ground:
+                self.velocity.y = self.jump_strength * dt * jump_direction  # Initial jump
+                self.is_jumping = True
+                self.on_ground = False
+                self.jump_countdown = self.max_jump_countdown
+                new_state = "jump"
+            elif self.is_jumping and self.jump_countdown > 0:
+                self.velocity.y += self.jump_hold_force * dt * jump_direction
+                self.jump_countdown -= 1
 
         # Reset jump state when landing
         if self.on_ground:

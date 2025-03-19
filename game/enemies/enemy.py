@@ -6,11 +6,11 @@ class Enemy(Entity):
     def __init__(self, x, y, width, height, scale, player):
         super().__init__(x, y, width * scale, height * scale)
         self.player = player
-        self.speed = 40
+        self.speed = 20
         self.jump_force = 160
         self.damage = 1
         self.attack_range = 32  # Attack range in pixels
-        self.detection_range = 200  # Distance to start chasing the player
+        self.detection_range = 20  # Distance to start chasing the player
 
         # AI flags
         self.has_jumped = False
@@ -19,12 +19,15 @@ class Enemy(Entity):
         self.hit = False
 
         # Load animations
-        self.sprites = self.load_sprites("assets/characters/enemy.png",
+        self.load_sprites("assets/characters/enemy.png",
                                          "assets/characters/enemy.json")
+
+        self.state = "idle"
+        self.sprite_index = 0
+        self.image = self.sprites[self.state][self.sprite_index] if self.sprites.get(self.state) else None
 
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
-        new_state = "idle"
 
         # Chase player if nearby
         if abs(self.rect.centerx - self.player.rect.centerx) < self.detection_range:
@@ -33,12 +36,15 @@ class Enemy(Entity):
             self.patrol(level, dt)
 
         # Jump over obstacles or gaps
+        new_state = "jump"
         if self.drop and not self.has_jumped:
             self.jump(dt, 0.1 * self.speed, 40)
             self.has_jumped = True
         elif self.obstacle and not self.has_jumped:
             self.jump(dt, 0, self.jump_force)
             self.has_jumped = True
+        else:
+            new_state = "run"
 
         if self.on_ground:
             self.has_jumped = False

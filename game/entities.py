@@ -38,7 +38,6 @@ class Entity(pygame.sprite.Sprite):
                 col, row = map(int, frame.split(","))  # Get sprite position
                 x, y = col * tile_size, row * tile_size
                 sprite = sprite_sheet.subsurface((x, y, tile_size, tile_size))  # Extract sprite
-                sprite = pygame.transform.scale(sprite, (self.rect.width, self.rect.height))  # Scale to entity size
                 self.sprites[state].append(sprite)
 
         if "idle" in self.sprites:
@@ -85,10 +84,10 @@ class Entity(pygame.sprite.Sprite):
                     self.velocity.x = 0
             elif direction == "vertical":
                 if self.rect.colliderect(tile.rect):
-                    if self.velocity.y > 0 and level.gravity > 0:  # ✅ Falling Down (Normal Gravity)
+                    if self.velocity.y > 0 and level.gravity > 0:  # Falling Down
                         self.rect.bottom = tile.rect.top
                         self.on_ground = True
-                    elif self.velocity.y < 0 and level.gravity < 0:  # ✅ Falling Up (Flipped Gravity)
+                    elif self.velocity.y < 0 and level.gravity < 0:  # Falling Up
                         self.rect.top = tile.rect.bottom
                         self.on_ground = True
                     self.velocity.y = 0
