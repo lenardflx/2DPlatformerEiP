@@ -8,6 +8,7 @@ class Entity:
         self.on_ground = False
         #hit gibt an ob mit etwas kollidiert wurde
         self.hit = False
+    spikes = False
 
     def update(self, level, dt):
         self.hit = False

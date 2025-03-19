@@ -17,9 +17,9 @@ class Player(Entity):
         self.controls = controls
         self.coins = 0
     
-    spikes = False
     jump_count = 0
     health = 6
+    coins = 0
     max_health = 6
     maxjump = 12
     hitstun = 0
@@ -39,8 +39,8 @@ class Player(Entity):
 
         if self.spikes:
             self.spikes = False
-            self.get_hit(2, 60)
-            self.velocity.y = -5
+            self.get_hit(2, 30)
+            self.velocity.y = -4
 
         if self.health <= 0:
             self.eliminate()
