@@ -34,25 +34,34 @@ class Enemy(Entity):
         else:
             self.patrol(level, dt)
 
-        if self.facing_right:
-            self.drop       = not level.get_tile_at(self.rect.right + 1, self.rect.bottom + 1)
-            self.obstacle   = (not level.get_tile_at(self.rect.right + 1, self.rect.bottom)) and level.get_tile_at(self.rect.right + 1, self.rect.bottom - 1)
+        if level.gravity > 0:
+            if self.facing_right:
+                self.drop       = not level.get_tile_at(self.rect.right + 1, self.rect.bottom + 1)
+                self.obstacle   = (not level.get_tile_at(self.rect.right + 1, self.rect.bottom)) and level.get_tile_at(self.rect.right + 1, self.rect.bottom - 1)
+            else:
+                self.drop       = not level.get_tile_at(self.rect.left - 1, self.rect.bottom + 1)
+                self.obstacle   = (not level.get_tile_at(self.rect.left - 1, self.rect.bottom)) and level.get_tile_at(self.rect.left - 1, self.rect.bottom - 1)
         else:
-            self.drop       = not level.get_tile_at(self.rect.left - 1, self.rect.bottom + 1)
-            self.obstacle   = (not level.get_tile_at(self.rect.left - 1, self.rect.bottom)) and level.get_tile_at(self.rect.left - 1, self.rect.bottom - 1)
+            if self.facing_right:
+                self.drop       = not level.get_tile_at(self.rect.right + 1, self.rect.top - 1)
+                self.obstacle   = (not level.get_tile_at(self.rect.right + 1, self.rect.top)) and level.get_tile_at(self.rect.right + 1, self.rect.top + 1)
+            else:
+                self.drop       = not level.get_tile_at(self.rect.left - 1, self.rect.top - 1)
+                self.obstacle   = (not level.get_tile_at(self.rect.left - 1, self.rect.top)) and level.get_tile_at(self.rect.left - 1, self.rect.top + 1)
+
+
 
         if self.on_ground:
             self.has_jumped = False
 
-        print(self.facing_right)
-
         # Jump over obstacles or gaps
         new_state = "jump"
+
         if self.drop and not self.has_jumped:
-            self.jump(0.25 * self.speed, 2)
+            self.jump(dt, 15 * self.speed, 120, level.gravity >= 0)
             self.has_jumped = True
         elif self.obstacle and not self.has_jumped:
-            self.jump(0, 3)
+            self.jump(dt, 0, 200, level.gravity >= 0)
             self.has_jumped = True
         else:
             new_state = "run"
@@ -90,14 +99,16 @@ class Enemy(Entity):
         """Handles enemy attacking logic."""
         self.player.got_hit = (self.damage, 60, 2)
 
-    def jump(self, x_vel, y_vel):
+    def jump(self, dt, x_vel, y_vel, sgn):
         """Applies jump force to the enemy."""
         if self.facing_right:
-            self.velocity.x = x_vel
+            self.velocity.x = x_vel * dt
         else:
-            self.velocity.x = -x_vel
-        
-        self.velocity.y = -y_vel
+            self.velocity.x = -x_vel * dt
+        if not sgn:
+            y_vel *= -1
+
+        self.velocity.y = -y_vel * dt
 
     def eliminate(self):
         """Handles enemy elimination."""
