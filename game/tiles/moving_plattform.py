@@ -49,7 +49,7 @@ class MovingPlatform(Tile):
         # Carry entities smoothly
         for entity in [player] + list(level.enemies):  # Convert Group to List
             tmp = (self.is_between(self.rect.top, self.rect.bottom, entity.rect.bottom) or self.is_between(self.rect.top, self.rect.bottom, entity.rect.top))
-            tmp2 = (self.is_between(self.rect.left, self.rect.right, entity.rect.left) or self.is_between(self.rect.left, self.rect.right, entity.rect.right))
+            tmp2 = (self.is_between(self.rect.left, self.rect.right, (entity.rect.left + entity.rect.right)/2))
 
             if (
                 entity.rect.bottom == self.rect.top  # Standing exactly on the platform
@@ -69,6 +69,5 @@ class MovingPlatform(Tile):
                 entity.rect.right = self.rect.left  # Pushed from left
 
     def is_between(self, x, y, z):
-        if (z >= x and z <= y) or (z <= x and z >= y):
-            return True
-        return False
+        return (z >= x and z <= y) or (z <= x and z >= y)
+    

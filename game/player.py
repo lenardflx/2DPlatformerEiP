@@ -1,7 +1,3 @@
-import json
-import os
-import pygame
-from core.controls import Controls
 from game.entities import Entity
 
 class Player(Entity):
