@@ -116,7 +116,7 @@ class Menu:
             image = self.button_hover_image if button["hovered"] else self.button_image
 
             rect = image.get_rect()
-            rect.center = (screen_width // 2, screen_height // 2 + i * button_spacing)
+            rect.center = (screen_width // 2, screen_height // 2 + i * button_spacing - len(menu_buttons) * 20)
             button["rect"] = rect
 
             screen.blit(image, rect)
