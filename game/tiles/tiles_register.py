@@ -1,4 +1,4 @@
-TILES_CLASSES = {}  # Registry for tiles types
+TILES_CLASSES = {} # Registry for tiles types
 def register_tile(name):
     """Decorator to register a tile class."""
     def wrapper(cls):

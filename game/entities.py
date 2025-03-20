@@ -3,8 +3,10 @@ import json
 import pygame
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, scale=1):
         super().__init__()
+        width *= scale
+        height *= scale
 
         # Entity properties
         self.rect = pygame.Rect(x, y, width, height)
@@ -17,11 +19,13 @@ class Entity(pygame.sprite.Sprite):
         self.attacking = False
         self.stunned = False
 
-        # Animation system
+        # Render system
         self.sprites = {}
         self.sprite_index = 0
         self.animation_speed = 0.1
         self.time_accumulator = 0
+        self.scale = scale
+        self.render_offset = (0, 0)
 
         self.stun = 0
 
@@ -35,6 +39,7 @@ class Entity(pygame.sprite.Sprite):
 
         sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
         tile_size = data["tile_size"]
+        scaled_size = int(tile_size * self.scale)
         self.sprites = {}  # Store animations
 
         for state, frames in data["animations"].items():
@@ -43,13 +48,22 @@ class Entity(pygame.sprite.Sprite):
                 col, row = map(int, frame.split(","))  # Get sprite position
                 x, y = col * tile_size, row * tile_size
                 sprite = sprite_sheet.subsurface((x, y, tile_size, tile_size))  # Extract sprite
+                sprite = pygame.transform.scale(sprite, (scaled_size, scaled_size))
                 self.sprites[state].append(sprite)
 
         self.sprite_index = 0
         self.image = self.sprites[self.state][self.sprite_index]  # Set initial sprite
 
+        # set render offset (horizontal centering, vertical bottom)
+        x_off = (self.rect.width - scaled_size) // 2
+        y_off = self.rect.height - scaled_size
+        self.render_offset = (x_off, y_off)
+
     def update(self, level, dt):
         """Handles entity movement, physics, and animations."""
+        if self.stun > 0:
+            self.stun -= 1
+
         self.velocity.y += level.gravity * dt  # Apply gravity
         self.move(level)
         self.update_animation(dt)
@@ -133,9 +147,21 @@ class Entity(pygame.sprite.Sprite):
         self.sprite_index = 0  # ✅ Reset animation frame
 
     def render(self, screen, camera):
-        """Renders the entity sprite."""
-        screen.blit(self.image, camera.apply(self))
+        """Renders the entity sprite at the correct position with an offset."""
+        render_pos = camera.apply(self)  # Get position from camera
+        screen.blit(self.image, (render_pos[0] + self.render_offset[0],
+                                 render_pos[1] + self.render_offset[1]))
 
     def eliminate(self):
         """Removes the entity from the game."""
         print(f"{self.__class__.__name__} eliminated")
+
+    def hit(self, attacker):
+        """Handles entity damage, knockback, and hit animation."""
+        self.stun = 20
+
+        knockback_x = 3 if self.rect.x > attacker.rect.x else -3
+        knockback_y = 2 if self.is_flipped else -2
+
+        self.velocity.x = knockback_x
+        self.velocity.y = knockback_y

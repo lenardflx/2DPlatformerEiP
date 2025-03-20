@@ -4,8 +4,8 @@ from game.tiles.tiles_register import register_tile
 
 @register_tile("moving_platform")
 class MovingPlatform(Tile):
-    def __init__(self, x, y, tile_info, tileset, tile_size=16):
-        super().__init__(x, y, tile_info, tileset, tile_size)
+    def __init__(self, x, y, tile_info, tile_set, tile_size):
+        super().__init__(x, y, tile_info, tile_set, tile_size)
 
         self.update_required = True  # Ensure the platform updates every frame
 
@@ -13,6 +13,8 @@ class MovingPlatform(Tile):
         self.direction = self.metadata.get("direction", "horizontal")
         self.movement_direction = 1  # 1 = forward, -1 = reverse
         self.tile_size = tile_size  # Tile size reference for movement
+
+        self.solid = True
 
     def update(self, engine):
         """Moves the platform and interacts with the player + enemies."""
@@ -35,11 +37,9 @@ class MovingPlatform(Tile):
             )  # Only check in movement direction (up/down)
 
         # Check for solid collisions
-        blocked = any(tile.rect.colliderect(check_rect) for tile in level.get_solid_tiles_near(self))
-
-        if blocked:
+        if any(tile.rect.colliderect(check_rect) for tile in level.get_solid_tiles_near(self)):
             self.movement_direction *= -1  # Reverse direction
-            return  # Stop movement this frame
+            return
 
         # Move platform if no collision
         delta_x = next_x - self.rect.x
@@ -48,26 +48,62 @@ class MovingPlatform(Tile):
 
         # Carry entities smoothly
         for entity in [player] + list(level.enemies):  # Convert Group to List
-            tmp = (self.is_between(self.rect.top, self.rect.bottom, entity.rect.bottom) or self.is_between(self.rect.top, self.rect.bottom, entity.rect.top))
-            tmp2 = (self.is_between(self.rect.left, self.rect.right, (entity.rect.left + entity.rect.right)/2))
+            if self.is_stuck_between_walls(entity, level):
+                entity.eliminate()  # Kill stuck entity
+                continue
 
-            if (
-                entity.rect.bottom == self.rect.top  # Standing exactly on the platform
-                and entity.velocity.y >= 0  # Ensures they are not jumping
-                and tmp2
-            ):
+            standing_on = (
+                not entity.is_flipped and
+                entity.rect.bottom == self.rect.top and  # Standing on platform
+                entity.velocity.y >= 0 and  # Not jumping
+                entity.rect.right > self.rect.left and entity.rect.left < self.rect.right  # Within platform bounds
+            )
+
+            hanging_under = (
+                entity.is_flipped and
+                entity.rect.top == self.rect.bottom and  # Hanging under platform
+                entity.velocity.y <= 0 and  # Not jumping upwards
+                entity.rect.right > self.rect.left and entity.rect.left < self.rect.right  # Within platform bounds
+            )
+
+            if standing_on or hanging_under:
                 entity.rect.y += delta_y  # Move up/down with platform
                 entity.rect.x += delta_x  # Stick horizontally
                 entity.velocity.x = delta_x  # Sync velocity for smooth movement
                 entity.on_ground = True
 
             # Push entities left or right if colliding from the sides
-            elif (self.movement_direction > 0 and entity.rect.left < self.rect.right <= entity.rect.left + abs(delta_x)) and tmp:
-                entity.rect.left = self.rect.right  # Pushed from right
+            elif self.colliding_from_side(entity, delta_x):
+                entity.rect.x += delta_x  # Apply horizontal push
+                if entity.on_ground:  # Prevent jumping issue
+                    entity.velocity.x = delta_x
 
-            elif (self.movement_direction < 0 and entity.rect.right > self.rect.left >= entity.rect.right - abs(delta_x)) and tmp:
-                entity.rect.right = self.rect.left  # Pushed from left
+    @staticmethod
+    def is_stuck_between_walls(entity, level):
+        """Detects if an entity is stuck between a wall and a moving platform."""
+        left_blocked = any(
+            tile.rect.colliderect(pygame.Rect(entity.rect.left - 1, entity.rect.y, 1, entity.rect.height))
+            for tile in level.get_solid_tiles_near(entity)
+        )
+        right_blocked = any(
+            tile.rect.colliderect(pygame.Rect(entity.rect.right + 1, entity.rect.y, 1, entity.rect.height))
+            for tile in level.get_solid_tiles_near(entity)
+        )
 
-    def is_between(self, x, y, z):
-        return (z >= x and z <= y) or (z <= x and z >= y)
-    
+        return left_blocked and right_blocked
+
+    def colliding_from_side(self, entity, delta_x):
+        """Check if entity is colliding with the platform from the side."""
+        colliding_right = (
+                self.movement_direction > 0 and
+                entity.rect.left < self.rect.right <= entity.rect.left + abs(delta_x) and
+                entity.rect.bottom > self.rect.top and entity.rect.top < self.rect.bottom
+        )
+
+        colliding_left = (
+                self.movement_direction < 0 and
+                entity.rect.right > self.rect.left >= entity.rect.right - abs(delta_x) and
+                entity.rect.bottom > self.rect.top and entity.rect.top < self.rect.bottom
+        )
+
+        return (colliding_right or colliding_left) and entity.velocity.y >= 0  # No pushing while jumping

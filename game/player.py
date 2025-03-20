@@ -4,19 +4,18 @@ from game.entities import Entity
 
 class Player(Entity):
     def __init__(self, x, y, width, height, scale, controls):
-        super().__init__(x, y, width * scale, height * scale)
+        super().__init__(x, y, width, height, scale)
         self.controls = controls
 
         # Player attributes
         self.max_health = 6
         self.health = self.max_health
         self.coins = 0
-        self.speed = 120
-        self.jump_strength = -100  # Base jump force
-        self.jump_hold_force = -20  # Additional force while holding jump
-        self.max_jump_countdown = 6  # Maximum frames to hold jump
+        self.speed = 100 * self.scale
+        self.jump_strength = -50 * self.scale # Base jump force
+        self.jump_hold_force = -15 * self.scale # Additional force while holding jump
+        self.max_jump_countdown = 7  # Maximum frames to hold jump
         self.jump_countdown = self.max_jump_countdown
-        self.hitstun = 0
 
         # Animation flags
         self.flicker = 0
@@ -44,11 +43,6 @@ class Player(Entity):
             self.flicker = not self.damage_anim_active or (self.immunity_frames % 6 < 3)
         else:
             self.flicker = False  # No flicker after immunity ends
-
-        if self.hitstun > 0:
-            self.hitstun -= 1
-        if self.stun > 0:
-            self.stun -= 1
 
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1
@@ -119,6 +113,7 @@ class Player(Entity):
                 self.attack_cooldown = 20  # Cooldown after attack
                 self.sprite_index = 0  # Reset animation
                 new_state = "attack"
+                self.perform_attack(level)
 
         # Attack Animation Handling
         if self.attack_active:
@@ -129,21 +124,29 @@ class Player(Entity):
         super().update(level, dt)  # Apply physics and collision
         self.state = new_state  # Update state for animation
 
+    def perform_attack(self, level):
+        """Creates an attack hitbox and eliminates enemies inside it."""
+        attack_width = self.rect.width * 0.75
+        attack_height = self.rect.height * 0.5
+        attack_x = self.rect.right if self.facing_right else self.rect.left - attack_width
+        attack_y = self.rect.top
+
+        attack_rect = pygame.Rect(attack_x, attack_y, attack_width, attack_height)
+
+        # Check collision with enemies
+        for enemy in level.enemies:
+            if attack_rect.colliderect(enemy.rect):
+                enemy.hit(self)
+
     def hit(self, attacker):
         """Handles player damage, knockback, and hit animation."""
-        if self.hitstun == 0 and self.immunity_frames == 0:
+        if self.immunity_frames == 0:
             # Reduce health
             self.health -= attacker.damage
-            self.hitstun = 20
             self.stun = 30
             self.immunity_frames = 40
 
-            # Determine knockback direction based on attacker position
-            knockback_x = 3 if self.rect.x > attacker.rect.x else -3
-            knockback_y = -2  # Small upward knockback
-
-            self.velocity.x = knockback_x
-            self.velocity.y = knockback_y
+            super().hit(attacker)
 
             # Activate hit animation
             self.state = "take_dmg"

@@ -1,5 +1,5 @@
 {
-    "tile_size": 16,
+    "tile_size": 32,
     "tiles": {
         "1": {
             "index": 1,
@@ -9,6 +9,42 @@
         },
         "2": {
             "index": 2,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 1.0 }
+        },
+        "3": {
+            "index": 3,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 1.0 }
+        },
+        "4": {
+            "index": 4,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 1.0 }
+        },
+        "5": {
+            "index": 5,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 1.0 }
+        },
+        "6": {
+            "index": 6,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 1.0 }
+        },
+        "7": {
+            "index": 7,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 1.0 }
+        },
+        "8": {
+            "index": 8,
             "collision_type": "platform",
             "type": "moving_platform",
             "hitbox": { "width": 1.0, "height": 0.5 },
@@ -16,6 +52,15 @@
                 "speed": 1,
                 "direction": "horizontal",
                 "range": 3
+            }
+        },
+        "9": {
+            "index": 9,
+            "collision_type": "painful",
+            "type": "spike",
+            "hitbox": { "width": 1.0, "height": 0.5, "offset_x": 0.0, "offset_y": 0.0 },
+            "metadata": {
+                "damage": 1
             }
         }
     }

@@ -1,16 +1,18 @@
+import pygame
+
 from game.enemies.enemy_registry import register_enemy
 from game.entities import Entity
 
 @register_enemy("basic_enemy")
 class Enemy(Entity):
-    def __init__(self, x, y, width, height, scale, player):
-        super().__init__(x, y, width * scale, height * scale)
+    def __init__(self, x, y, width, height, scale, player, level):
+        super().__init__(x, y, width, height, scale)
         self.player = player
+        self.level = level
         self.speed = 40
         self.jump_force = 160
         self.damage = 1
-        self.attack_range = 30  # Attack range in pixels
-        self.detection_range = 80  # Distance to start chasing the player
+        self.detection_range = 4  # Distance to start chasing the player
 
         self.damage = 1
 
@@ -18,7 +20,6 @@ class Enemy(Entity):
         self.has_jumped = True
         self.drop = False
         self.obstacle = False
-        self.hit = False
 
         # Load animations
         self.load_sprites("assets/characters/enemy.png",
@@ -31,27 +32,12 @@ class Enemy(Entity):
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
         # Chase player if nearby
-        if abs(((self.rect.centerx-self.player.rect.centerx)**2 + (self.rect.centery-self.player.rect.centery)**2)**0.5) < self.detection_range:
-            self.chase_player(dt)
-        else:
-            self.patrol(level, dt)
-
-        if level.gravity > 0:
-            if self.facing_right:
-                self.drop       = not level.get_tile_at(self.rect.right + 1, self.rect.bottom + 1)
-                self.obstacle   = (not level.get_tile_at(self.rect.right + 1, self.rect.bottom)) and level.get_tile_at(self.rect.right + 1, self.rect.bottom - 1)
+        distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
+        if not self.stun:
+            if distance_to_player < self.detection_range * self.level.tile_size:
+                self.chase_player(dt)
             else:
-                self.drop       = not level.get_tile_at(self.rect.left - 1, self.rect.bottom + 1)
-                self.obstacle   = (not level.get_tile_at(self.rect.left - 1, self.rect.bottom)) and level.get_tile_at(self.rect.left - 1, self.rect.bottom - 1)
-        else:
-            if self.facing_right:
-                self.drop       = not level.get_tile_at(self.rect.right + 1, self.rect.top - 1)
-                self.obstacle   = (not level.get_tile_at(self.rect.right + 1, self.rect.top)) and level.get_tile_at(self.rect.right + 1, self.rect.top + 1)
-            else:
-                self.drop       = not level.get_tile_at(self.rect.left - 1, self.rect.top - 1)
-                self.obstacle   = (not level.get_tile_at(self.rect.left - 1, self.rect.top)) and level.get_tile_at(self.rect.left - 1, self.rect.top + 1)
-
-
+                self.patrol(level, dt)
 
         if self.on_ground:
             self.has_jumped = False
@@ -78,15 +64,18 @@ class Enemy(Entity):
     def patrol(self, level, dt):
         """Moves the enemy left and right, reversing direction on collisions."""
         if self.facing_right:
-            if self.rect.right >= level.width or self.hit:
-                self.facing_right = False
-            else:
-                self.velocity.x = self.speed * dt
+            self.velocity.x = self.speed * dt
         else:
-            if self.rect.left <= 0 or self.hit:
-                self.facing_right = True
-            else:
-                self.velocity.x = -self.speed * dt
+            self.velocity.x = -self.speed * dt
+
+        future_rect = self.rect.copy()
+        future_rect.x += self.velocity.x
+
+        for tile in self.level.get_solid_tiles_near(self):
+            if future_rect.colliderect(tile.rect):
+                self.facing_right = not self.facing_right
+                self.velocity.x *= -1
+                break
 
     def chase_player(self, dt):
         """Moves toward the player if within detection range."""

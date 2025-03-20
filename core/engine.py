@@ -43,8 +43,8 @@ class GameEngine:
 
         # UI and Menu
         self.ui = UI()
-        self.menu = Menu(self.native_size)
-        self.menu.active_type = MenuState.START
+        self.menu = Menu(self.native_size, self.controls)
+        self.menu.active_type = MenuState.MAIN
 
         #Ability Cooldown
         self.cooldown = 0
@@ -78,12 +78,10 @@ class GameEngine:
             if self.controls.is_action_active("gravity_inverse"):
                 self.flip_gravity()
 
-            if self.is_playing:
-                # Game is running
-                if self.controls.is_action_active("menu"):
-                    self.menu.active_type = MenuState.PAUSE  # Open pause menu
-                    self.is_playing = False  # Pause the game
+            if self.controls.is_action_active("menu"):
+                self.menu.toggle_menu(MenuState.PAUSE, self)
 
+            if self.is_playing:
                 self.ui.handle_event(event, self)  # Pass single event to UI
             else:
                 self.menu.handle_event(event, self)  # Pass single event to Menu

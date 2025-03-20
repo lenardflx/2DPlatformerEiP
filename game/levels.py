@@ -49,12 +49,13 @@ class Level(pygame.sprite.LayeredUpdates):
         self.player = Player(self.spawn[0], self.spawn[1], w, h, s, controls)
 
         # Load enemies from JSON
+        w, h = get_game_data("enemy_size")
+        s = get_game_data("enemy_scale")
         for enemy_data in level_data.get("enemies", []):
             enemy_type = enemy_data["type"]
             x, y = enemy_data["x"] * self.tile_size, enemy_data["y"] * self.tile_size
-            print(enemy_type,ENEMY_CLASSES)
             if enemy_type in ENEMY_CLASSES:
-                enemy = ENEMY_CLASSES[enemy_type](x, y, self.tile_size, self.tile_size, 1, self.player)
+                enemy = ENEMY_CLASSES[enemy_type](x, y, w, h, s, self.player, self)
                 self.enemies.add(enemy)
 
         # Load tiles
@@ -65,7 +66,7 @@ class Level(pygame.sprite.LayeredUpdates):
                 if str(tile_id) in self.tile_data["tiles"]:
                     tile_info = self.tile_data["tiles"][str(tile_id)]
                     tile_class = TILES_CLASSES.get(tile_info["type"], Tile)
-                    tile = tile_class(x * self.tile_size, y * self.tile_size, tile_info, self.tile_set)
+                    tile = tile_class(x * self.tile_size, y * self.tile_size, tile_info, self.tile_set, self.tile_size)
 
                     self.tiles.add(tile)
                     self.add(tile)
