@@ -56,6 +56,10 @@ class Entity(pygame.sprite.Sprite):
         self.move(level)
         self.update_animation(dt)
 
+        # Check if out of bounds
+        if (not self.is_flipped and self.rect.top > level.height) or (self.is_flipped and self.rect.bottom < 0):
+            self.eliminate()
+
     def flip_gravity(self):
         """Flips the entity's sprite and inverts its vertical velocity."""
         self.velocity.y *= -1  # Invert falling direction

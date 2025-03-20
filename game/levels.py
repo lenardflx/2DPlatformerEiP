@@ -3,8 +3,9 @@ import pygame
 import os
 
 from core.game_data import get_game_data
-from game.tiles import TILE_CLASSES, Tile
 from game.enemies.enemy_registry import ENEMY_CLASSES
+from game.tiles.basic_tile import Tile
+from game.tiles.tiles_register import TILES_CLASSES
 from game.player import Player  # Import Player
 
 class Level(pygame.sprite.LayeredUpdates):
@@ -63,7 +64,7 @@ class Level(pygame.sprite.LayeredUpdates):
                     continue
                 if str(tile_id) in self.tile_data["tiles"]:
                     tile_info = self.tile_data["tiles"][str(tile_id)]
-                    tile_class = TILE_CLASSES.get(tile_info["type"], Tile)
+                    tile_class = TILES_CLASSES.get(tile_info["type"], Tile)
                     tile = tile_class(x * self.tile_size, y * self.tile_size, tile_info, self.tile_set)
 
                     self.tiles.add(tile)
@@ -115,5 +116,5 @@ class Level(pygame.sprite.LayeredUpdates):
         """Renders everything inside the level."""
         self.tiles.draw(screen)
         for enemy in self.enemies:
-            screen.blit(enemy.image, camera.apply(enemy))
-        screen.blit(self.player.image, camera.apply(self.player))
+            enemy.render(screen, camera)
+        self.player.render(screen,camera)
