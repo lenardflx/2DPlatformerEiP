@@ -48,6 +48,8 @@ class MovingPlatform(Tile):
 
         # Carry entities smoothly
         for entity in [player] + list(level.enemies):  # Convert Group to List
+            tmp = (self.is_between(self.rect.top, self.rect.bottom, entity.rect.bottom) or self.is_between(self.rect.top, self.rect.bottom, entity.rect.top))
+
             if (
                 entity.rect.bottom == self.rect.top  # Standing exactly on the platform
                 and entity.velocity.y >= 0  # Ensures they are not jumping
@@ -58,8 +60,13 @@ class MovingPlatform(Tile):
                 entity.on_ground = True
 
             # Push entities left or right if colliding from the sides
-            elif self.movement_direction > 0 and entity.rect.left < self.rect.right <= entity.rect.left + abs(delta_x):
+            elif (self.movement_direction > 0 and entity.rect.left < self.rect.right <= entity.rect.left + abs(delta_x)) and tmp:
                 entity.rect.left = self.rect.right  # Pushed from right
 
-            elif self.movement_direction < 0 and entity.rect.right > self.rect.left >= entity.rect.right - abs(delta_x):
+            elif (self.movement_direction < 0 and entity.rect.right > self.rect.left >= entity.rect.right - abs(delta_x)) and tmp:
                 entity.rect.right = self.rect.left  # Pushed from left
+
+    def is_between(self, x, y, z):
+        if (z >= x and z <= y) or (z <= x and z >= y):
+            return True
+        return False
