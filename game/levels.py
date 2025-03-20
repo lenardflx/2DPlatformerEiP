@@ -52,7 +52,7 @@ class Level(pygame.sprite.LayeredUpdates):
         for enemy_data in level_data.get("enemies", []):
             enemy_type = enemy_data["type"]
             x, y = enemy_data["x"] * self.tile_size, enemy_data["y"] * self.tile_size
-
+            print(enemy_type,ENEMY_CLASSES)
             if enemy_type in ENEMY_CLASSES:
                 enemy = ENEMY_CLASSES[enemy_type](x, y, self.tile_size, self.tile_size, 1, self.player)
                 self.enemies.add(enemy)

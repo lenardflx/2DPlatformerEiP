@@ -1,1 +1,1 @@
-from . import * # Load all enemy classes
+from .enemy import * # Load all enemy classes
