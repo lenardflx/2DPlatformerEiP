@@ -10,7 +10,7 @@ class Enemy(Entity):
         self.jump_force = 160
         self.damage = 1
         self.attack_range = 30  # Attack range in pixels
-        self.detection_range = 200  # Distance to start chasing the player
+        self.detection_range = 80  # Distance to start chasing the player
 
         # AI flags
         self.has_jumped = True
@@ -28,10 +28,8 @@ class Enemy(Entity):
 
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
-
-
         # Chase player if nearby
-        if abs(self.rect.centerx - self.player.rect.centerx) < self.detection_range:
+        if abs(((self.rect.centerx-self.player.rect.centerx)**2 + (self.rect.centery-self.player.rect.centery)**2)**0.5) < self.detection_range:
             self.chase_player(dt)
         else:
             self.patrol(level, dt)
@@ -45,6 +43,8 @@ class Enemy(Entity):
 
         if self.on_ground:
             self.has_jumped = False
+
+        print(self.facing_right)
 
         # Jump over obstacles or gaps
         new_state = "jump"
