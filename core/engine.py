@@ -5,7 +5,7 @@ from core.camera import Camera
 from core.game_data import get_game_data
 from game.background import Background
 from game.levels import Level
-from game.menu import Menu, MenuOptions
+from game.menu import Menu, MenuState
 from core.controls import Controls
 from game.user_interface import UI
 
@@ -43,8 +43,11 @@ class GameEngine:
 
         # UI and Menu
         self.ui = UI()
-        self.menu = Menu()
-        self.menu.active_type = MenuOptions.START
+        self.menu = Menu(self.native_size)
+        self.menu.active_type = MenuState.START
+
+        #Ability Cooldown
+        self.cooldown = 0
 
         # Camera System
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
@@ -78,7 +81,7 @@ class GameEngine:
             if self.is_playing:
                 # Game is running
                 if self.controls.is_action_active("menu"):
-                    self.menu.active_type = MenuOptions.PAUSE  # Open pause menu
+                    self.menu.active_type = MenuState.PAUSE  # Open pause menu
                     self.is_playing = False  # Pause the game
 
                 self.ui.handle_event(event, self)  # Pass single event to UI
@@ -86,9 +89,11 @@ class GameEngine:
                 self.menu.handle_event(event, self)  # Pass single event to Menu
 
     def flip_gravity(self):
+        
         """Flips gravity and mirrors entities vertically."""
-        if not self.level.player.on_ground:
+        if self.cooldown > 0:
             return # Prevent flipping mid-air
+        self.cooldown = 60
 
         self.level.gravity *= -1
         for entity in [self.level.player] + list(self.level.enemies):
@@ -135,6 +140,8 @@ class GameEngine:
         self.screen.blit(scaled_surface, (x_offset, y_offset))
 
     def update(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
         """Updates all game objects and logic."""
         if self.is_playing:
             self.level.update(self.dt, self)
@@ -144,7 +151,7 @@ class GameEngine:
             self.level.check_touch(self.level.player, self)
 
         if self.level.player.health <= 0:
-            self.menu.active_type = MenuOptions.DEATH
+            self.menu.active_type = MenuState.DEATH
             self.is_playing = False
 
     def run(self):

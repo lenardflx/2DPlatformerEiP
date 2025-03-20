@@ -2,7 +2,7 @@ import pygame
 import os
 import json
 
-from game.menu import MenuOptions
+from game.menu import MenuState
 
 
 class UI:
@@ -81,6 +81,6 @@ class UI:
         if event.type == pygame.MOUSEBUTTONDOWN:
             pause_rect = pygame.Rect(20, 20, self.pause_size, self.pause_size)
             if pause_rect.collidepoint(event.pos):
-                engine.menu_state = MenuOptions.PAUSE
+                engine.menu_state = MenuState.PAUSE
                 engine.is_playing = False
                 print("Game Paused!")

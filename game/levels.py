@@ -3,8 +3,9 @@ import pygame
 import os
 
 from core.game_data import get_game_data
-from game.tiles import TILE_CLASSES, Tile
 from game.enemies.enemy_registry import ENEMY_CLASSES
+from game.tiles.basic_tile import Tile
+from game.tiles.tiles_register import TILES_CLASSES
 from game.player import Player  # Import Player
 
 class Level(pygame.sprite.LayeredUpdates):
@@ -51,7 +52,7 @@ class Level(pygame.sprite.LayeredUpdates):
         for enemy_data in level_data.get("enemies", []):
             enemy_type = enemy_data["type"]
             x, y = enemy_data["x"] * self.tile_size, enemy_data["y"] * self.tile_size
-
+            print(enemy_type,ENEMY_CLASSES)
             if enemy_type in ENEMY_CLASSES:
                 enemy = ENEMY_CLASSES[enemy_type](x, y, self.tile_size, self.tile_size, 1, self.player)
                 self.enemies.add(enemy)
@@ -63,7 +64,7 @@ class Level(pygame.sprite.LayeredUpdates):
                     continue
                 if str(tile_id) in self.tile_data["tiles"]:
                     tile_info = self.tile_data["tiles"][str(tile_id)]
-                    tile_class = TILE_CLASSES.get(tile_info["type"], Tile)
+                    tile_class = TILES_CLASSES.get(tile_info["type"], Tile)
                     tile = tile_class(x * self.tile_size, y * self.tile_size, tile_info, self.tile_set)
 
                     self.tiles.add(tile)
@@ -74,6 +75,12 @@ class Level(pygame.sprite.LayeredUpdates):
 
                 self.width = max(self.width, (x + 1) * self.tile_size)
                 self.height = max(self.height, (y + 1) * self.tile_size)
+
+    def get_tile_at(self, x, y):
+        """Returns the tile at the given position."""
+        for tile in self.tiles:
+            if tile.rect.collidepoint(x, y):
+                return tile
 
     def get_solid_tiles_near(self, entity, radius=2):
         """Returns a list of solid tiles near the given entity for collision checking."""
@@ -115,5 +122,5 @@ class Level(pygame.sprite.LayeredUpdates):
         """Renders everything inside the level."""
         self.tiles.draw(screen)
         for enemy in self.enemies:
-            screen.blit(enemy.image, camera.apply(enemy))
-        screen.blit(self.player.image, camera.apply(self.player))
+            enemy.render(screen, camera)
+        self.player.render(screen,camera)

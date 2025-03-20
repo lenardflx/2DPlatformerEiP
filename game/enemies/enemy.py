@@ -6,11 +6,11 @@ class Enemy(Entity):
     def __init__(self, x, y, width, height, scale, player):
         super().__init__(x, y, width * scale, height * scale)
         self.player = player
-        self.speed = 20
+        self.speed = 40
         self.jump_force = 160
         self.damage = 1
-        self.attack_range = 32  # Attack range in pixels
-        self.detection_range = 20  # Distance to start chasing the player
+        self.attack_range = 30  # Attack range in pixels
+        self.detection_range = 200  # Distance to start chasing the player
 
         # AI flags
         self.has_jumped = False
@@ -80,7 +80,7 @@ class Enemy(Entity):
 
     def attack(self):
         """Handles enemy attacking logic."""
-        self.player.get_hit(self.damage, 60, knockback=30)
+        self.player.got_hit = (self.damage, 60, 2)
 
     def jump(self, dt, x_vel, y_vel):
         """Applies jump force to the enemy."""
@@ -89,4 +89,4 @@ class Enemy(Entity):
 
     def eliminate(self):
         """Handles enemy elimination."""
-        print("Enemy eliminated")
+        self.kill()
