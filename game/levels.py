@@ -76,6 +76,12 @@ class Level(pygame.sprite.LayeredUpdates):
                 self.width = max(self.width, (x + 1) * self.tile_size)
                 self.height = max(self.height, (y + 1) * self.tile_size)
 
+    def get_tile_at(self, x, y):
+        """Returns the tile at the given position."""
+        for tile in self.tiles:
+            if tile.rect.collidepoint(x, y):
+                return tile
+
     def get_solid_tiles_near(self, entity, radius=2):
         """Returns a list of solid tiles near the given entity for collision checking."""
         nearby_tiles = []
