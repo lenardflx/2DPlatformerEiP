@@ -11,8 +11,11 @@ class Entity(pygame.sprite.Sprite):
         self.velocity = pygame.Vector2(0, 0)
         self.on_ground = False
         self.facing_right = True
-        self.state = "idle"
         self.is_flipped = False
+        self.state = "idle"
+        self.last_state = "idle"
+        self.attacking = False
+        self.stunned = False
 
         # Animation system
         self.sprites = {}
@@ -41,11 +44,6 @@ class Entity(pygame.sprite.Sprite):
                 x, y = col * tile_size, row * tile_size
                 sprite = sprite_sheet.subsurface((x, y, tile_size, tile_size))  # Extract sprite
                 self.sprites[state].append(sprite)
-
-        if "idle" in self.sprites:
-            self.state = "idle"
-        else:
-            self.state = next(iter(self.sprites))
 
         self.sprite_index = 0
         self.image = self.sprites[self.state][self.sprite_index]  # Set initial sprite
@@ -78,8 +76,9 @@ class Entity(pygame.sprite.Sprite):
         self.rect.y += self.velocity.y
         self.handle_collisions(level, direction="vertical")
 
-    def handle_collisions(self, level, direction):
+    def handle_collisions(self, level, direction, ground_buffer=1):
         """Handles collisions with solid tiles in the given direction."""
+
         for tile in level.get_solid_tiles_near(self):
             if direction == "horizontal":
                 if self.rect.colliderect(tile.rect):
@@ -104,20 +103,34 @@ class Entity(pygame.sprite.Sprite):
         if not frames:
             return  # No frames available for this state
 
-        # Ensure sprite_index is within range after switching states
-        self.sprite_index = min(self.sprite_index, len(frames) - 1)
+        if self.state != self.last_state:
+            self.sprite_index = 0
+            self.last_state = self.state
 
         self.time_accumulator += dt
         if self.time_accumulator >= self.animation_speed:
             self.time_accumulator -= self.animation_speed
-            self.sprite_index = (self.sprite_index + 1) % len(frames)  # Cycle through frames
+            if self.state in ["jump", "attack", "take_dmg"]:
+                if self.sprite_index < len(frames) - 1:
+                    self.sprite_index += 1  # Progress animation normally
+            else:
+                self.sprite_index = (self.sprite_index + 1) % len(frames)  # Loop animation
 
-        # Update the current image
+        # Apply flipped transformations
         self.image = frames[self.sprite_index]
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
         if self.is_flipped:
             self.image = pygame.transform.flip(self.image, False, True)
+
+    def set_state(self, new_state):
+        """Safely switches states and resets animations."""
+        if new_state == self.state:
+            return
+        if self.state not in ["attack", "take_dmg"]:  # ✅ Prevent overriding mid-attack/damage
+            self.last_state = self.state  # ✅ Store last valid movement state
+        self.state = new_state
+        self.sprite_index = 0  # ✅ Reset animation frame
 
     def render(self, screen, camera):
         """Renders the entity sprite."""
