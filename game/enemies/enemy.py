@@ -13,7 +13,7 @@ class Enemy(Entity):
         self.detection_range = 200  # Distance to start chasing the player
 
         # AI flags
-        self.has_jumped = False
+        self.has_jumped = True
         self.drop = False
         self.obstacle = False
         self.hit = False
@@ -29,25 +29,33 @@ class Enemy(Entity):
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
 
+
         # Chase player if nearby
         if abs(self.rect.centerx - self.player.rect.centerx) < self.detection_range:
             self.chase_player(dt)
         else:
             self.patrol(level, dt)
 
-        # Jump over obstacles or gaps
-        new_state = "jump"
-        if self.drop and not self.has_jumped:
-            self.jump(dt, 0.1 * self.speed, 40)
-            self.has_jumped = True
-        elif self.obstacle and not self.has_jumped:
-            self.jump(dt, 0, self.jump_force)
-            self.has_jumped = True
+        if self.facing_right:
+            self.drop       = not level.get_tile_at(self.rect.right + 1, self.rect.bottom + 1)
+            self.obstacle   = (not level.get_tile_at(self.rect.right + 1, self.rect.bottom)) and level.get_tile_at(self.rect.right + 1, self.rect.bottom - 1)
         else:
-            new_state = "run"
+            self.drop       = not level.get_tile_at(self.rect.left - 1, self.rect.bottom + 1)
+            self.obstacle   = (not level.get_tile_at(self.rect.left - 1, self.rect.bottom)) and level.get_tile_at(self.rect.left - 1, self.rect.bottom - 1)
 
         if self.on_ground:
             self.has_jumped = False
+
+        # Jump over obstacles or gaps
+        new_state = "jump"
+        if self.drop and not self.has_jumped:
+            self.jump(0.25 * self.speed, 2)
+            self.has_jumped = True
+        elif self.obstacle and not self.has_jumped:
+            self.jump(0, 3)
+            self.has_jumped = True
+        else:
+            new_state = "run"
 
         super().update(level, dt)
         self.state = new_state  # Update animation state
@@ -82,10 +90,14 @@ class Enemy(Entity):
         """Handles enemy attacking logic."""
         self.player.got_hit = (self.damage, 60, 2)
 
-    def jump(self, dt, x_vel, y_vel):
+    def jump(self, x_vel, y_vel):
         """Applies jump force to the enemy."""
-        self.velocity.x += x_vel if self.facing_right else -x_vel
-        self.velocity.y = -y_vel * dt
+        if self.facing_right:
+            self.velocity.x = x_vel
+        else:
+            self.velocity.x = -x_vel
+        
+        self.velocity.y = -y_vel
 
     def eliminate(self):
         """Handles enemy elimination."""
