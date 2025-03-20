@@ -20,6 +20,8 @@ class Entity(pygame.sprite.Sprite):
         self.animation_speed = 0.1
         self.time_accumulator = 0
 
+        self.stun = 0
+
         self.image = pygame.Surface((width, height))
         self.image.fill((255, 0, 0))  # Temporary red box (if sprite is missing)
 

@@ -46,6 +46,9 @@ class GameEngine:
         self.menu = Menu()
         self.menu.active_type = MenuOptions.START
 
+        #Ability Cooldown
+        self.cooldown = 0
+
         # Camera System
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
@@ -86,9 +89,11 @@ class GameEngine:
                 self.menu.handle_event(event, self)  # Pass single event to Menu
 
     def flip_gravity(self):
+        
         """Flips gravity and mirrors entities vertically."""
-        if not self.level.player.on_ground:
+        if self.cooldown > 0:
             return # Prevent flipping mid-air
+        self.cooldown = 60
 
         self.level.gravity *= -1
         for entity in [self.level.player] + list(self.level.enemies):
@@ -135,6 +140,8 @@ class GameEngine:
         self.screen.blit(scaled_surface, (x_offset, y_offset))
 
     def update(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
         """Updates all game objects and logic."""
         if self.is_playing:
             self.level.update(self.dt, self)

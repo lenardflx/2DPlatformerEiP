@@ -92,8 +92,8 @@ class MovingPlatform(Tile):
         # Carry entities smoothly
         for entity in [player] + list(level.enemies):  # Convert Group to List
             if (
-                    entity.rect.bottom == self.rect.top  # Standing exactly on the platform
-                    and entity.velocity.y >= 0  # Ensures they are not jumping
+                entity.rect.bottom == self.rect.top  # Standing exactly on the platform
+                and entity.velocity.y >= 0  # Ensures they are not jumping
             ):
                 entity.rect.y += delta_y  # Move up/down with platform
                 entity.rect.x += delta_x  # Stick horizontally

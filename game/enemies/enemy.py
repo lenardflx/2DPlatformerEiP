@@ -80,7 +80,7 @@ class Enemy(Entity):
 
     def attack(self):
         """Handles enemy attacking logic."""
-        self.player.get_hit(self.damage, 60, knockback=30)
+        self.player.got_hit = (self.damage, 60, 2)
 
     def jump(self, dt, x_vel, y_vel):
         """Applies jump force to the enemy."""

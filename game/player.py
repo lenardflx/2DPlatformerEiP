@@ -20,6 +20,7 @@ class Player(Entity):
         self.jump_countdown = self.max_jump_countdown
         self.hitstun = 0
         self.is_jumping = False
+        self.got_hit = (0, 0, 0)
 
         self.load_sprites("assets/characters/player.png", "assets/characters/player.json")
 
@@ -31,25 +32,32 @@ class Player(Entity):
 
         if self.hitstun > 0:
             self.hitstun -= 1
+        if self.stun > 0:
+            self.stun -= 1
 
-        # Reset movement
-        self.velocity.x = 0
+        # Stop movement
+        if self.on_ground:
+            self.velocity.x = 0
         new_state = "idle"
 
         # Handle movement
         left = self.controls.is_action_active("move_left")
         right = self.controls.is_action_active("move_right")
 
-        if left and right:
-            new_state = "idle"
-        elif left:
-            self.velocity.x = -self.speed * dt
-            self.facing_right = False
-            new_state = "run"
-        elif right:
-            self.velocity.x = self.speed * dt
-            self.facing_right = True
-            new_state = "run"
+        if self.stun == 0:
+            if left and right:
+                new_state = "idle"
+            elif left:
+                self.velocity.x = -self.speed * dt
+                self.facing_right = False
+                new_state = "run"
+            elif right:
+                self.velocity.x = self.speed * dt
+                self.facing_right = True
+                new_state = "run"
+
+        if not self.got_hit == (0,0,0):
+            self.get_hit()
 
         # Handle jumping (hold jump for higher jumps)
         jump_pressed = self.controls.is_action_active("jump")
@@ -73,9 +81,15 @@ class Player(Entity):
         super().update(level, dt)  # Apply physics and collision
         self.state = new_state  # Update state for animation
 
-    def get_hit(self, damage, duration, knockback=0):
+    def get_hit(self):
         """Handles player damage and knockback."""
         if self.hitstun == 0:
-            self.health -= damage
-            self.hitstun = duration
-            self.velocity.x += knockback if not self.facing_right else -knockback
+            self.health -= self.got_hit[0]
+            self.hitstun = self.got_hit[1]
+            self.stun = 30
+            if self.facing_right:
+                self.velocity.x = -self.got_hit[2]
+            else:
+                self.velocity.x = self.got_hit[2]
+            self.velocity.y = -2
+        self.got_hit = (0, 0, 0)
