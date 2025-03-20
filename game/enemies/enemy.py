@@ -12,6 +12,8 @@ class Enemy(Entity):
         self.attack_range = 30  # Attack range in pixels
         self.detection_range = 80  # Distance to start chasing the player
 
+        self.damage = 1
+
         # AI flags
         self.has_jumped = True
         self.drop = False
@@ -97,7 +99,7 @@ class Enemy(Entity):
 
     def attack(self):
         """Handles enemy attacking logic."""
-        self.player.got_hit = (self.damage, 60, 2)
+        self.player.hit(self)
 
     def jump(self, dt, x_vel, y_vel, sgn):
         """Applies jump force to the enemy."""

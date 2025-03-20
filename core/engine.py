@@ -57,9 +57,9 @@ class GameEngine:
         self.is_playing = True
         self.menu.active_type = None  # No menu is active
 
-    def load_next_level(self):
+    def load_level(self, level_number):
         """Loads the next level and resets the game state."""
-        self.current_level += 1
+        self.current_level = level_number
         self.level = Level(self.current_level, self.controls)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
@@ -89,7 +89,6 @@ class GameEngine:
                 self.menu.handle_event(event, self)  # Pass single event to Menu
 
     def flip_gravity(self):
-        
         """Flips gravity and mirrors entities vertically."""
         if self.cooldown > 0:
             return # Prevent flipping mid-air
@@ -109,9 +108,8 @@ class GameEngine:
                 background.render(self.scaled_surface, self.camera)
 
             # Render game objects
-            for sprite in self.all_sprites:
-                pos = self.camera.apply(sprite).topleft
-                self.scaled_surface.blit(sprite.image, pos)
+            if self.level:
+                self.level.render(self.scaled_surface, self.camera)
 
             # Draw UI separately (not affected by camera)
             self.ui.render(self.scaled_surface)

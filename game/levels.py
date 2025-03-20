@@ -120,7 +120,8 @@ class Level(pygame.sprite.LayeredUpdates):
 
     def render(self, screen, camera):
         """Renders everything inside the level."""
-        self.tiles.draw(screen)
+        for tile in self.tiles:
+            screen.blit(tile.image, camera.apply(tile).topleft)
         for enemy in self.enemies:
             enemy.render(screen, camera)
         self.player.render(screen,camera)

@@ -134,11 +134,7 @@ class Entity(pygame.sprite.Sprite):
 
     def render(self, screen, camera):
         """Renders the entity sprite."""
-        if self.sprites:
-            sprite = self.sprites[self.state][self.sprite_index]
-            if not self.facing_right:
-                sprite = pygame.transform.flip(sprite, True, False)
-            screen.blit(sprite, camera.apply(self))
+        screen.blit(self.image, camera.apply(self))
 
     def eliminate(self):
         """Removes the entity from the game."""

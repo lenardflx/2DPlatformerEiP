@@ -80,7 +80,7 @@ class Menu:
             game_engine.is_playing = True
             self.active_type = MenuState.NONE
         elif key == "retry":
-            game_engine.load_next_level()
+            game_engine.load_level(game_engine.current_level)
             game_engine.is_playing = True
             self.active_type = MenuState.NONE
         elif key == "main_menu":
