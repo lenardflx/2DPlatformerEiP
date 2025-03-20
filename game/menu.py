@@ -2,29 +2,31 @@ import json
 import os
 import pygame
 
-class MenuOptions:
-    START = 0
-    PAUSE = 1
-    DEATH = 2
-    SETTINGS = 3
-    LEVELS = 4
+class MenuState:
+    NONE = 0
+    START = 1
+    PAUSE = 2
+    DEATH = 3
+    SETTINGS = 4
+    LEVELS = 5
 
 class Menu:
-    def __init__(self):
+    def __init__(self, screen_size):
         """Initializes the menu system and loads UI assets."""
         with open("assets/menu/menu.json") as f:
             menu_data = json.load(f)
 
-        self.active_type = MenuOptions.START
+        self.active_type = MenuState.START
         self.last_frame = None
+        self.screen_size = screen_size
 
         # Define button layouts for different menu types
         self.menu_layouts = {
-            MenuOptions.START: ["continue", "levels", "settings", "exit"],
-            MenuOptions.PAUSE: ["resume", "retry", "settings", "main_menu"],
-            MenuOptions.DEATH: ["retry", "main_menu"],
-            MenuOptions.SETTINGS: ["controls"],
-            MenuOptions.LEVELS: []
+            MenuState.START: ["continue", "levels", "settings", "exit"],
+            MenuState.PAUSE: ["resume", "retry", "settings", "main_menu"],
+            MenuState.DEATH: ["retry", "main_menu"],
+            MenuState.SETTINGS: ["controls"],
+            MenuState.LEVELS: []
         }
 
         # Load button images
@@ -47,9 +49,10 @@ class Menu:
         mouse_x, mouse_y = self.scale_mouse_position(engine)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            for key, button in self.buttons.items():
-                if button["rect"].collidepoint((mouse_x, mouse_y)):
-                    self.handle_button_action(key, engine)
+            if event.button == 1:  # Left mouse button
+                for key, button in self.buttons.items():
+                    if button["rect"].collidepoint((mouse_x, mouse_y)):
+                        self.handle_button_action(key, engine)
 
         # Check hover state
         for key, button in self.buttons.items():
@@ -71,40 +74,37 @@ class Menu:
 
         return int(scaled_x), int(scaled_y)
 
-    def handle_button_action(self, key, engine):
-        """Handles button clicks and transitions between menus."""
+    def handle_button_action(self, key, game_engine):
+        """Handles button clicks."""
         if key in ["continue", "resume"]:
-            engine.is_playing = True  # Resume game
-            engine.menu_state = None  # Close menu
+            game_engine.is_playing = True
+            self.active_type = MenuState.NONE
         elif key == "retry":
-            engine.load_next_level()  # Reset the level
-            engine.is_playing = True
-            engine.menu_state = None
-        elif key in ["main_menu", "exit"]:
-            engine.menu_state = MenuOptions.START
-            engine.is_playing = False
+            game_engine.load_next_level()
+            game_engine.is_playing = True
+            self.active_type = MenuState.NONE
+        elif key == "main_menu":
+            self.active_type = MenuState.START
+            game_engine.is_playing = False
         elif key == "settings":
-            self.open_menu(MenuOptions.SETTINGS, engine)
+            self.open_menu(MenuState.SETTINGS, game_engine)
         elif key == "levels":
-            self.open_menu(MenuOptions.LEVELS, engine)
-        elif key == "exit":  # Prevent duplicate "exit"
-            engine.is_running = False
+            self.open_menu(MenuState.LEVELS, game_engine)
+        elif key == "exit":
+            pygame.quit()
+            exit()
 
     def render(self, screen):
         """Renders the menu on the screen."""
-        if self.active_type == MenuOptions.START:
-            screen.fill((0, 0, 255))  # Blue background for main menu
-        else:
-            if self.last_frame:
-                screen.blit(self.last_frame, (0, 0))
+        if self.active_type == MenuState.NONE:
+            return
 
-            overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-            if self.active_type == MenuOptions.DEATH:
-                overlay.fill((255, 0, 0, 128))  # Red tint for death screen
-                self.render_text(screen, "You Died", screen.get_width() // 2, 100, size=50)
-            else:
-                overlay.fill((128, 128, 128, 128))  # Semi-transparent gray overlay
-            screen.blit(overlay, (0, 0))
+        if self.last_frame:
+            screen.blit(self.last_frame, (0, 0))
+
+        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        overlay.fill((128, 128, 128, 128))
+        screen.blit(overlay, (0, 0))
 
         # Center menu buttons
         screen_width, screen_height = screen.get_size()
@@ -131,15 +131,12 @@ class Menu:
 
     def open_menu(self, menu_type, engine):
         """Opens a specific menu type and captures the current game screen for overlay effects."""
+        # Capture the current game screen before opening the menu
+        if self.active_type == MenuState.NONE:
+            window_width, window_height = engine.screen.get_size()
+            scale = min(window_width / self.screen_size[0], window_height / self.screen_size[1])
+            new_width = int(self.screen_size[0] * scale)
+            new_height = int(self.screen_size[1] * scale)
+            self.last_frame = pygame.transform.scale(engine.scaled_surface, (new_width, new_height))
+
         self.active_type = menu_type
-
-        # Capture only the scaled game area before the menu opens
-        window_width, window_height = engine.screen.get_size()
-        scale = min(window_width / engine.native_size[0], window_height / engine.native_size[1])
-        new_width = int(engine.native_size[0] * scale)
-        new_height = int(engine.native_size[1] * scale)
-
-        # Scale `scaled_surface` to full screen size for proper overlay
-        self.last_frame = pygame.transform.scale(engine.scaled_surface, (new_width, new_height))
-
-        engine.is_menu = True
