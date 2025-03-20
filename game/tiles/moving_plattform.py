@@ -55,6 +55,7 @@ class MovingPlatform(Tile):
                 entity.rect.y += delta_y  # Move up/down with platform
                 entity.rect.x += delta_x  # Stick horizontally
                 entity.velocity.x = delta_x  # Sync velocity for smooth movement
+                entity.on_ground = True
 
             # Push entities left or right if colliding from the sides
             elif self.movement_direction > 0 and entity.rect.left < self.rect.right <= entity.rect.left + abs(delta_x):
