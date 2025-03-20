@@ -74,9 +74,9 @@ class GameEngine:
                 exit()
             elif event.type == pygame.VIDEORESIZE:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            elif event.type == pygame.KEYDOWN:
-                if self.controls.is_action_active("gravity_inverse"):
-                    self.flip_gravity()
+
+            if self.controls.is_action_active("gravity_inverse"):
+                self.flip_gravity()
 
             if self.is_playing:
                 # Game is running
