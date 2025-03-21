@@ -118,7 +118,8 @@ class Charger(Entity):
         
     def attack(self):
         """Handles enemy attacking logic."""
-        self.player.hit(self)
+        if self.stun == 0:
+            self.player.hit(self)
 
     def jump(self, dt, x_vel, y_vel, sgn):
         """Applies jump force to the enemy."""
@@ -134,3 +135,7 @@ class Charger(Entity):
     def eliminate(self):
         """Handles enemy elimination."""
         self.kill()
+
+    def hit(self, attacker):
+        if self.stun != 0:
+            super().hit(attacker)

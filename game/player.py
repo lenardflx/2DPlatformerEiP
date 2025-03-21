@@ -13,6 +13,8 @@ class Player(Entity):
         self.health = self.max_health
         self.coins = 0
         self.speed = 100 * self.scale
+        self.kb_x = 2
+        self.kb_y = 1
 
         # Jumping attributes
         self.jump_was_released = True
