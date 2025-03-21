@@ -4,7 +4,7 @@
   "game_title": "Sigmaboy",
   "level_scale": 16,
   "background_scale": 4,
-  "player_size": [16,32],
+  "player_size": [16,20],
   "player_scale": 2,
   "enemy_size": [16,32],
   "enemy_scale": 2
