@@ -1,1 +1,3 @@
-from .enemy import * # Load all enemy classes
+# Load all enemy classes
+from .guard import *
+from .drone import *

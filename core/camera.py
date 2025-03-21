@@ -26,6 +26,8 @@ class Camera:
         """Adjusts object position based on the camera's position."""
         if isinstance(target, pygame.Rect):
             return target.move(-self.camera.x * speed, -self.camera.y)
+        elif hasattr(target, "render_rect"):
+            return target.render_rect.move(-self.camera.x * speed, -self.camera.y)
         elif hasattr(target, "rect"):
             return target.rect.move(-self.camera.x * speed, -self.camera.y)
         return target
