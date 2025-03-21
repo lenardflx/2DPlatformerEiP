@@ -104,12 +104,20 @@ class Entity(pygame.sprite.Sprite):
         elif direction == "vertical":
             for tile in level.get_solid_tiles_near(self):
                 if self.rect.colliderect(tile.rect):
-                    if self.velocity.y > 0 and level.gravity > 0:
-                        self.rect.bottom = tile.rect.top
-                        self.velocity.y = 0
-                    elif self.velocity.y < 0 and level.gravity < 0:
-                        self.rect.top = tile.rect.bottom
-                        self.velocity.y = 0
+                    if level.gravity > 0: #Falling with normal gravity
+                        if self.velocity.y > 0:     #Fall
+                            self.rect.bottom = tile.rect.top
+                            self.velocity.y = 0
+                        elif self.velocity.y < 0:   #Jump
+                            self.rect.top = tile.rect.bottom
+                            self.velocity.y = 0
+                    else: #Falling with inverted gravity
+                        if self.velocity.y < 0:     #Fall
+                            self.rect.top = tile.rect.bottom
+                            self.velocity.y = 0
+                        elif self.velocity.y > 0:   #Jump
+                            self.rect.bottom = tile.rect.top
+                            self.velocity.y = 0
 
         # Always check for grounding (secondary contact check)
         self.check_if_grounded(level)
