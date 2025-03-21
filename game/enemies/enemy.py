@@ -73,10 +73,10 @@ class Enemy(Entity):
 
         if self.facing_right:
             self.velocity.x = self.speed * dt
-            future_rect = level.get_tile_at(future_rect[0] + future_rect[2] + 1, future_rect[1])
+            future_rect = level.get_tile_at(future_rect.left + future_rect.width + 1, future_rect.top)
         else:
             self.velocity.x = -self.speed * dt
-            future_rect = level.get_tile_at(future_rect[0] - 1, future_rect[1])
+            future_rect = level.get_tile_at(future_rect.left - 1, future_rect.top)
 
         if future_rect:
             self.velocity.x *= -1
