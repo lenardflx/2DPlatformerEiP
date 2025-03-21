@@ -28,7 +28,6 @@ class GravityInverseAbility(Ability):
         super().__init__(level, player, cooldown=150)
 
     def activate(self):
-        print("GravityInverseAbilityActivated", self.current_cooldown)
         if not self.can_activate():
             return False
         self.level.flip_gravity()

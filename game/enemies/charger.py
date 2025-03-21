@@ -5,8 +5,9 @@ from game.entities import Entity
 
 @register_enemy("charger")
 class Charger(Entity):
-    def __init__(self, x, y, width, height, scale, player, level):
-        super().__init__(x, y, width, height, scale)
+    def __init__(self, x, y, sprite_path, json_path, player, level):
+        super().__init__(x, y, sprite_path, json_path)
+        self.hit_edge = False
         self.player = player
         self.level = level
         self.speed = 32
@@ -26,9 +27,7 @@ class Charger(Entity):
         self.drop = False
         self.obstacle = False
 
-        # Load animations
-        self.load_sprites("assets/characters/enemy.png", "assets/characters/enemy.json")
-
+        # animations
         self.state = "idle"
         self.sprite_index = 0
         self.image = self.sprites[self.state][self.sprite_index] if self.sprites.get(self.state) else None

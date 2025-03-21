@@ -5,8 +5,8 @@ from game.entities import Entity
 
 @register_enemy("guard")
 class Guard(Entity):
-    def __init__(self, x, y, width, height, scale, player, level):
-        super().__init__(x, y, width, height, scale)
+    def __init__(self, x, y, sprite_path, json_path, player, level):
+        super().__init__(x, y, sprite_path, json_path)
         self.player = player
         self.level = level
         self.speed = 40
@@ -23,9 +23,7 @@ class Guard(Entity):
         self.drop = False
         self.obstacle = False
 
-        # Load animations
-        self.load_sprites("assets/characters/enemy.png", "assets/characters/enemy.json")
-
+        # animations
         self.state = "idle"
         self.sprite_index = 0
         self.image = self.sprites[self.state][self.sprite_index] if self.sprites.get(self.state) else None
@@ -39,7 +37,7 @@ class Guard(Entity):
             self.facing_right = False
 
         # Chase player if nearby
-        distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
+        distance_to_player = pygame.Vector2(self.rect.midbottom).distance_to(self.player.rect.midtop)
         if not self.stun:
             if distance_to_player < self.detection_range * self.level.tile_size:
                 self.chase_player(dt)

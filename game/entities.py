@@ -3,76 +3,77 @@ import json
 import pygame
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, scale=1):
+    def __init__(self, x, y, sprite_path, json_path):
         super().__init__()
-        width *= scale
-        height *= scale
+        # Load sprite data first so we know the size and scale before creating the rect
+        self.sprites = {}
+        self.state = "idle"
+        self.last_state = "idle"
+        self.sprite_index = 0
+        self.animation_speed = 0.1
+        self.time_accumulator = 0
+        self.render_offset = (0, 0)
 
-        # Entity properties
+        self.sprite_data = None
+        self.entity_size = [16, 16]
+        self.scale = 1.0
+
+        self.load_sprite_metadata(sprite_path, json_path)  # loads size & scale
+
+        # Calculate scaled hitbox size
+        width = self.entity_size[0] * self.scale
+        height = self.entity_size[1] * self.scale
         self.rect = pygame.Rect(x, y, width, height)
+
+        # Physics
         self.velocity = pygame.Vector2(0, 0)
         self.on_ground = False
         self.facing_right = True
         self.is_flipped = False
-        self.state = "idle"
-        self.last_state = "idle"
         self.attacking = False
         self.stunned = False
-        self.hit_edge = False
-        self.kb_x = 0
-        self.kb_y = 0
-        self.max_health = 0
-        self.health = self.max_health
-        self.damage = 0
-
-        # Render system
-        self.sprites = {}
-        self.sprite_index = 0
-        self.animation_speed = 0.1
-        self.time_accumulator = 0
-        self.scale = scale
-        self.render_offset = (0, 0)
-
         self.stun = 0
 
+        # Fallback image (in case sprites are not loaded)
         self.image = pygame.Surface((width, height))
-        self.image.fill((255, 0, 0))  # Temporary red box (if sprite is missing)
+        self.image.fill((255, 0, 0))
 
-    def load_sprites(self, sprite_path, json_path):
-        """Loads animations from a sprite sheet and JSON mapping file."""
+        # Actually load the sprites into memory
+        self.load_sprites(sprite_path)
 
+    def load_sprite_metadata(self, sprite_path, json_path):
+        """Load metadata like entity_size and scale from the JSON config."""
         with open(json_path) as f:
             data = json.load(f)
 
-        sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
-        tile_size = data["tile_size"]
-        scaled_size = int(tile_size * self.scale)
-        self.sprites = {}  # Store animations
+        self.sprite_data = data
+        self.entity_size = tuple(data.get("entity_size", [16, 16]))
+        self.scale = data.get("entity_scale", 1.0)
+        self.tile_size = data.get("tile_size", 16)
 
-        for state, frames in data["animations"].items():
+    def load_sprites(self, sprite_path):
+        """Loads animations from a sprite sheet using already-loaded metadata."""
+        sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
+        scaled_size = int(self.tile_size * self.scale)
+
+        for state, frames in self.sprite_data["animations"].items():
             self.sprites[state] = []
             for frame in frames:
-                col, row = map(int, frame.split(","))  # Get sprite position
-                x, y = col * tile_size, row * tile_size
-                sprite = sprite_sheet.subsurface((x, y, tile_size, tile_size))  # Extract sprite
+                col, row = map(int, frame.split(","))
+                x, y = col * self.tile_size, row * self.tile_size
+                sprite = sprite_sheet.subsurface((x, y, self.tile_size, self.tile_size))
                 sprite = pygame.transform.scale(sprite, (scaled_size, scaled_size))
                 self.sprites[state].append(sprite)
 
-        self.sprite_index = 0
-        self.image = self.sprites[self.state][self.sprite_index]  # Set initial sprite
+        self.image = self.sprites[self.state][0]
 
-        # set render offset (horizontal centering, vertical bottom)
+        # Set render offset (centered horizontally, bottom aligned)
         x_off = (self.rect.width - scaled_size) // 2
         y_off = self.rect.height - scaled_size
         self.render_offset = (x_off, y_off)
 
     def update(self, level, dt):
         """Handles entity movement, physics, and animations."""
-
-        if self.health <= 0:
-            self.eliminate()
-            return
-        
         if self.stun > 0:
             self.stun -= 1
 
@@ -112,7 +113,6 @@ class Entity(pygame.sprite.Sprite):
                     elif self.velocity.x < 0:  # Moving left
                         self.rect.left = tile.rect.right
                     self.velocity.x = 0
-                    self.hit_edge = True
 
         elif direction == "vertical":
             for tile in level.get_solid_tiles_near(self):
@@ -188,25 +188,24 @@ class Entity(pygame.sprite.Sprite):
         self.sprite_index = 0  # Reset animation frame
 
     def render(self, screen, camera):
-        """Renders the entity sprite at the correct position with an offset."""
-        render_pos = camera.apply(self)  # Get position from camera
-        screen.blit(self.image, (render_pos[0] + self.render_offset[0],
-                                 render_pos[1] + self.render_offset[1]))
+        """Renders the entity sprite with gravity-aware offset."""
+        base_pos = camera.apply(self)
+        x = base_pos[0] + self.render_offset[0]
+        y = base_pos[1] if self.is_flipped else base_pos[1] + self.render_offset[1]
+
+        screen.blit(self.image, (x, y))
+        pygame.draw.rect(screen, (255, 0, 0), base_pos, 1) # Debug: show hitbox
 
     def eliminate(self):
         """Removes the entity from the game."""
         print(f"{self.__class__.__name__} eliminated")
-        self.kill()
 
     def hit(self, attacker):
         """Handles entity damage, knockback, and hit animation."""
         self.stun = 20
-        self.hit_edge = True
-        self.health -= attacker.damage
 
-        knockback_x = attacker.kb_x if self.rect.x > attacker.rect.x else -attacker.kb_x
-        knockback_y = attacker.kb_y if self.is_flipped else -attacker.kb_y
+        knockback_x = 3 if self.rect.x > attacker.rect.x else -3
+        knockback_y = 2 if self.is_flipped else -2
 
-        self.velocity.y = knockback_y
         self.velocity.x = knockback_x
-        self.on_ground = False
+        self.velocity.y = knockback_y

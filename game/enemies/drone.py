@@ -5,8 +5,8 @@ from game.entities import Entity
 
 @register_enemy("drone")
 class Drone(Entity):
-    def __init__(self, x, y, width, height, scale, player, level):
-        super().__init__(x, y, width, height, scale)
+    def __init__(self, x, y, sprite_path, json_path, player, level):
+        super().__init__(x, y, sprite_path, json_path)
         self.player = player
         self.level = level
         self.speed = 60  # Slightly faster
@@ -17,8 +17,6 @@ class Drone(Entity):
         self.direction = pygame.Vector2(0, 0)
         self.smoothing = 0.05  # Smaller = smoother turning
 
-        # Load animations
-        self.load_sprites("assets/characters/drone.png", "assets/characters/drone.json")
         self.state = "idle"
 
     def update(self, level, dt):

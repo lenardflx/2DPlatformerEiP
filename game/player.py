@@ -4,8 +4,8 @@ from game.entities import Entity
 import game.abilities as abilities
 
 class Player(Entity):
-    def __init__(self, x, y, width, height, scale, controls, level):
-        super().__init__(x, y, width, height, scale)
+    def __init__(self, x, y, sprite_path, json_path, controls, level):
+        super().__init__(x, y, sprite_path, json_path)
         self.controls = controls
 
         # Player attributes
@@ -42,8 +42,6 @@ class Player(Entity):
             "double_jump": abilities.DoubleJumpAbility(level, self),
             "gravity_inverse": abilities.GravityInverseAbility(level, self),
         }
-
-        self.load_sprites("assets/characters/player.png", "assets/characters/player.json")
 
     def update(self, level, dt):
         """Handles player movement, physics, and animations."""

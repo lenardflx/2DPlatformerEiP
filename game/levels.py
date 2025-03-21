@@ -48,18 +48,24 @@ class Level(pygame.sprite.LayeredUpdates):
 
         # Create player
         self.spawn = (level_data["spawn"][0] * self.tile_size, level_data["spawn"][1] * self.tile_size)
-        w, h = get_game_data("player_size")
-        s = get_game_data("player_scale")
-        self.player = Player(self.spawn[0], self.spawn[1], w, h, s, controls, self)
+        self.player = Player(
+            self.spawn[0], self.spawn[1],
+            "assets/characters/player.png",
+            "assets/characters/player.json",
+            controls, self
+        )
 
         # Load enemies from JSON
-        w, h = get_game_data("enemy_size")
-        s = get_game_data("enemy_scale")
         for enemy_data in level_data.get("enemies", []):
             enemy_type = enemy_data["type"]
             x, y = enemy_data["x"] * self.tile_size, enemy_data["y"] * self.tile_size
             if enemy_type in ENEMY_CLASSES:
-                enemy = ENEMY_CLASSES[enemy_type](x, y, w, h, s, self.player, self)
+                enemy = ENEMY_CLASSES[enemy_type](
+                    x, y,
+                    f"assets/characters/{enemy_type}.png",
+                    f"assets/characters/{enemy_type}.json",
+                    self.player, self
+                )
                 self.enemies.add(enemy)
 
         # Load tiles
