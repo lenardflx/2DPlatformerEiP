@@ -78,7 +78,8 @@ class MovingPlatform(Tile):
                 entity.on_ground = True
                 continue
 
-            if self.colliding_from_side(entity, delta_x):
+            # Check for wall collisions
+            if self.colliding_from_side(entity, delta_x) and False:
                 if self.is_stuck_between_walls(entity, level):
                     entity.eliminate()
                 else:
