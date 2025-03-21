@@ -15,6 +15,8 @@ class Entity(pygame.sprite.Sprite):
         self.time_accumulator = 0
         self.render_offset = (0, 0)
         self.hit_edge = False
+        self.kb_x = 3
+        self.kb_y = 2
         self.max_health = 6
         self.health = self.max_health
 
