@@ -60,9 +60,10 @@ class Charger(Entity):
 
         if self.hit_edge:
             self.hit_edge = not self.hit_edge
-            self.velocity.x = 0
-            self.is_chasing = False
-            self.stun = 120
+            if self.is_chasing:
+                self.velocity.x = 0
+                self.is_chasing = False
+                self.stun = 120
 
         if self.is_chasing:
             self.chase_timer += 1

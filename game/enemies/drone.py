@@ -10,6 +10,9 @@ class Drone(Entity):
         self.level = level
         self.speed = 60
         self.damage = 1
+        self.health = 6
+        self.kb_x = 3
+        self.kb_y = 2
         self.detection_range = 12 * level.tile_size
 
         # Pathfinding smoothing
