@@ -13,6 +13,9 @@ class Entity(pygame.sprite.Sprite):
         self.animation_speed = 0.1
         self.time_accumulator = 0
         self.render_offset = (0, 0)
+        self.hit_edge = False
+        self.max_health = 0
+        self.health = self.max_health
 
         self.sprite_data = None
         self.entity_size = [16, 16]
@@ -74,6 +77,10 @@ class Entity(pygame.sprite.Sprite):
 
     def update(self, level, dt):
         """Handles entity movement, physics, and animations."""
+        if self.health <= 0:
+            self.eliminate()
+            return
+
         if self.stun > 0:
             self.stun -= 1
 
@@ -113,6 +120,7 @@ class Entity(pygame.sprite.Sprite):
                     elif self.velocity.x < 0:  # Moving left
                         self.rect.left = tile.rect.right
                     self.velocity.x = 0
+                    self.hit_edge = True
 
         elif direction == "vertical":
             for tile in level.get_solid_tiles_near(self):
@@ -198,14 +206,17 @@ class Entity(pygame.sprite.Sprite):
 
     def eliminate(self):
         """Removes the entity from the game."""
+        self.kill()
         print(f"{self.__class__.__name__} eliminated")
 
     def hit(self, attacker):
         """Handles entity damage, knockback, and hit animation."""
         self.stun = 20
+        self.health -= attacker.damage
 
-        knockback_x = 3 if self.rect.x > attacker.rect.x else -3
-        knockback_y = 2 if self.is_flipped else -2
+        knockback_x = attacker.kb_x if self.rect.x > attacker.rect.x else -attacker.kb_x
+        knockback_y = attacker.kb_y if self.is_flipped else -attacker.kb_y
 
         self.velocity.x = knockback_x
         self.velocity.y = knockback_y
+        self.on_ground = False

@@ -47,10 +47,6 @@ class Player(Entity):
         """Handles player movement, physics, and animations."""
         self.player_dt = dt
 
-        if self.health <= 0:
-            self.eliminate()
-            return
-
         if self.immunity_frames > 0:
             self.immunity_frames -= 1
             # Flicker AFTER the hit animation is done

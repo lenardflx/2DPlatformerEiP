@@ -7,7 +7,6 @@ from game.entities import Entity
 class Charger(Entity):
     def __init__(self, x, y, sprite_path, json_path, player, level):
         super().__init__(x, y, sprite_path, json_path)
-        self.hit_edge = False
         self.player = player
         self.level = level
         self.speed = 32
@@ -50,12 +49,12 @@ class Charger(Entity):
                     else:
                         self.facing_right = False
                 self.is_chasing = True
-        
+
         if self.hit_edge:
-            self.hit_edge = False
+            self.hit_edge = not self.hit_edge
             self.velocity.x = 0
             self.is_chasing = False
-            self.stun = 120
+            self.stun = 90
 
         if self.is_chasing:
             self.chase_timer += 1
