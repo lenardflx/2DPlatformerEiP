@@ -22,8 +22,7 @@ class Enemy(Entity):
         self.obstacle = False
 
         # Load animations
-        self.load_sprites("assets/characters/enemy.png",
-                                         "assets/characters/enemy.json")
+        self.load_sprites("assets/characters/enemy.png", "assets/characters/enemy.json")
 
         self.state = "idle"
         self.sprite_index = 0
@@ -31,6 +30,9 @@ class Enemy(Entity):
 
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
+
+        self.facing_right = self.velocity.x >= 0
+
         # Chase player if nearby
         distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
         if not self.stun:
@@ -63,28 +65,25 @@ class Enemy(Entity):
 
     def patrol(self, level, dt):
         """Moves the enemy left and right, reversing direction on collisions."""
-        if self.facing_right:
-            self.velocity.x = self.speed * dt
-        else:
-            self.velocity.x = -self.speed * dt
 
         future_rect = self.rect.copy()
-        future_rect.x += self.velocity.x
 
-        for tile in self.level.get_solid_tiles_near(self):
-            if future_rect.colliderect(tile.rect):
-                self.facing_right = not self.facing_right
-                self.velocity.x *= -1
-                break
+        if self.facing_right:
+            self.velocity.x = self.speed * dt
+            future_rect = level.get_tile_at(future_rect[0] + future_rect[2] + 1, future_rect[1])
+        else:
+            self.velocity.x = -self.speed * dt
+            future_rect = level.get_tile_at(future_rect[0] - 1, future_rect[1])
+
+        if future_rect:
+            self.velocity.x *= -1
 
     def chase_player(self, dt):
         """Moves toward the player if within detection range."""
         if self.rect.centerx < self.player.rect.centerx:
             self.velocity.x = self.speed * dt
-            self.facing_right = True
         else:
             self.velocity.x = -self.speed * dt
-            self.facing_right = False
 
     def attack(self):
         """Handles enemy attacking logic."""
