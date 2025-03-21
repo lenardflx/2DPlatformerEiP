@@ -20,63 +20,71 @@ class MovingPlatform(Tile):
         """Moves the platform and interacts with the player + enemies."""
         level = engine.level
         player = level.player
-        next_x, next_y = self.rect.x, self.rect.y
 
         if self.direction == "horizontal":
-            next_x += self.speed * self.movement_direction
+            delta_x = self.speed * self.movement_direction
+            delta_y = 0
+            next_rect = self.rect.move(delta_x, 0)
             check_rect = pygame.Rect(
-                next_x + (self.rect.width if self.movement_direction > 0 else -1),
-                self.rect.y, 1, self.rect.height
-            )  # Only check in movement direction (left/right)
+                next_rect.right if self.movement_direction > 0 else next_rect.left - 1,
+                next_rect.y, 1, next_rect.height
+            )
         else:
-            next_y += self.speed * self.movement_direction
+            delta_x = 0
+            delta_y = self.speed * self.movement_direction
+            next_rect = self.rect.move(0, delta_y)
             check_rect = pygame.Rect(
-                self.rect.x,
-                next_y + (self.rect.height if self.movement_direction > 0 else -1),
-                self.rect.width, 1
-            )  # Only check in movement direction (up/down)
+                next_rect.x,
+                next_rect.bottom if self.movement_direction > 0 else next_rect.top - 1,
+                next_rect.width, 1
+            )
 
         # Check for solid collisions
         if any(tile.rect.colliderect(check_rect) for tile in level.get_solid_tiles_near(self)):
-            self.movement_direction *= -1  # Reverse direction
+            self.movement_direction *= -1
             return
 
         # Move platform if no collision
-        delta_x = next_x - self.rect.x
-        delta_y = next_y - self.rect.y
-        self.rect.x, self.rect.y = next_x, next_y
+        self.rect = next_rect
 
         # Carry entities smoothly
-        for entity in [player] + list(level.enemies):  # Convert Group to List
-            if self.is_stuck_between_walls(entity, level):
-                entity.eliminate()  # Kill stuck entity
+        for entity in [player] + list(level.enemies):
+            is_above = (
+                    not entity.is_flipped and
+                    entity.rect.bottom == self.rect.top and
+                    entity.velocity.y >= 0 and
+                    self.rect.left < entity.rect.right and self.rect.right > entity.rect.left
+            )
+
+            is_below = (
+                    entity.is_flipped and
+                    entity.rect.top == self.rect.bottom and
+                    entity.velocity.y <= 0 and
+                    self.rect.left < entity.rect.right and self.rect.right > entity.rect.left
+            )
+
+            will_touch_wall = False
+            future_rect = entity.rect.move(delta_x, 0)
+            if delta_x != 0:
+                wall_check = pygame.Rect(future_rect.x, future_rect.y, future_rect.width, future_rect.height)
+                if any(tile.rect.colliderect(wall_check) for tile in level.get_solid_tiles_near(entity)):
+                    will_touch_wall = True
+
+            # Carrying logic
+            if (is_above or is_below) and not will_touch_wall:
+                entity.rect.y += delta_y
+                entity.rect.x += delta_x
+                entity.velocity.x = delta_x
+                entity.on_ground = True
                 continue
 
-            standing_on = (
-                not entity.is_flipped and
-                entity.rect.bottom == self.rect.top and  # Standing on platform
-                entity.velocity.y >= 0 and  # Not jumping
-                entity.rect.right > self.rect.left and entity.rect.left < self.rect.right  # Within platform bounds
-            )
-
-            hanging_under = (
-                entity.is_flipped and
-                entity.rect.top == self.rect.bottom and  # Hanging under platform
-                entity.velocity.y <= 0 and  # Not jumping upwards
-                entity.rect.right > self.rect.left and entity.rect.left < self.rect.right  # Within platform bounds
-            )
-
-            if standing_on or hanging_under:
-                entity.rect.y += delta_y  # Move up/down with platform
-                entity.rect.x += delta_x  # Stick horizontally
-                entity.velocity.x = delta_x  # Sync velocity for smooth movement
-                entity.on_ground = True
-
-            # Push entities left or right if colliding from the sides
-            elif self.colliding_from_side(entity, delta_x):
-                entity.rect.x += delta_x  # Apply horizontal push
-                if entity.on_ground:  # Prevent jumping issue
-                    entity.velocity.x = delta_x
+            if self.colliding_from_side(entity, delta_x):
+                if self.is_stuck_between_walls(entity, level):
+                    entity.eliminate()
+                else:
+                    entity.rect.x += delta_x
+                    if entity.on_ground:
+                        entity.velocity.x = delta_x
 
     @staticmethod
     def is_stuck_between_walls(entity, level):
