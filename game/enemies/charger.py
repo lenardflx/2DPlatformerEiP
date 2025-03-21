@@ -20,6 +20,7 @@ class Charger(Entity):
         self.kb_y = 4
         self.max_health = 16
         self.health = self.max_health
+        self.max_stun = 120
 
         # AI flags
         self.has_jumped = True
@@ -39,6 +40,13 @@ class Charger(Entity):
         elif self.velocity.x < 0:
             self.facing_right = False
 
+        if self.stun > 0:
+            self.max_stun -= 1
+
+        if self.max_stun == 0 or self.stun == 0:
+            self.max_stun = 120
+            self.stun = 0
+
         # Chase player if nearby
         distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
         if not self.stun:
@@ -54,7 +62,7 @@ class Charger(Entity):
             self.hit_edge = not self.hit_edge
             self.velocity.x = 0
             self.is_chasing = False
-            self.stun = 90
+            self.stun = 120
 
         if self.is_chasing:
             self.chase_timer += 1
