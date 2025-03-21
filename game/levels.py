@@ -91,8 +91,8 @@ class Level(pygame.sprite.LayeredUpdates):
 
                 if tile.update_required:
                     self.updating_tiles.add(tile)
-
-                self.tile_grid[y][x] = tile
+                if tile.solid:
+                    self.tile_grid[y][x] = tile
 
                 self.width = max(self.width, (x + 1) * self.tile_size)
                 self.height = max(self.height, (y + 1) * self.tile_size)
@@ -103,7 +103,7 @@ class Level(pygame.sprite.LayeredUpdates):
                 enemy.set_level(self)
 
     def get_tile_at(self, x, y):
-        """Returns the tile at the given world coordinate (x, y)."""
+        """Returns the tile at the given world coordinate in pixel (x, y)."""
         grid_x = int(x // self.tile_size)
         grid_y = int(y // self.tile_size)
         if 0 <= grid_x < self.grid_width and 0 <= grid_y < self.grid_height:

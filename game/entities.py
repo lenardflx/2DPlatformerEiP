@@ -209,8 +209,11 @@ class Entity(pygame.sprite.Sprite):
         self.stun = 20
         self.health -= attacker.damage
 
-        knockback_x = attacker.kb_x if self.rect.x > attacker.rect.x else -attacker.kb_x
-        knockback_y = attacker.kb_y if self.is_flipped else -attacker.kb_y
+        kb_x = getattr(attacker, "kb_x", 3)
+        kb_y = getattr(attacker, "kb_y", 2)
+
+        knockback_x = kb_x if self.rect.x > attacker.rect.x else -kb_x
+        knockback_y = kb_y if self.is_flipped else -kb_y
 
         self.velocity.x = knockback_x
         self.velocity.y = knockback_y
