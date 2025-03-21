@@ -3,8 +3,8 @@ import pygame
 from game.enemies.enemy_registry import register_enemy
 from game.entities import Entity
 
-@register_enemy("basic_enemy")
-class Enemy(Entity):
+@register_enemy("guard")
+class Guard(Entity):
     def __init__(self, x, y, width, height, scale, player, level):
         super().__init__(x, y, width, height, scale)
         self.player = player

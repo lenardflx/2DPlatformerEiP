@@ -43,6 +43,10 @@ class Tile(pygame.sprite.Sprite):
         # Check if solid
         self.solid = self.collision_type == "solid"
 
+    @property
+    def render_rect(self):
+        return self.rect.move(-self.hitbox_offset_x, -self.hitbox_offset_y)
+
     def update(self, level):
         """Override in subclasses if needed"""
         pass

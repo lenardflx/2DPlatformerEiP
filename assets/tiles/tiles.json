@@ -58,10 +58,16 @@
             "index": 9,
             "collision_type": "painful",
             "type": "spike",
-            "hitbox": { "width": 1.0, "height": 0.5, "offset_x": 0.0, "offset_y": 0.0 },
+            "hitbox": { "width": 1.0, "height": 0.2, "offset_x": 0.0, "offset_y": 0.8 },
             "metadata": {
                 "damage": 1
             }
+        },
+        "10": {
+            "index": 9,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": { "width": 1.0, "height": 0.2, "offset_x": 0.0, "offset_y": 0.8 }
         }
     }
 }
