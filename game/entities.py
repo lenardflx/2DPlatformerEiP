@@ -92,24 +92,44 @@ class Entity(pygame.sprite.Sprite):
 
     def handle_collisions(self, level, direction, ground_buffer=1):
         """Handles collisions with solid tiles in the given direction."""
-
-        for tile in level.get_solid_tiles_near(self):
-            if direction == "horizontal":
+        if direction == "horizontal":
+            for tile in level.get_solid_tiles_near(self):
                 if self.rect.colliderect(tile.rect):
                     if self.velocity.x > 0:  # Moving right
                         self.rect.right = tile.rect.left
                     elif self.velocity.x < 0:  # Moving left
                         self.rect.left = tile.rect.right
                     self.velocity.x = 0
-            elif direction == "vertical":
+
+        elif direction == "vertical":
+            for tile in level.get_solid_tiles_near(self):
                 if self.rect.colliderect(tile.rect):
-                    if self.velocity.y > 0 and level.gravity > 0:  # Falling Down
+                    if self.velocity.y > 0 and level.gravity > 0:
                         self.rect.bottom = tile.rect.top
-                        self.on_ground = True
-                    elif self.velocity.y < 0 and level.gravity < 0:  # Falling Up
+                        self.velocity.y = 0
+                    elif self.velocity.y < 0 and level.gravity < 0:
                         self.rect.top = tile.rect.bottom
-                        self.on_ground = True
-                    self.velocity.y = 0
+                        self.velocity.y = 0
+
+        # Always check for grounding (secondary contact check)
+        self.check_if_grounded(level)
+
+    def check_if_grounded(self, level):
+        """Ensures on_ground is true when standing on something."""
+        self.on_ground = False  # Reset
+
+        feet_rect = self.rect.copy()
+        buffer = 1  # Slight overlap below feet
+
+        if level.gravity > 0:
+            feet_rect.y += buffer
+        else:
+            feet_rect.y -= buffer
+
+        for tile in level.get_solid_tiles_near(self):
+            if feet_rect.colliderect(tile.rect):
+                self.on_ground = True
+                return
 
     def update_animation(self, dt):
         """Updates the entity's animation safely and efficiently."""
@@ -141,10 +161,10 @@ class Entity(pygame.sprite.Sprite):
         """Safely switches states and resets animations."""
         if new_state == self.state:
             return
-        if self.state not in ["attack", "take_dmg"]:  # ✅ Prevent overriding mid-attack/damage
-            self.last_state = self.state  # ✅ Store last valid movement state
+        if self.state not in ["attack", "take_dmg"]:  # Prevent overriding mid-attack/damage
+            self.last_state = self.state  # Store last valid movement state
         self.state = new_state
-        self.sprite_index = 0  # ✅ Reset animation frame
+        self.sprite_index = 0  # Reset animation frame
 
     def render(self, screen, camera):
         """Renders the entity sprite at the correct position with an offset."""

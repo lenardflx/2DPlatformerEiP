@@ -46,9 +46,6 @@ class GameEngine:
         self.menu = Menu(self.native_size, self.controls)
         self.menu.active_type = MenuState.MAIN
 
-        #Ability Cooldown
-        self.cooldown = 0
-
         # Camera System
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
 
@@ -75,9 +72,6 @@ class GameEngine:
             elif event.type == pygame.VIDEORESIZE:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-            if self.controls.is_action_active("gravity_inverse"):
-                self.flip_gravity()
-
             if self.controls.is_action_active("menu"):
                 self.menu.toggle_menu(MenuState.PAUSE, self)
 
@@ -85,16 +79,6 @@ class GameEngine:
                 self.ui.handle_event(event, self)  # Pass single event to UI
             else:
                 self.menu.handle_event(event, self)  # Pass single event to Menu
-
-    def flip_gravity(self):
-        """Flips gravity and mirrors entities vertically."""
-        if self.cooldown > 0:
-            return # Prevent flipping mid-air
-        self.cooldown = 60
-
-        self.level.gravity *= -1
-        for entity in [self.level.player] + list(self.level.enemies):
-            entity.flip_gravity()
 
     def render(self):
         """Renders everything on a fixed surface and scales it while keeping the aspect ratio."""
@@ -136,8 +120,6 @@ class GameEngine:
         self.screen.blit(scaled_surface, (x_offset, y_offset))
 
     def update(self):
-        if self.cooldown > 0:
-            self.cooldown -= 1
         """Updates all game objects and logic."""
         if self.is_playing:
             self.level.update(self.dt, self)

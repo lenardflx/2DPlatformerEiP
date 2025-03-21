@@ -1,9 +1,10 @@
 import pygame
 
 from game.entities import Entity
+import game.abilities as abilities
 
 class Player(Entity):
-    def __init__(self, x, y, width, height, scale, controls):
+    def __init__(self, x, y, width, height, scale, controls, level):
         super().__init__(x, y, width, height, scale)
         self.controls = controls
 
@@ -12,9 +13,12 @@ class Player(Entity):
         self.health = self.max_health
         self.coins = 0
         self.speed = 100 * self.scale
-        self.jump_strength = -50 * self.scale # Base jump force
-        self.jump_hold_force = -15 * self.scale # Additional force while holding jump
-        self.max_jump_countdown = 7  # Maximum frames to hold jump
+
+        # Jumping attributes
+        self.jump_was_released = True
+        self.jump_strength = -50 * self.scale
+        self.jump_hold_force = -15 * self.scale
+        self.max_jump_countdown = 7
         self.jump_countdown = self.max_jump_countdown
 
         # Animation flags
@@ -27,25 +31,37 @@ class Player(Entity):
         self.damage_anim_active = False
 
         self.is_jumping = False
-        self.got_hit = (0, 0, 0)
+
+        # Abilities
+        self.level = level
+        self.player_dt = 0
+        self.abilities = {
+            "double_jump": abilities.DoubleJumpAbility(level, self),
+            "gravity_inverse": abilities.GravityInverseAbility(level, self),
+        }
 
         self.load_sprites("assets/characters/player.png", "assets/characters/player.json")
 
     def update(self, level, dt):
         """Handles player movement, physics, and animations."""
+        self.player_dt = dt
+
         if self.health <= 0:
             self.eliminate()
             return
 
         if self.immunity_frames > 0:
             self.immunity_frames -= 1
-            # Flicker every 2 out of 4 frames AFTER the hit animation is done
+            # Flicker AFTER the hit animation is done
             self.flicker = not self.damage_anim_active or (self.immunity_frames % 6 < 3)
         else:
             self.flicker = False  # No flicker after immunity ends
 
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1
+
+        for ability in self.abilities.values():
+            ability.update()
 
         new_state = "idle"
 
@@ -80,17 +96,35 @@ class Player(Entity):
         jump_pressed = self.controls.is_action_active("jump")
         jump_direction = -1 if self.is_flipped else 1  # Flip jump when gravity is inverted
 
+        # Jump
+        perform_start_jump = False
         if jump_pressed and not self.attack_active:
             if self.on_ground:
-                self.velocity.y = self.jump_strength * dt * jump_direction  # Initial jump
-                self.is_jumping = True
-                self.jump_anim_done = False  # Reset jump animation flag
-                self.on_ground = False
-                self.jump_countdown = self.max_jump_countdown
-                new_state = "jump"
-            elif self.is_jumping and self.jump_countdown > 0:
+                perform_start_jump = True
+            elif self.is_jumping and self.jump_countdown > 0 and not self.jump_was_released:
+                # Hold to jump higher
                 self.velocity.y += self.jump_hold_force * dt * jump_direction
                 self.jump_countdown -= 1
+            elif (
+                    not self.on_ground and
+                    self.jump_was_released and
+                    self.abilities["double_jump"].can_activate()
+            ):
+                perform_start_jump = True
+                self.abilities["double_jump"].activate()
+
+        if perform_start_jump:
+            self.velocity.y = self.jump_strength * dt * jump_direction
+            self.jump_countdown = self.max_jump_countdown
+            self.is_jumping = True
+            self.jump_anim_done = False
+            self.jump_was_released = False
+            self.on_ground = False
+            new_state = "jump"
+
+        # Release Jump
+        if not jump_pressed:
+            self.jump_was_released = True
 
         # Handle Jump Animation
         if self.is_jumping:
@@ -120,6 +154,10 @@ class Player(Entity):
             new_state = "attack"
             if self.sprite_index >= len(self.sprites["attack"]) - 1:
                 self.attack_active = False  # End attack after animation
+
+        # Gravity Ability
+        if self.controls.is_action_active("gravity_inverse"):
+            self.abilities["gravity_inverse"].activate()
 
         super().update(level, dt)  # Apply physics and collision
         self.state = new_state  # Update state for animation
