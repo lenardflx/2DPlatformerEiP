@@ -180,8 +180,6 @@ class Player(Entity):
     def hit(self, attacker):
         """Handles player damage, knockback, and hit animation."""
         if self.immunity_frames == 0:
-            # Reduce health
-            self.health -= attacker.damage
             self.stun = 30
             self.immunity_frames = 40
 
