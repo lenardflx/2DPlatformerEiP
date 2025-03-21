@@ -68,7 +68,7 @@ class Level(pygame.sprite.LayeredUpdates):
                 )
                 self.enemies.add(enemy)
 
-        # Load tiles
+        # Load tiles from JSON
         tile_map = level_data["tiles"]
         self.grid_height = len(tile_map)
         self.grid_width = max(len(row) for row in tile_map)
