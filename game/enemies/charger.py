@@ -3,18 +3,21 @@ import pygame
 from game.enemies.enemy_registry import register_enemy
 from game.entities import Entity
 
-@register_enemy("basic_enemy")
-class Enemy(Entity):
+@register_enemy("charger")
+class Charger(Entity):
     def __init__(self, x, y, width, height, scale, player, level):
         super().__init__(x, y, width, height, scale)
         self.player = player
         self.level = level
-        self.speed = 40
-        self.jump_force = 160
-        self.damage = 1
-        self.detection_range = 4  # Distance to start chasing the player
-        self.kb_x = 3
-        self.kb_y = 2
+        self.speed = 30
+        self.max_speed = 80
+        self.jump_force = 100
+        self.damage = 3
+        self.detection_range = 6  # Distance to start chasing the player
+        self.is_chasing = False
+        self.chase_timer = 0
+        self.kb_x = 6
+        self.kb_y = 4
 
         # AI flags
         self.has_jumped = True
@@ -31,6 +34,8 @@ class Enemy(Entity):
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
 
+        print(self.velocity.x)
+
         if self.velocity.x > 0:
             self.facing_right = True
         elif self.velocity.x < 0:
@@ -40,9 +45,25 @@ class Enemy(Entity):
         distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
         if not self.stun:
             if distance_to_player < self.detection_range * self.level.tile_size:
-                self.chase_player(dt)
-            else:
-                self.patrol(level, dt)
+                if self.chase_timer == 0:
+                    if self.rect.centerx < self.player.rect.centerx:
+                        self.facing_right = True
+                    else:
+                        self.facing_right = False
+                self.is_chasing = True
+        
+        if self.hit_edge:
+            self.hit_edge = False
+            self.velocity.x = 0
+            self.is_chasing = False
+            self.stun = 20
+
+        if self.is_chasing:
+            self.chase_timer += 1
+            self.chase_player(dt)
+        else:
+            self.chase_timer = 0
+            self.patrol(level, dt)
 
         if self.on_ground:
             self.has_jumped = False
@@ -83,11 +104,19 @@ class Enemy(Entity):
 
     def chase_player(self, dt):
         """Moves toward the player if within detection range."""
-        if self.rect.centerx < self.player.rect.centerx:
-            self.velocity.x = self.speed * dt
+        if self.chase_timer < 90:
+            self.velocity.x = 0
         else:
-            self.velocity.x = -self.speed * dt
+            if self.facing_right:
+                self.velocity.x += 0.5 * (self.speed * dt)
+            else:
+                self.velocity.x -= 0.5 * (self.speed * dt)
 
+            if self.velocity.x > self.max_speed * dt:
+                self.velocity.x = self.max_speed * dt
+            elif self.velocity.x < -self.max_speed * dt:
+                self.velocity.x = -self.max_speed * dt
+        
     def attack(self):
         """Handles enemy attacking logic."""
         self.player.hit(self)

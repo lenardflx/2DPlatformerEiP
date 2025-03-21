@@ -18,6 +18,9 @@ class Entity(pygame.sprite.Sprite):
         self.last_state = "idle"
         self.attacking = False
         self.stunned = False
+        self.hit_edge = False
+        self.kb_x = 0
+        self.kb_y = 0
 
         # Render system
         self.sprites = {}
@@ -100,6 +103,7 @@ class Entity(pygame.sprite.Sprite):
                     elif self.velocity.x < 0:  # Moving left
                         self.rect.left = tile.rect.right
                     self.velocity.x = 0
+                    self.hit_edge = True
 
         elif direction == "vertical":
             for tile in level.get_solid_tiles_near(self):
@@ -187,9 +191,11 @@ class Entity(pygame.sprite.Sprite):
     def hit(self, attacker):
         """Handles entity damage, knockback, and hit animation."""
         self.stun = 20
+        self.hit_edge = True
 
-        knockback_x = 3 if self.rect.x > attacker.rect.x else -3
-        knockback_y = 2 if self.is_flipped else -2
+        knockback_x = attacker.kb_x if self.rect.x > attacker.rect.x else -attacker.kb_x
+        knockback_y = attacker.kb_y if self.is_flipped else -attacker.kb_y
 
-        self.velocity.x = knockback_x
         self.velocity.y = knockback_y
+        self.velocity.x = knockback_x
+        self.on_ground = False
