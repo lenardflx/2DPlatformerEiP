@@ -37,6 +37,7 @@ class Entity(pygame.sprite.Sprite):
 
     def load_sprites(self, sprite_path, json_path):
         """Loads animations from a sprite sheet and JSON mapping file."""
+
         with open(json_path) as f:
             data = json.load(f)
 
@@ -61,6 +62,7 @@ class Entity(pygame.sprite.Sprite):
         x_off = (self.rect.width - scaled_size) // 2
         y_off = self.rect.height - scaled_size
         self.render_offset = (x_off, y_off)
+        self.image.fill((255, 0, 0))  # Temporary red box (if sprite is missing)
 
     def update(self, level, dt):
         """Handles entity movement, physics, and animations."""

@@ -9,8 +9,8 @@ class Charger(Entity):
         super().__init__(x, y, width, height, scale)
         self.player = player
         self.level = level
-        self.speed = 30
-        self.max_speed = 80
+        self.speed = 32
+        self.max_speed = 1200
         self.jump_force = 100
         self.damage = 3
         self.detection_range = 6  # Distance to start chasing the player
@@ -34,8 +34,6 @@ class Charger(Entity):
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
 
-        print(self.velocity.x)
-
         if self.velocity.x > 0:
             self.facing_right = True
         elif self.velocity.x < 0:
@@ -56,14 +54,15 @@ class Charger(Entity):
             self.hit_edge = False
             self.velocity.x = 0
             self.is_chasing = False
-            self.stun = 20
+            self.stun = 120
 
         if self.is_chasing:
             self.chase_timer += 1
             self.chase_player(dt)
         else:
             self.chase_timer = 0
-            self.patrol(level, dt)
+            if self.stun == 0:
+                self.patrol(level, dt)
 
         if self.on_ground:
             self.has_jumped = False
@@ -108,9 +107,9 @@ class Charger(Entity):
             self.velocity.x = 0
         else:
             if self.facing_right:
-                self.velocity.x += 0.5 * (self.speed * dt)
+                self.velocity.x += 0.33 * (self.speed * dt)
             else:
-                self.velocity.x -= 0.5 * (self.speed * dt)
+                self.velocity.x -= 0.33 * (self.speed * dt)
 
             if self.velocity.x > self.max_speed * dt:
                 self.velocity.x = self.max_speed * dt
