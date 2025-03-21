@@ -31,7 +31,10 @@ class Enemy(Entity):
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
 
-        self.facing_right = self.velocity.x >= 0
+        if self.velocity.x > 0:
+            self.facing_right = True
+        elif self.velocity.x < 0:
+            self.facing_right = False
 
         # Chase player if nearby
         distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
