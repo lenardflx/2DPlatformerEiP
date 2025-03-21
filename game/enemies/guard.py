@@ -15,6 +15,8 @@ class Guard(Entity):
         self.detection_range = 4  # Distance to start chasing the player
         self.kb_x = 3
         self.kb_y = 2
+        self.max_health =  4
+        self.health = self.max_health
 
         # AI flags
         self.has_jumped = True
@@ -102,7 +104,3 @@ class Guard(Entity):
             y_vel *= -1
 
         self.velocity.y = -y_vel * dt
-
-    def eliminate(self):
-        """Handles enemy elimination."""
-        self.kill()

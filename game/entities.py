@@ -21,6 +21,9 @@ class Entity(pygame.sprite.Sprite):
         self.hit_edge = False
         self.kb_x = 0
         self.kb_y = 0
+        self.max_health = 0
+        self.health = self.max_health
+        self.damage = 0
 
         # Render system
         self.sprites = {}
@@ -65,6 +68,11 @@ class Entity(pygame.sprite.Sprite):
 
     def update(self, level, dt):
         """Handles entity movement, physics, and animations."""
+
+        if self.health <= 0:
+            self.eliminate()
+            return
+        
         if self.stun > 0:
             self.stun -= 1
 
@@ -188,11 +196,13 @@ class Entity(pygame.sprite.Sprite):
     def eliminate(self):
         """Removes the entity from the game."""
         print(f"{self.__class__.__name__} eliminated")
+        self.kill()
 
     def hit(self, attacker):
         """Handles entity damage, knockback, and hit animation."""
         self.stun = 20
         self.hit_edge = True
+        self.health -= attacker.damage
 
         knockback_x = attacker.kb_x if self.rect.x > attacker.rect.x else -attacker.kb_x
         knockback_y = attacker.kb_y if self.is_flipped else -attacker.kb_y

@@ -11,6 +11,7 @@ class Player(Entity):
         # Player attributes
         self.max_health = 6
         self.health = self.max_health
+        self.damage = 1
         self.coins = 0
         self.speed = 100 * self.scale
         self.kb_x = 2
@@ -111,7 +112,7 @@ class Player(Entity):
                     not self.on_ground and
                     self.jump_was_released and
                     self.abilities["double_jump"].can_activate()
-            ):
+                ):
                 perform_start_jump = True
                 self.abilities["double_jump"].activate()
 

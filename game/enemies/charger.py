@@ -13,11 +13,13 @@ class Charger(Entity):
         self.max_speed = 1200
         self.jump_force = 100
         self.damage = 3
-        self.detection_range = 6  # Distance to start chasing the player
+        self.detection_range = 7  # Distance to start chasing the player
         self.is_chasing = False
         self.chase_timer = 0
         self.kb_x = 6
         self.kb_y = 4
+        self.max_health = 16
+        self.health = self.max_health
 
         # AI flags
         self.has_jumped = True
@@ -131,10 +133,6 @@ class Charger(Entity):
             y_vel *= -1
 
         self.velocity.y = -y_vel * dt
-
-    def eliminate(self):
-        """Handles enemy elimination."""
-        self.kill()
 
     def hit(self, attacker):
         if self.stun != 0:
