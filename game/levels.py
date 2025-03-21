@@ -91,11 +91,16 @@ class Level(pygame.sprite.LayeredUpdates):
 
                 if tile.update_required:
                     self.updating_tiles.add(tile)
-                elif getattr(tile, "solid", False):
-                    self.tile_grid[y][x] = tile  # store in fast-access grid
+
+                self.tile_grid[y][x] = tile
 
                 self.width = max(self.width, (x + 1) * self.tile_size)
                 self.height = max(self.height, (y + 1) * self.tile_size)
+
+        # Rebuild the pathfinding grid
+        for enemy in self.enemies:
+            if hasattr(enemy, "set_level"):
+                enemy.set_level(self)
 
     def get_tile_at(self, x, y):
         """Returns the tile at the given world coordinate (x, y)."""

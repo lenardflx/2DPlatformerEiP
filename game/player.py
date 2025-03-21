@@ -5,7 +5,7 @@ import game.abilities as abilities
 
 class Player(Entity):
     def __init__(self, x, y, sprite_path, json_path, controls, level):
-        super().__init__(x, y, sprite_path, json_path)
+        super().__init__(x, y, sprite_path, json_path, level)
         self.controls = controls
 
         # Player attributes

@@ -1,23 +1,20 @@
 import pygame
-import math
 from game.enemies.enemy_registry import register_enemy
 from game.entities import Entity
 
 @register_enemy("drone")
 class Drone(Entity):
     def __init__(self, x, y, sprite_path, json_path, player, level):
-        super().__init__(x, y, sprite_path, json_path)
+        super().__init__(x, y, sprite_path, json_path, level)
         self.player = player
         self.level = level
-        self.speed = 60  # Slightly faster
+        self.speed = 60
         self.damage = 1
-        self.detection_range = 6 * level.tile_size
+        self.detection_range = 12 * level.tile_size
 
         # Pathfinding smoothing
         self.direction = pygame.Vector2(0, 0)
-        self.smoothing = 0.05  # Smaller = smoother turning
-
-        self.state = "idle"
+        self.smoothing = 0.2
 
     def update(self, level, dt):
         distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
@@ -41,21 +38,34 @@ class Drone(Entity):
             self.attack()
 
     def chase_player(self, dt):
-        """Smooth flying with hover effect."""
-        target_vec = pygame.Vector2(
-            self.player.rect.centerx - self.rect.centerx,
-            self.player.rect.centery - self.rect.centery
-        )
+        """Make drone hover toward the player's head, adjust if blocked."""
 
-        if target_vec.length() != 0:
-            target_vec = target_vec.normalize()
+        # 🎯 Target = Player's head (centerx, top)
+        target = pygame.Vector2(self.player.rect.centerx, self.player.rect.top)
+        current = pygame.Vector2(self.rect.centerx, self.rect.centery)
 
-        # Smooth movement toward target
-        self.direction = self.direction.lerp(target_vec, self.smoothing)
+        direction = (target - current)
 
+        # Detect if we're stuck (not moving for a while)
+        if direction.length_squared() < 1:
+            self.velocity.x = 0
+            self.velocity.y = 0
+            return
+
+        # Normalize and apply smoothing
+        direction = direction.normalize()
+        self.direction = self.direction.lerp(direction, self.smoothing)
+
+        # Set velocity
         base_speed = self.speed * dt
         self.velocity.x = self.direction.x * base_speed
         self.velocity.y = self.direction.y * base_speed
+
+        # If stuck at wall, add vertical bias to move up/down around it
+        probe_rect = self.rect.move(self.velocity.x * 2, self.velocity.y * 2)
+        if any(probe_rect.colliderect(tile.rect) for tile in self.level.get_solid_tiles_near(self)):
+            # Try to nudge up or down to escape
+            self.velocity.y += (-1 if self.rect.centery > self.player.rect.centery else 1) * base_speed * 0.5
 
     def attack(self):
         self.player.hit(self)

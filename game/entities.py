@@ -2,8 +2,9 @@ import json
 
 import pygame
 
+
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, x, y, sprite_path, json_path):
+    def __init__(self, x, y, sprite_path, json_path, level):
         super().__init__()
         # Load sprite data first so we know the size and scale before creating the rect
         self.sprites = {}
@@ -14,7 +15,7 @@ class Entity(pygame.sprite.Sprite):
         self.time_accumulator = 0
         self.render_offset = (0, 0)
         self.hit_edge = False
-        self.max_health = 0
+        self.max_health = 6
         self.health = self.max_health
 
         self.sprite_data = None
@@ -125,20 +126,12 @@ class Entity(pygame.sprite.Sprite):
         elif direction == "vertical":
             for tile in level.get_solid_tiles_near(self):
                 if self.rect.colliderect(tile.rect):
-                    if level.gravity > 0: #Falling with normal gravity
-                        if self.velocity.y > 0:     #Fall
-                            self.rect.bottom = tile.rect.top
-                            self.velocity.y = 0
-                        elif self.velocity.y < 0:   #Jump
-                            self.rect.top = tile.rect.bottom
-                            self.velocity.y = 0
-                    else: #Falling with inverted gravity
-                        if self.velocity.y < 0:     #Fall
-                            self.rect.top = tile.rect.bottom
-                            self.velocity.y = 0
-                        elif self.velocity.y > 0:   #Jump
-                            self.rect.bottom = tile.rect.top
-                            self.velocity.y = 0
+                    if self.velocity.y > 0:     #Fall
+                        self.rect.bottom = tile.rect.top
+                        self.velocity.y = 0
+                    elif self.velocity.y < 0:   #Jump
+                        self.rect.top = tile.rect.bottom
+                        self.velocity.y = 0
 
         # Always check for grounding (secondary contact check)
         self.check_if_grounded(level)
