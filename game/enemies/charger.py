@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from game.enemies.enemy_registry import register_enemy
 from game.entities import Entity
@@ -9,138 +10,193 @@ class Charger(Entity):
         super().__init__(x, y, sprite_path, json_path, level)
         self.player = player
         self.level = level
-        self.speed = 32
-        self.max_speed = 1200
-        self.jump_force = 100
+
+        # Core stats
+        self.base_speed = 32
+        self.charge_speed = 1000
         self.damage = 3
-        self.detection_range = 7  # Distance to start chasing the player
-        self.is_chasing = False
-        self.chase_timer = 0
-        self.kb_x = 6
-        self.kb_y = 4
+        self.kb_x = 5
+        self.kb_y = 8
         self.max_health = 16
         self.health = self.max_health
-        self.max_stun = 120
+        self.detection_range = 7 * self.level.tile_size
 
-        # AI flags
-        self.has_jumped = True
-        self.drop = False
-        self.obstacle = False
+        # AI state
+        self.ai_state = "idle"
+        self.commit_to_charge = False
 
-        # animations
-        self.state = "idle"
-        self.sprite_index = 0
-        self.image = self.sprites[self.state][self.sprite_index] if self.sprites.get(self.state) else None
+        # Timers
+        self.attack_windup_timer = 0
+        self.charge_timer = 0
+        self.charge_cooldown = 0
+        self.idle_timer = random.randint(30, 60)
+        self.patrol_timer = random.randint(60, 120)
+
+        # Patrol
+        self.patrol_dir = random.choice([-1, 1])
+        self.patrol_speed_variation = random.uniform(0.8, 1.2)
 
     def update(self, level, dt):
-        """Handles enemy movement and AI behavior."""
-
         if self.velocity.x > 0:
             self.facing_right = True
         elif self.velocity.x < 0:
             self.facing_right = False
 
+        # Stun
         if self.stun > 0:
-            self.max_stun -= 1
+            self.stun -= 1
+            self.set_state("idle")
+            self.velocity.x = 0
+            super().update(level, dt)
+            return
 
-        if self.max_stun == 0 or self.stun == 0:
-            self.max_stun = 120
-            self.stun = 0
+        if self.charge_cooldown > 0:
+            self.charge_cooldown -= 1
 
-        # Chase player if nearby
-        distance_to_player = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
-        if not self.stun:
-            if distance_to_player < self.detection_range * self.level.tile_size:
-                if self.chase_timer == 0:
-                    if self.rect.centerx < self.player.rect.centerx:
-                        self.facing_right = True
-                    else:
-                        self.facing_right = False
-                self.is_chasing = True
+        # Player detection
+        distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
+        player_visible = distance < self.detection_range and self.has_line_of_sight()
 
-        if self.hit_edge:
-            self.hit_edge = not self.hit_edge
-            if self.is_chasing:
+        # AI state
+        match self.ai_state:
+
+            case "idle":
                 self.velocity.x = 0
-                self.is_chasing = False
-                self.stun = 120
 
-        if self.is_chasing:
-            self.chase_timer += 1
-            self.chase_player(dt)
-        else:
-            self.chase_timer = 0
-            if self.stun == 0:
-                self.patrol(level, dt)
+                if self.commit_to_charge:
+                    self.ai_state = "attack"
+                    self.attack_windup_timer = 30
+                    self.face_player()
 
-        if self.on_ground:
-            self.has_jumped = False
+                elif player_visible:
+                    if self.charge_cooldown > 0:
+                        self.set_state("await")
+                        self.ai_state = "await"
+                    else:
+                        self.ai_state = "attack"
+                        self.attack_windup_timer = 30
+                        self.face_player()
 
-        # Jump over obstacles or gaps
-        new_state = "jump"
+                else:
+                    self.set_state("idle")
+                    self.idle_timer -= 1
+                    if self.idle_timer <= 0:
+                        self.ai_state = "patrol"
+                        self.patrol_timer = random.randint(60, 120)
+                        self.patrol_dir = random.choice([-1, 1])
+                        self.patrol_speed_variation = random.uniform(0.8, 1.2)
+                        self.idle_timer = random.randint(30, 60)
 
-        if self.drop and not self.has_jumped:
-            self.jump(dt, 15 * self.speed, 120, level.gravity >= 0)
-            self.has_jumped = True
-        elif self.obstacle and not self.has_jumped:
-            self.jump(dt, 0, 200, level.gravity >= 0)
-            self.has_jumped = True
-        else:
-            new_state = "run"
+            case "patrol":
+                self.set_state("run")
+                self.patrol_timer -= 1
+                speed = self.base_speed * self.patrol_speed_variation * dt
+                self.velocity.x = self.patrol_dir * speed
+                self.facing_right = self.patrol_dir > 0
+
+                if self.detect_wall_ahead():
+                    self.patrol_dir *= -1
+                    self.facing_right = not self.facing_right
+
+                if player_visible and self.charge_cooldown <= 0:
+                    self.ai_state = "attack"
+                    self.attack_windup_timer = 30
+                    self.face_player()
+                    self.commit_to_charge = True
+                elif self.patrol_timer <= 0:
+                    self.ai_state = "idle"
+
+            case "attack":
+                self.set_state("attack")
+                self.velocity.x = 0
+                self.face_player()
+                self.commit_to_charge = True
+
+                # Only attack after windup
+                frames = self.sprites.get("attack", [])
+                if self.sprite_index >= len(frames) - 1:
+                    self.ai_state = "charge"
+                    self.charge_timer = 40
+                    self.sprite_index = 0
+
+            case "charge":
+                self.set_state("charge")
+                self.charge_timer -= 1
+
+                accel = 0.25 * self.charge_speed * dt
+                if self.facing_right:
+                    self.velocity.x = min(self.velocity.x + accel, self.charge_speed * dt)
+                else:
+                    self.velocity.x = max(self.velocity.x - accel, -self.charge_speed * dt)
+
+                # Attack on frontal collision
+                if self.rect.colliderect(self.player.rect):
+                    aligned = (self.facing_right and self.player.rect.centerx > self.rect.centerx) or \
+                              (not self.facing_right and self.player.rect.centerx < self.rect.centerx)
+                    if aligned:
+                        self.attack()
+
+                if self.charge_timer <= 0 or self.hit_edge:
+                    self.velocity.x = 0
+                    self.hit_edge = False
+                    self.charge_cooldown = 90
+                    self.ai_state = "await"
+                    self.set_state("await")
+                    self.commit_to_charge = False
+
+            case "await":
+                self.velocity.x = 0
+                self.set_state("await")
+                self.face_player()
+
+                if self.commit_to_charge:
+                    self.ai_state = "attack"
+                    self.attack_windup_timer = 30
+                    self.face_player()
+                elif player_visible and self.charge_cooldown <= 0:
+                    self.ai_state = "attack"
+                    self.attack_windup_timer = 30
+                    self.face_player()
+                    self.commit_to_charge = True
+                elif not player_visible:
+                    self.ai_state = "idle"
 
         super().update(level, dt)
-        self.state = new_state  # Update animation state
 
-        # Attack player if touching them
-        if self.rect.colliderect(self.player.rect):
-            self.attack()
+    def has_line_of_sight(self):
+        """Checks for solid tiles between self and player."""
+        start = pygame.Vector2(self.rect.center)
+        end = pygame.Vector2(self.player.rect.center)
+        direction = (end - start)
+        steps = int(direction.length() // self.level.tile_size)
+        if steps == 0:
+            return True
+        direction = direction.normalize() * self.level.tile_size
+        pos = start
+        for _ in range(steps):
+            pos += direction
+            tile = self.level.get_tile_at(pos.x, pos.y)
+            if tile and getattr(tile, "solid", False):
+                return False
+        return True
 
-    def patrol(self, level, dt):
-        """Moves the enemy left and right, reversing direction on collisions."""
+    def patrol(self, dt):
+        pass  # Handled inside update()
 
-        future_rect = self.rect.copy()
+    def detect_wall_ahead(self):
+        offset = self.rect.width if self.facing_right else -1
+        probe = self.rect.move(offset, 0)
+        return any(tile.rect.colliderect(probe) for tile in self.level.get_solid_tiles_near(self))
 
-        if self.facing_right:
-            self.velocity.x = self.speed * dt
-            future_rect = level.get_tile_at(future_rect.left + future_rect.width + 1, future_rect.top)
-        else:
-            self.velocity.x = -self.speed * dt
-            future_rect = level.get_tile_at(future_rect.left - 1, future_rect.top)
+    def face_player(self):
+        self.facing_right = self.rect.centerx < self.player.rect.centerx
 
-        if future_rect:
-            self.velocity.x *= -1
-
-    def chase_player(self, dt):
-        """Moves toward the player if within detection range."""
-        if self.chase_timer < 90:
-            self.velocity.x = 0
-        else:
-            if self.facing_right:
-                self.velocity.x += 0.33 * (self.speed * dt)
-            else:
-                self.velocity.x -= 0.33 * (self.speed * dt)
-
-            if self.velocity.x > self.max_speed * dt:
-                self.velocity.x = self.max_speed * dt
-            elif self.velocity.x < -self.max_speed * dt:
-                self.velocity.x = -self.max_speed * dt
-        
     def attack(self):
-        """Handles enemy attacking logic."""
         if self.stun == 0:
             self.player.hit(self)
 
-    def jump(self, dt, x_vel, y_vel, sgn):
-        """Applies jump force to the enemy."""
-        if self.facing_right:
-            self.velocity.x = x_vel * dt
-        else:
-            self.velocity.x = -x_vel * dt
-        if not sgn:
-            y_vel *= -1
-
-        self.velocity.y = -y_vel * dt
-
     def hit(self, attacker):
-        if self.stun != 0:
+        if self.stun == 0:
             super().hit(attacker)
+            self.ai_state = "idle"
+            self.charge_cooldown = 60

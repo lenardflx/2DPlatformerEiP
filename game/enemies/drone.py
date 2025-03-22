@@ -43,10 +43,10 @@ class Drone(Entity):
                 self.velocity = pygame.Vector2(0, 0)
         elif distance < self.detection_range and not self.stun:
             self.smart_chase(dt)
-            self.state = "run"
+            self.set_state("run")
         else:
             self.velocity *= 0.9  # slow down
-            self.state = "idle"
+            self.set_state("idle")
 
         # Rotation toward player (limited to slight tilts)
         dx = self.player.rect.centerx - self.rect.centerx

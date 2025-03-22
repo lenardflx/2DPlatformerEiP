@@ -1,5 +1,0 @@
-{
-  "idle": ["enemy_1.png"],
-  "run": ["enemy_1.png", "enemy_2.png"],
-  "jump": ["enemy_2.png"]
-}
