@@ -127,8 +127,7 @@ class Menu:
     def handle_button_action(self, key, engine):
         """Handles button press logic."""
         if key == "start":
-            engine.load_level(0)
-            engine.is_playing = True
+            engine.start_game()
             self.active_type = MenuState.NONE
         elif key == "resume":
             engine.is_playing = True
