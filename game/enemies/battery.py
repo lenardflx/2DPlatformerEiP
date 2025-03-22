@@ -78,6 +78,7 @@ class Battery(Entity):
                 self.ai_state = "idle"
 
         elif self.ai_state == "chase":
+            self.facing_right = self.rect.centerx < self.player.rect.centerx
             self.set_state("chase")
             direction = 1 if self.facing_right else -1
             self.velocity.x = direction * self.speed * dt
