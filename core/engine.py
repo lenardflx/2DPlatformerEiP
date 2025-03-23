@@ -4,6 +4,7 @@ import pygame
 from core.camera import Camera
 from core.font import FontManager
 from core.game_data import get_game_data
+from core.sound import SoundManager
 from game.background import Background
 from game.levels import Level
 from game.menu import Menu, MenuState
@@ -25,6 +26,10 @@ class GameEngine:
         self.screen = pygame.display.set_mode(self.native_size, pygame.RESIZABLE)
         pygame.display.set_caption(get_game_data("game_title"))
         self.scaled_surface = pygame.Surface(self.native_size)
+
+        # Main Theme Music
+        self.sound = SoundManager()
+        self.sound.play_music()
 
         # Core Components
         self.font_manager = FontManager(self.native_size)
