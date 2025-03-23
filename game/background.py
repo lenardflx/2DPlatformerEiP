@@ -1,38 +1,46 @@
-import os
 import pygame
+import os
 import math
+
 from core.game_data import get_game_data
+
 
 class Background:
     def __init__(self, data):
-        """Initializes a background layer with parallax effect."""
-        self.image = pygame.image.load(os.path.join("assets/background/", data["file"])).convert_alpha()
+        """Creates a background object from a dictionary of data."""
+        self.image = pygame.image.load(data["image"]).convert_alpha()
         self.scale = get_game_data("background_scale")
-        self.speed = data["speed"]
-        self.follow_camera = data["follow_camera"]
-
-        # Store original image for scaling later
-        self.original_image = self.image
+        self.type = data.get("type", "static")
+        self.speed = data.get("speed", 0)
+        self.offset = 0
         self.rect = self.image.get_rect()
 
     def render(self, screen, camera):
-        """Renders the background with correct scaling and parallax effect."""
-        # Scale image dynamically to match screen size
-        screen_width, screen_height = screen.get_size()
-        scaled_width = int(self.original_image.get_width() * self.scale)
-        scaled_height = int(self.original_image.get_height() * self.scale)
+        """Renders the background on the screen with proper scaling."""
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
 
-        if self.image.get_width() != scaled_width or self.image.get_height() != scaled_height:
-            self.image = pygame.transform.scale(self.original_image, (scaled_width, scaled_height))
-            self.rect = self.image.get_rect()
+        # Scale image to screen size
+        scaled_image = pygame.transform.scale(self.image, (screen_width, screen_height))
+        scaled_rect = scaled_image.get_rect()
 
-        # Compute how many times the background needs to be drawn
-        clone_amount = math.ceil(screen_width / self.rect.width) + 1  # Ensure full coverage
+        if self.type == "static":
+            screen.blit(scaled_image, (0, 0))
 
-        # Compute camera offsets once
-        x_offset = -camera.camera.x * self.speed if self.follow_camera else 0
-        y_offset = -camera.camera.y * self.speed if self.follow_camera else 0
+        elif self.type == "follow_camera":
+            x = -camera.camera.x * self.speed
+            y = -camera.camera.y * self.speed
+            for i in range(-1, screen_width // scaled_rect.width + 2):
+                for j in range(-1, screen_height // scaled_rect.height + 2):
+                    screen.blit(
+                        scaled_image,
+                        (x % scaled_rect.width + i * scaled_rect.width,
+                         y % scaled_rect.height + j * scaled_rect.height)
+                    )
 
-        # Render repeated backgrounds
-        for i in range(clone_amount):
-            screen.blit(self.image, (self.rect.width * i + x_offset, y_offset))
+        elif self.type == "scroll":
+            self.offset += self.speed
+            self.offset %= scaled_rect.width
+            for i in range(-1, screen_width // scaled_rect.width + 2):
+                screen.blit(scaled_image, (-self.offset + i * scaled_rect.width, 0))
+

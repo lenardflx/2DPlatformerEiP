@@ -26,48 +26,43 @@ class GameEngine:
         pygame.display.set_caption(get_game_data("game_title"))
         self.scaled_surface = pygame.Surface(self.native_size)
 
-        # Game State
-        self.level = None
-        self.current_level = None
-        self.is_playing = False
-        self.showing_story = False
-        self.showing_tutorial = False
-
-        # Data
-        self.levels_data = None
-        self.level_count = None
-        self.completed_levels = []  # TODO: Load/save from persistent file
-        self.load_level_metadata()
-
-        # Font/UI
+        # Core Components
         self.font_manager = FontManager(self.native_size)
-        self.ui = UI()
         self.menu = Menu(self.native_size, self.controls)
         self.menu.active_type = MenuState.MAIN
+        self.ui = UI()
 
-        # Story settings
+        # Game State
+        self.is_playing = False
+        self.level = None
+        self.current_level = None
+        self.completed_levels = []
+
+        # Pre-Level Slides
         self.story_texts = []
         self.story_index = 0
-        self.story_timer = 0
-        self.story_skip_hold = 0
-        self.story_fade_duration = 45
-        self.story_display_duration = 200
+        self.tutorial_images = []
+        self.tutorial_index = 0
+        self.slide_mode = None
+        self.slide_timer = 0
+        self.slide_fade_duration = 30
+        self.slide_display_duration = 180
 
-        # Tutorial
-        self.tutorial_slide = 0
-        self.tutorial_total = 3
-
-        # Level title
+        # Title Fade
         self.show_level_title = False
-        self.level_title_timer = 0
-        self.level_title_duration = 200
-        self.level_title_fade = 30
         self.level_title = ""
+        self.level_title_timer = 0
+        self.level_title_duration = 180
+        self.level_title_fade = 30
 
-        # Background
-        with open("assets/background/background.json") as f:
-            bg_data = json.load(f)
-        self.backgrounds = [Background(d) for d in bg_data[::-1]]
+
+        # Load Level Meta
+        self.levels_data = {}
+        self.level_count = 0
+        self.load_level_metadata()
+
+        # Background (init later on level load)
+        self.backgrounds = []
 
         # Camera (init later on level load)
         self.camera = None
@@ -83,17 +78,28 @@ class GameEngine:
         """Returns the next level ID based on the last completed level."""
         if not self.completed_levels:
             return 0
-        last = self.completed_levels[-1]
-        return (last + 1) % self.level_count
+        return (self.completed_levels[-1] + 1) % self.level_count
 
     def start_game(self):
-        """Starts the game from current level."""
-        if not self.completed_levels:
-            self.showing_tutorial = True
-        else:
-            self.load_story_intro(self.next_level)
+        """Starts the game from the first level."""
         self.is_playing = True
-        self.menu.active_type = None
+        self.menu.active_type = MenuState.NONE
+        self.load_levels_data(self.next_level)
+
+    def load_levels_data(self, level_id):
+        """Load story + tutorial slides before a level"""
+        self.current_level = level_id
+        level_data = self.levels_data.get(str(level_id), {})
+
+        self.story_texts = level_data.get("story", [])
+        self.story_index = 0
+        self.tutorial_images = [pygame.image.load(path).convert_alpha() for path in level_data.get("tutorial", [])]
+        self.tutorial_index = 0
+
+        self.slide_mode = "story" if self.story_texts else "tutorial"
+
+        bg_data = self.levels_data.get(str(level_id), {}).get("background", [])
+        self.backgrounds = [Background(layer) for layer in bg_data[::-1]]
 
     def load_level(self, level_id):
         """Loads a level by ID."""
@@ -102,15 +108,6 @@ class GameEngine:
         self.show_level_title = True
         self.level_title_timer = 0
         self.level_title = self.levels_data.get(str(level_id), {}).get("title", f"Level {level_id + 1}")
-
-    def load_story_intro(self, level_id):
-        """Loads the story intro for a level."""
-        self.showing_story = True
-        self.story_index = 0
-        self.story_timer = 0
-        self.story_skip_hold = 0
-        self.current_level = level_id
-        self.story_texts = self.levels_data.get(str(level_id), {}).get("story", [])
 
     def handle_events(self):
         """Handles all game events like input and window resizing."""
@@ -125,82 +122,71 @@ class GameEngine:
             if self.controls.is_action_active("menu"):
                 self.menu.toggle_menu(MenuState.PAUSE, self)
 
-            keys = pygame.key.get_pressed()
-
-            if self.is_playing:
-                if self.showing_story:
-                    if keys[pygame.K_SPACE]:
-                        self.story_skip_hold += 1
-                        if self.story_skip_hold > 30:
-                            self.showing_story = False
-                            self.load_level(self.current_level)
-                    else:
-                        self.story_skip_hold = 0
-
-                    if event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
-                        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                            self.story_index += 1
-                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                            self.story_index += 1
-
-                        if self.story_index >= len(self.story_texts):
-                            self.showing_story = False
-                            self.load_level(self.current_level)
-
-                elif self.showing_tutorial:
-                    if event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
-                        self.tutorial_slide += 1
-                        if self.tutorial_slide > self.tutorial_total:
-                            self.showing_tutorial = False
-                            self.load_story_intro(0)
-                else:
-                    self.ui.handle_event(event, self)
+            if self.slide_mode:
+                if event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
+                    self.next_slide()
+            elif self.is_playing:
+                self.ui.handle_event(event, self)
             else:
                 self.menu.handle_event(event, self)
 
     def update(self):
         """Updates all game objects and logic."""
-        if self.is_playing and self.showing_story:
-            self.story_timer += 1
-            total_time = self.story_fade_duration * 2 + self.story_display_duration
-            if self.story_timer >= total_time:
-                self.story_timer = 0
-                self.story_index += 1
-                if self.story_index >= len(self.story_texts):
-                    self.showing_story = False
-                    self.load_level(self.current_level)
+        if self.slide_mode:
+            self.slide_timer += 1
+            total_time = self.slide_fade_duration * 2 + self.slide_display_duration
+            if self.slide_timer >= total_time:
+                self.slide_timer = 0
+                self.next_slide()
+            return
 
-        elif self.is_playing and not self.showing_tutorial:
-            self.level.update(self.dt, self)
-            self.camera.follow(self.level.player)
-            self.ui.update(self.level.player)
-            self.level.check_touch(self.level.player, self)
+        # Prevent crash if level not loaded yet
+        if not self.level:
+            return
 
-            if self.level.player.health <= 0:
-                self.menu.active_type = MenuState.DEATH
-                self.is_playing = False
+        self.level.update(self.dt, self)
+        self.camera.follow(self.level.player)
+        self.ui.update(self.level.player)
+        self.level.check_touch(self.level.player, self)
+
+        if self.level.player.health <= 0:
+            self.menu.active_type = MenuState.DEATH
+            self.is_playing = False
 
         if self.show_level_title:
             self.level_title_timer += 1
             if self.level_title_timer >= self.level_title_duration:
                 self.show_level_title = False
 
+    def next_slide(self):
+        """Progresses to the next slide in the current slide mode."""
+        if self.slide_mode == "story":
+            self.story_index += 1
+            if self.story_index >= len(self.story_texts):
+                self.slide_mode = "tutorial" if self.tutorial_images else None
+        elif self.slide_mode == "tutorial":
+            self.tutorial_index += 1
+            if self.tutorial_index >= len(self.tutorial_images):
+                self.slide_mode = None
+                self.load_level(self.current_level)
+
     def render(self):
         """Renders everything on a fixed surface and scales it while keeping the aspect ratio."""
         self.scaled_surface.fill((0, 0, 0))
 
-        if self.is_playing:
-            if self.showing_tutorial:
-                self.render_tutorial(self.scaled_surface)
-            elif self.showing_story:
-                self.render_story(self.scaled_surface)
-            else:
-                for bg in self.backgrounds:
-                    bg.render(self.scaled_surface, self.camera)
-                self.level.render(self.scaled_surface, self.camera)
-                self.ui.render(self.scaled_surface)
-                if self.show_level_title:
-                    self.render_level_title(self.scaled_surface)
+        if self.slide_mode == "story":
+            self.render_story(self.scaled_surface)
+        elif self.slide_mode == "tutorial":
+            self.render_tutorial(self.scaled_surface)
+        elif self.is_playing:
+            for bg in self.backgrounds:
+                bg.render(self.scaled_surface, self.camera)
+
+            self.level.render(self.scaled_surface, self.camera)
+            self.ui.render(self.scaled_surface)
+
+            if self.show_level_title:
+                self.render_level_title(self.scaled_surface)
         else:
             self.menu.render(self.scaled_surface)
 
@@ -209,19 +195,16 @@ class GameEngine:
 
     def render_story(self, screen):
         screen.fill((0, 0, 0))
-
-        if 0 <= self.story_index < len(self.story_texts):
-            text = self.story_texts[self.story_index]
+        if self.story_index < len(self.story_texts):
             alpha = self.font_manager.fade_alpha(
-                self.story_timer,
-                self.story_fade_duration,
-                self.story_display_duration,
-                self.story_fade_duration
+                self.slide_timer,
+                self.slide_fade_duration,
+                self.slide_display_duration,
+                self.slide_fade_duration
             )
-
             self.font_manager.render(
+                text=self.story_texts[self.story_index],
                 surface=screen,
-                text=text,
                 position=(screen.get_width() // 2, screen.get_height() // 2),
                 size=24,
                 wrap=True,
@@ -230,6 +213,20 @@ class GameEngine:
                 alpha=alpha
             )
 
+    def render_tutorial(self, screen):
+        screen.fill((0, 0, 0))
+        if self.tutorial_index < len(self.tutorial_images):
+            alpha = self.font_manager.fade_alpha(
+                self.slide_timer,
+                self.slide_fade_duration,
+                self.slide_display_duration,
+                self.slide_fade_duration
+            )
+            img = self.tutorial_images[self.tutorial_index].copy()
+            img.set_alpha(alpha)
+            rect = img.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+            screen.blit(img, rect)
+
     def render_level_title(self, screen):
         alpha = self.font_manager.fade_alpha(
             self.level_title_timer,
@@ -237,7 +234,6 @@ class GameEngine:
             self.level_title_duration - 2 * self.level_title_fade,
             self.level_title_fade
         )
-
         self.font_manager.render(
             surface=screen,
             text=self.level_title,
@@ -246,11 +242,6 @@ class GameEngine:
             align_center=True,
             alpha=alpha
         )
-
-    def render_tutorial(self, screen):
-        slides = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
-        color = slides[self.tutorial_slide % len(slides)]
-        screen.fill(color)
 
     def scale_and_center(self):
         win_w, win_h = self.screen.get_size()
