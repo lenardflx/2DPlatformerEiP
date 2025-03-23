@@ -1,17 +1,17 @@
 [
   {
-    "file": "layer_1.png",
+    "file": "2_3.png",
     "speed": 0.6,
     "follow_camera": true
   },
   {
-    "file": "layer_2.png",
+    "file": "2_2.png",
     "speed": 0.4,
     "follow_camera": true
   },
   {
-    "file": "layer_3.png",
-    "speed": 0,
-    "follow_camera": false
+    "file": "2_1.png",
+    "speed": 0.2,
+    "follow_camera": true
   }
 ]
