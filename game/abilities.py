@@ -4,6 +4,7 @@ class Ability:
         self.cooldown = cooldown
         self.current_cooldown = 0
         self.level = level
+        self.sound_manager = level.sound_manager
 
     def activate(self):
         self.current_cooldown = self.cooldown
@@ -30,6 +31,7 @@ class GravityInverseAbility(Ability):
     def activate(self):
         if not self.can_activate():
             return False
+        self.sound_manager.play_sfx("gravity_inverse")
         self.level.flip_gravity()
         self.current_cooldown = self.cooldown
         return True

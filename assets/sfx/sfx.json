@@ -1,3 +1,8 @@
 {
-  "main_theme": "music.wav"
+  "main_theme": "music.wav",
+  "explosion": "explosion.wav",
+  "basic_attack": "basic_attack.wav",
+  "gravity_inverse": "gravity_inverse.wav",
+  "menu_hover": "menu_hover.wav",
+  "button_click": "button_click.wav"
 }

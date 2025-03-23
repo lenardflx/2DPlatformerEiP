@@ -9,7 +9,7 @@ from game.tiles.tiles_register import TILES_CLASSES
 from game.player import Player  # Import Player
 
 class Level(pygame.sprite.LayeredUpdates):
-    def __init__(self, level_number, controls):
+    def __init__(self, level_number, controls, sound_manager):
         super().__init__()
 
         # Load tile metadata
@@ -31,10 +31,11 @@ class Level(pygame.sprite.LayeredUpdates):
 
         self.gravity = 9.8
 
-        # Placeholder values for level size
+        # Placeholder values for level sizaae
         self.width = 0
         self.height = 0
 
+        self.sound_manager = sound_manager
         self.load_level(level_number, controls)
 
     def load_level(self, level_number, controls):
@@ -52,7 +53,7 @@ class Level(pygame.sprite.LayeredUpdates):
             self.spawn[0], self.spawn[1],
             "assets/characters/player.png",
             "assets/characters/player.json",
-            controls, self
+            controls, self, self.sound_manager
         )
 
         # Load enemies from JSON
@@ -64,7 +65,7 @@ class Level(pygame.sprite.LayeredUpdates):
                     x, y,
                     f"assets/characters/{enemy_type}.png",
                     f"assets/characters/{enemy_type}.json",
-                    self.player, self
+                    self.player, self, self.sound_manager
                 )
                 self.enemies.add(enemy)
 

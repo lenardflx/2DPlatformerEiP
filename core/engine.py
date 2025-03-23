@@ -7,7 +7,7 @@ from core.game_data import get_game_data
 from core.sound import SoundManager
 from game.background import Background
 from game.levels import Level
-from game.menu import Menu, MenuState
+from game.menu.menu import Menu, MenuState
 from core.controls import Controls
 from game.user_interface import UI
 
@@ -28,14 +28,8 @@ class GameEngine:
         self.scaled_surface = pygame.Surface(self.native_size)
 
         # Main Theme Music
-        self.sound = SoundManager()
-        self.sound.play_music()
-
-        # Core Components
-        self.font_manager = FontManager(self.native_size)
-        self.menu = Menu(self.native_size, self.controls)
-        self.menu.active_type = MenuState.MAIN
-        self.ui = UI()
+        self.sound_manager = SoundManager()
+        self.sound_manager.play_music()
 
         # Game State
         self.is_playing = False
@@ -60,11 +54,16 @@ class GameEngine:
         self.level_title_duration = 180
         self.level_title_fade = 30
 
-
         # Load Level Meta
         self.levels_data = {}
         self.level_count = 0
         self.load_level_metadata()
+
+        # Core Components
+        self.font_manager = FontManager(self.native_size)
+        self.menu = Menu(self.native_size, self.controls, self.levels_data, self.font_manager, self.sound_manager)
+        self.menu.active_type = MenuState.MAIN
+        self.ui = UI()
 
         # Background (init later on level load)
         self.backgrounds = []
@@ -108,7 +107,7 @@ class GameEngine:
 
     def load_level(self, level_id):
         """Loads a level by ID."""
-        self.level = Level(level_id, self.controls)
+        self.level = Level(level_id, self.controls, self.sound_manager)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
         self.show_level_title = True
         self.level_title_timer = 0
@@ -135,6 +134,19 @@ class GameEngine:
             else:
                 self.menu.handle_event(event, self)
 
+    def get_scaled_mouse(self):
+        window_width, window_height = self.screen.get_size()
+        scale_x = window_width / self.native_size[0]
+        scale_y = window_height / self.native_size[1]
+        scale = min(scale_x, scale_y)
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        scaled_x = (mouse_x - (window_width - self.native_size[0] * scale) / 2) / scale
+        scaled_y = (mouse_y - (window_height - self.native_size[1] * scale) / 2) / scale
+
+        return int(scaled_x), int(scaled_y)
+
     def update(self):
         """Updates all game objects and logic."""
         if self.slide_mode:
@@ -149,19 +161,19 @@ class GameEngine:
         if not self.level:
             return
 
-        self.level.update(self.dt, self)
-        self.camera.follow(self.level.player)
-        self.ui.update(self.level.player)
-        self.level.check_touch(self.level.player, self)
+        if self.is_playing:
+            self.level.update(self.dt, self)
+            self.camera.follow(self.level.player)
+            self.ui.update(self.level.player)
+            self.level.check_touch(self.level.player, self)
 
-        if self.level.player.health <= 0:
-            self.menu.active_type = MenuState.DEATH
-            self.is_playing = False
+            if self.level.player.show_death_screen:
+                self.menu.open_menu(MenuState.DEATH, self)
 
-        if self.show_level_title:
-            self.level_title_timer += 1
-            if self.level_title_timer >= self.level_title_duration:
-                self.show_level_title = False
+            if self.show_level_title:
+                self.level_title_timer += 1
+                if self.level_title_timer >= self.level_title_duration:
+                    self.show_level_title = False
 
     def next_slide(self):
         """Progresses to the next slide in the current slide mode."""
@@ -193,7 +205,7 @@ class GameEngine:
             if self.show_level_title:
                 self.render_level_title(self.scaled_surface)
         else:
-            self.menu.render(self.scaled_surface)
+            self.menu.render(self.scaled_surface, self)
 
         self.scale_and_center()
         pygame.display.flip()

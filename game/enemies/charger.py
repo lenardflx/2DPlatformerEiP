@@ -6,8 +6,8 @@ from game.entities import Entity
 
 @register_enemy("charger")
 class Charger(Entity):
-    def __init__(self, x, y, sprite_path, json_path, player, level):
-        super().__init__(x, y, sprite_path, json_path, level)
+    def __init__(self, x, y, sprite_path, json_path, player, level, sound_manager):
+        super().__init__(x, y, sprite_path, json_path, level, sound_manager)
         self.player = player
         self.level = level
 
@@ -180,9 +180,6 @@ class Charger(Entity):
                 return False
         return True
 
-    def patrol(self, dt):
-        pass  # Handled inside update()
-
     def detect_wall_ahead(self):
         offset = self.rect.width if self.facing_right else -1
         probe = self.rect.move(offset, 0)
@@ -195,8 +192,7 @@ class Charger(Entity):
         if self.stun == 0:
             self.player.hit(self)
 
-    def hit(self, attacker):
+    def hit(self, attacker, stun=0):
         if self.stun == 0:
-            super().hit(attacker)
-            self.ai_state = "idle"
+            super().hit(attacker, stun)
             self.charge_cooldown = 60

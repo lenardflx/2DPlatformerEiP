@@ -28,5 +28,32 @@
         "type": "follow_camera"
       }
     ]
+  },
+  "1": {
+    "title": "The level 2 title",
+    "story": [
+      "and so on..."
+    ],
+    "tutorial": [
+      "assets/tutorial/level_0_1.png",
+      "assets/tutorial/level_0_2.png"
+    ],
+    "background": [
+      {
+        "image": "assets/backgrounds/layer_1.png",
+        "speed": 0.6,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/layer_2.png",
+        "speed": 0.4,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/layer_3.png",
+        "speed": 0.2,
+        "type": "follow_camera"
+      }
+    ]
   }
 }

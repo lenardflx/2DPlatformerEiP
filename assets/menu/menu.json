@@ -1,6 +1,10 @@
 {
-  "start_button": "start.png",
-  "quit_button": "quit.png",
-  "button_image": "menu_button.png",
-  "button_hover_image": "menu_button_hovered.png"
+    "play":    { "image":  "play.png",     "frame_width": 64 },
+    "resume":   { "image": "resume.png",    "frame_width": 64 },
+    "levels":   { "image": "levels.png",    "frame_width": 64 },
+    "options":  { "image": "options.png",   "frame_width": 64 },
+    "exit":     { "image": "exit.png",      "frame_width": 64 },
+    "back":     { "image": "exit.png",      "frame_width": 64 },
+    "retry":    { "image": "retry.png",     "frame_width": 64 },
+    "menu":     { "image": "menu.png",      "frame_width": 64 }
 }

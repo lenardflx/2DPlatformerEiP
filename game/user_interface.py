@@ -2,7 +2,7 @@ import pygame
 import os
 import json
 
-from game.menu import MenuState
+from game.menu.menu import MenuState
 
 
 class UI:

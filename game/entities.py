@@ -4,9 +4,10 @@ import pygame
 
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, x, y, sprite_path, json_path, level):
+    def __init__(self, x, y, sprite_path, json_path, level, sound_manager):
         super().__init__()
         # Load sprite data first so we know the size and scale before creating the rect
+        self.sound_manager = sound_manager
         self.sprites = {}
         self.state = "idle"
         self.last_state = "idle"
@@ -204,9 +205,9 @@ class Entity(pygame.sprite.Sprite):
         self.kill()
         print(f"{self.__class__.__name__} eliminated")
 
-    def hit(self, attacker):
+    def hit(self, attacker, stun=20):
         """Handles entity damage, knockback, and hit animation."""
-        self.stun = 20
+        self.stun = stun
         self.health -= attacker.damage
 
         kb_x = getattr(attacker, "kb_x", 3)

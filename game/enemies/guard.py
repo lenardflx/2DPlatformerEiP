@@ -5,8 +5,8 @@ from game.entities import Entity
 
 @register_enemy("guard")
 class Guard(Entity):
-    def __init__(self, x, y, sprite_path, json_path, player, level):
-        super().__init__(x, y, sprite_path, json_path, level)
+    def __init__(self, x, y, sprite_path, json_path, player, level, sound_manager):
+        super().__init__(x, y, sprite_path, json_path, level, sound_manager)
         self.player = player
         self.level = level
         self.speed = 40

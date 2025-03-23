@@ -4,8 +4,8 @@ from game.entities import Entity
 import game.abilities as abilities
 
 class Player(Entity):
-    def __init__(self, x, y, sprite_path, json_path, controls, level):
-        super().__init__(x, y, sprite_path, json_path, level)
+    def __init__(self, x, y, sprite_path, json_path, controls, level, sound_manager):
+        super().__init__(x, y, sprite_path, json_path, level, sound_manager)
         self.controls = controls
 
         # Player attributes
@@ -43,8 +43,18 @@ class Player(Entity):
             "gravity_inverse": abilities.GravityInverseAbility(level, self),
         }
 
+        # Death Screen
+        self.show_death_screen = False
+        self.death_screen_cooldown = 50
+
     def update(self, level, dt):
         """Handles player movement, physics, and animations."""
+        if self.health <= 0:
+            self.eliminate()
+            self.death_screen_cooldown -= 1
+            if self.death_screen_cooldown <= 0:
+                self.show_death_screen = True
+            return
         self.player_dt = dt
 
         if self.immunity_frames > 0:
@@ -161,6 +171,8 @@ class Player(Entity):
 
     def perform_attack(self, level):
         """Creates an attack hitbox and eliminates enemies inside it."""
+        self.sound_manager.play_sfx("basic_attack")
+
         attack_width = self.rect.width * 0.75
         attack_height = self.rect.height * 0.5
         attack_x = self.rect.right if self.facing_right else self.rect.left - attack_width
@@ -173,13 +185,12 @@ class Player(Entity):
             if attack_rect.colliderect(enemy.rect):
                 enemy.hit(self)
 
-    def hit(self, attacker):
+    def hit(self, attacker, stun=30):
         """Handles player damage, knockback, and hit animation."""
         if self.immunity_frames == 0:
-            self.stun = 30
             self.immunity_frames = 40
 
-            super().hit(attacker)
+            super().hit(attacker, stun)
 
             # Activate hit animation
             self.state = "take_dmg"

@@ -2,10 +2,10 @@ import pygame
 
 
 class FontManager:
-    def __init__(self, resolution, base_resolution=(1280, 720), font_path="assets/font/font.otf"):
+    def __init__(self, resolution, base_resolution=(1280, 720),):
         self.resolution = resolution
         self.base_resolution = base_resolution
-        self.font_path = font_path
+        self.font_path = "assets/font/font.otf"
         self.font_cache = {}
 
     def get_scaled_font(self, size):
@@ -38,9 +38,10 @@ class FontManager:
 
         return lines
 
-    def render(self, surface, text, position, size=20, color=(255, 255, 255), wrap=False, max_width=None, align_center=False, line_height=1.3, alpha=255):
-        """
-        Renders text on the given surface."""
+    def render(self, surface, text, position, size=20, color=(255, 255, 255),
+               wrap=False, max_width=None, align_center=False, align_right=False,
+               line_height=1.3, alpha=255):
+        """Renders text with optional alignment and wrapping."""
         font = self.get_scaled_font(size)
 
         if wrap and max_width:
@@ -54,10 +55,14 @@ class FontManager:
             if alpha < 255:
                 rendered.set_alpha(alpha)
             rect = rendered.get_rect()
+
             if align_center:
                 rect.centerx = x
+            elif align_right:
+                rect.right = x
             else:
                 rect.x = x
+
             rect.y = y
             surface.blit(rendered, rect)
             y += int(font.get_linesize() * line_height)
