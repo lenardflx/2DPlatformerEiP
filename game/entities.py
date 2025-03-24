@@ -115,7 +115,7 @@ class Entity(pygame.sprite.Sprite):
         self.rect.y += self.velocity.y
         self.handle_collisions(level, direction="vertical")
 
-    def handle_collisions(self, level, direction, ground_buffer=1):
+    def handle_collisions(self, level, direction):
         """Handles collisions with solid tiles in the given direction."""
         if direction == "horizontal":
             for tile in level.get_solid_tiles_near(self):

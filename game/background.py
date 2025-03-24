@@ -21,11 +21,16 @@ class Background:
         screen_height = screen.get_height()
 
         # Scale image to screen size
-        scaled_image = pygame.transform.scale(self.image, (screen_width, screen_height))
+        img_width, img_height = self.image.get_size()
+        scale = min(screen_width / img_width, screen_height / img_height)
+        new_size = (int(img_width * scale), int(img_height * scale))
+        scaled_image = pygame.transform.scale(self.image, new_size)
         scaled_rect = scaled_image.get_rect()
 
         if self.type == "static":
-            screen.blit(scaled_image, (0, 0))
+            amount = screen_width / scaled_rect.width + 1
+            for i in range(math.ceil(amount)):
+                screen.blit(scaled_image, (i * scaled_rect.width, 0))
 
         elif self.type == "follow_camera":
             x = -camera.camera.x * self.speed

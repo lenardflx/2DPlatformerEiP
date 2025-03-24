@@ -13,11 +13,11 @@ class Level(pygame.sprite.LayeredUpdates):
         super().__init__()
 
         # Load tile metadata
-        with open("assets/tiles/tiles.json") as f:
+        with open(f"assets/tiles/level_{level_number}_data.json") as f:
             self.tile_data = json.load(f)
 
         self.tile_size = self.tile_data["tile_size"]
-        self.tile_set = pygame.image.load("assets/tiles/tile_set.png").convert_alpha()
+        self.tile_set = pygame.image.load(f"assets/tiles/level_{level_number}_set.png").convert_alpha()
 
         self.tile_grid = []  # 2D array for fast solid tile lookup
         self.grid_width = 0
@@ -29,7 +29,7 @@ class Level(pygame.sprite.LayeredUpdates):
         self.spawn = (0, 0)
         self.player = None
 
-        self.gravity = 9.8
+        self.gravity = 12
 
         # Placeholder values for level sizaae
         self.width = 0
@@ -175,7 +175,8 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.update(self, dt)
 
         self.player.update(self, dt)
-        self.distance_to(self.player)
+        #self.distance_to(self.player)
+
     def render(self, screen, camera):
         """Renders everything inside the level."""
         for tile in self.tiles:

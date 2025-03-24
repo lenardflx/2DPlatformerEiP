@@ -12,7 +12,7 @@ class Guard(Entity):
         self.speed = 40
         self.jump_force = 160
         self.damage = 1
-        self.detection_range = 4  # Distance to start chasing the player
+        self.detection_range = 8  # Distance to start chasing the player
         self.kb_x = 3
         self.kb_y = 2
         self.max_health =  4
