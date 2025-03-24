@@ -31,7 +31,7 @@ class Button:
         self.hovering = hovering
         if self.hovering:
             self.frame_timer += 1
-            if self.frame_timer % 5 == 0:
+            if self.frame_timer % 2 == 0:
                 self.hover_index = min(self.hover_index + 1, len(self.hover_images) - 1)
         else:
             self.hover_index = 0

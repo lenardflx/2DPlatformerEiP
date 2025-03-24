@@ -41,7 +41,7 @@ class Menu:
             frames = [img.subsurface(pygame.Rect(i * w, 0, w, h)) for i in range(img.get_width() // w)]
             buttons[key] = {
                 "idle": frames[0],
-                "hover": frames[1:] if len(frames) > 1 else frames[0]
+                "hover": frames[1:]+frames[::-1] if len(frames) > 1 else frames[0]
             }
         return buttons
 
