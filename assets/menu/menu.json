@@ -4,7 +4,7 @@
     "levels":   { "image": "levels.png",    "frame_width": 64 },
     "options":  { "image": "options.png",   "frame_width": 64 },
     "exit":     { "image": "exit.png",      "frame_width": 64 },
-    "back":     { "image": "exit.png",      "frame_width": 64 },
+    "back":     { "image": "back.png",      "frame_width": 64 },
     "retry":    { "image": "retry.png",     "frame_width": 64 },
     "menu":     { "image": "menu.png",      "frame_width": 64 }
 }
