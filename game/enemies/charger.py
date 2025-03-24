@@ -37,21 +37,17 @@ class Charger(Entity):
         self.patrol_speed_variation = random.uniform(0.8, 1.2)
 
     def update(self, level, dt):
+        
         if self.velocity.x > 0:
             self.facing_right = True
         elif self.velocity.x < 0:
             self.facing_right = False
 
-        # Stun
-        if self.stun > 0:
-            self.stun -= 1
-            self.set_state("idle")
-            self.velocity.x = 0
-            super().update(level, dt)
-            return
-
         if self.charge_cooldown > 0:
             self.charge_cooldown -= 1
+
+        if self.stun > 0:
+            self.stun -= 1
 
         # Player detection
         distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
@@ -59,33 +55,24 @@ class Charger(Entity):
 
         # AI state
         match self.ai_state:
-
             case "idle":
-                self.velocity.x = 0
-
-                if self.commit_to_charge:
-                    self.ai_state = "attack"
-                    self.attack_windup_timer = 30
-                    self.face_player()
-
-                elif player_visible:
-                    if self.charge_cooldown > 0:
-                        self.set_state("await")
-                        self.ai_state = "await"
+                if self.on_ground:
+                    self.velocity.x = 0
+                if self.stun == 0:
+                    if player_visible:
+                        if self.charge_cooldown > 0:
+                            self.set_state("await")
+                            self.ai_state = "await"
+                        else:
+                            self.ai_state = "attack"
+                            self.attack_windup_timer = 30
+                            self.face_player()
                     else:
-                        self.ai_state = "attack"
-                        self.attack_windup_timer = 30
-                        self.face_player()
-
-                else:
-                    self.set_state("idle")
-                    self.idle_timer -= 1
-                    if self.idle_timer <= 0:
                         self.ai_state = "patrol"
                         self.patrol_timer = random.randint(60, 120)
-                        self.patrol_dir = random.choice([-1, 1])
+                        self.patrol_dir = 1 if self.facing_right else -1
                         self.patrol_speed_variation = random.uniform(0.8, 1.2)
-                        self.idle_timer = random.randint(30, 60)
+                        self.idle_timer = random.randint(0, 30)
 
             case "patrol":
                 self.set_state("run")
@@ -116,7 +103,7 @@ class Charger(Entity):
                 frames = self.sprites.get("attack", [])
                 if self.sprite_index >= len(frames) - 1:
                     self.ai_state = "charge"
-                    self.charge_timer = 40
+                    self.charge_timer = 120
                     self.sprite_index = 0
 
             case "charge":
@@ -136,13 +123,26 @@ class Charger(Entity):
                     if aligned:
                         self.attack()
 
-                if self.charge_timer <= 0 or self.hit_edge:
+                if self.charge_timer <= 0:
                     self.velocity.x = 0
-                    self.hit_edge = False
                     self.charge_cooldown = 90
                     self.ai_state = "await"
                     self.set_state("await")
                     self.commit_to_charge = False
+
+                if self.hit_edge:
+                    self.velocity.x = 0
+                    self.hit_edge = False
+                    self.charge_cooldown = 90
+                    self.charge_timer = 0
+                    self.ai_state = "idle"
+                    self.set_state("idle")
+                    self.commit_to_charge = False
+                    self.stun = 90
+                    if self.facing_right:
+                        self.knockback(-3, -1)
+                    else:
+                        self.knockback(3, -1)
 
             case "await":
                 self.velocity.x = 0
@@ -192,7 +192,6 @@ class Charger(Entity):
         if self.stun == 0:
             self.player.hit(self)
 
-    def hit(self, attacker, stun=0):
-        if self.stun == 0:
-            super().hit(attacker, stun)
-            self.charge_cooldown = 60
+    def hit(self, attacker, stun = 0):
+        if self.stun != 0:
+            super().hit(attacker, 0)

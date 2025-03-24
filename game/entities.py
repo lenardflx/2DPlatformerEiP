@@ -231,6 +231,10 @@ class Entity(pygame.sprite.Sprite):
         knockback_x = kb_x if self.rect.x > attacker.rect.x else -kb_x
         knockback_y = kb_y if self.is_flipped else -kb_y
 
-        self.velocity.x = knockback_x
-        self.velocity.y = knockback_y
+        self.knockback(knockback_x, knockback_y)
+
+    def knockback(self, x, y):
         self.on_ground = False
+        
+        self.velocity.x = x
+        self.velocity.y = y
