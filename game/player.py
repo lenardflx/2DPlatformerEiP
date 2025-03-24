@@ -17,6 +17,9 @@ class Player(Entity):
         self.kb_x = 2
         self.kb_y = 1
 
+        # attack charge
+        self.charge = 0
+
         # Jumping attributes
         self.jump_was_released = True
         self.jump_strength = -50 * self.scale
@@ -148,13 +151,16 @@ class Player(Entity):
             self.jump_anim_done = False  # Reset animation lock
 
         # Handle Attacking (LEFT-CLICK)
-        if pygame.mouse.get_pressed()[0]:  # Left mouse button
-            if self.attack_cooldown == 0 and not self.attack_active:
-                self.attack_active = True
-                self.attack_cooldown = 20  # Cooldown after attack
-                self.sprite_index = 0  # Reset animation
-                new_state = "attack"
-                self.perform_attack(level)
+        if pygame.mouse.get_pressed()[0] and not self.attack_cooldown:# Left mouse button
+            self.charge += 1 if self.charge <= 100 else 0
+        elif self.charge:
+            self.attack_active = True
+            self.attack_cooldown = 20 + self.charge//2
+            self.damage = 1+ self.charge//25
+            self.charge = 0
+            self.sprite_index = 0  # Reset animation
+            new_state = "attack"
+            self.perform_attack(level)
 
         # Attack Animation Handling
         if self.attack_active:
@@ -206,4 +212,3 @@ class Player(Entity):
     def eliminate(self):
         """Handles player elimination (game over)."""
         self.health = 0
-
