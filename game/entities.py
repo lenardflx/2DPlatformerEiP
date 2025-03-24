@@ -200,11 +200,25 @@ class Entity(pygame.sprite.Sprite):
 
         screen.blit(self.image, (x, y))
         pygame.draw.rect(screen, (255, 0, 0), base_pos, 1) # Debug: show hitbox
+        self.render_health_bar(screen,camera)
 
     def eliminate(self):
         """Removes the entity from the game."""
         self.kill()
         print(f"{self.__class__.__name__} eliminated")
+
+    def render_health_bar(self, screen, camera):
+        if self.health == self.max_health:
+            return
+        if self.is_flipped:
+            y = camera.apply(self).y + self.rect.height + 5
+        else:
+            y = camera.apply(self).y - 10
+        x = camera.apply(self).x
+
+        pygame.draw.rect(screen, (16,8,36), (x, y, self.rect.width, 3))
+        health_width = self.health / self.max_health * self.rect.width
+        pygame.draw.rect(screen, (60,160,255), (x, y, health_width, 3))
 
     def hit(self, attacker, stun=20):
         """Handles entity damage, knockback, and hit animation."""
