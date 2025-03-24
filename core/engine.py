@@ -65,8 +65,9 @@ class GameEngine:
         self.menu.active_type = MenuState.MAIN
         self.ui = UI()
 
-        # Background (init later on level load)
+        # Back-/Foregrounds (init later on level load)
         self.backgrounds = []
+        self.foreground = None
 
         # Camera (init later on level load)
         self.camera = None
@@ -104,6 +105,8 @@ class GameEngine:
 
         bg_data = self.levels_data.get(str(level_id), {}).get("background", [])
         self.backgrounds = [Background(layer) for layer in bg_data[::-1]]
+        self.foreground = pygame.image.load(level_data.get("foreground", "")).convert_alpha()
+        self.foreground.set_alpha(75)
 
     def load_level(self, level_id):
         """Loads a level by ID."""
@@ -204,6 +207,8 @@ class GameEngine:
 
             if self.show_level_title:
                 self.render_level_title(self.scaled_surface)
+
+            self.scaled_surface.blit(self.foreground, (0, 0))
         else:
             self.menu.render(self.scaled_surface, self)
 

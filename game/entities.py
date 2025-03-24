@@ -212,11 +212,12 @@ class Entity(pygame.sprite.Sprite):
     def render_health_bar(self, screen, camera):
         if self.health == self.max_health:
             return
+        pos = camera.apply(self)
         if self.is_flipped:
-            y = camera.apply(self).y + self.rect.height + 5
+            y = pos[1] + self.rect.height + 5
         else:
-            y = camera.apply(self).y - 10
-        x = camera.apply(self).x
+            y = pos[1] - 10
+        x = pos[0]
 
         pygame.draw.rect(screen, (16,8,36), (x, y, self.rect.width, 3))
         health_width = self.health / self.max_health * self.rect.width

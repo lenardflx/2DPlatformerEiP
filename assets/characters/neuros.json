@@ -9,5 +9,5 @@
         "charge": ["0,5","1,5"]
     },
     "entity_size": [16,20],
-    "entity_scale": 2
+    "entity_scale": 3
 }

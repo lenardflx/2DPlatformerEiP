@@ -48,6 +48,7 @@ class Player(Entity):
         self.is_jumping = False
 
         # Abilities
+        self.abilities_blocked = False
         self.level = level
         self.player_dt = 0
         self.abilities = {
@@ -163,6 +164,7 @@ class Player(Entity):
         if pygame.mouse.get_pressed()[0] and not self.attack_cooldown:
             self.charge = min(self.charge + 1, self.max_charge)
             self.speed = self.charge_speed
+            new_state = "charge"
         elif self.charge > 0:
             self.speed = self.base_speed
             self.attack_active = True
@@ -225,17 +227,17 @@ class Player(Entity):
         if self.flicker:
             return
         super().render(screen, camera)
-        self.draw_charge_bar(screen)
+        self.draw_charge_bar(screen, camera)
 
-    def draw_charge_bar(self, screen):
+    def draw_charge_bar(self, screen, camera):
         """Draws the player's charge bar beside the player, centered to their body height."""
         if self.charge > self.min_charge_display:
-            x = self.rect.left - self.charge_bar_width - 5 if self.facing_right else self.rect.right + 5
-            y = self.rect.centery - self.charge_bar_height // 2
+            pos = camera.apply(self)
+            y = pos[1] - self.charge_bar_height + self.rect.height // 2
+            x = pos[0] - self.charge_bar_width - 5 if self.facing_right else pos[0] + 5
             filled_height = self.charge / self.max_charge * self.charge_bar_height
 
             pygame.draw.rect(screen, (16,8,36), (x, y, self.charge_bar_width, self.charge_bar_height))
-            # Draw the filled portion of the charge bar (green)
             pygame.draw.rect(screen, (255,233,70),
                              (x, y + self.charge_bar_height - filled_height, self.charge_bar_width, filled_height))
 

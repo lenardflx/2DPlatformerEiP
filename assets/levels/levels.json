@@ -27,7 +27,8 @@
             "speed": 0,
             "type": "static"
         }
-    ]
+    ],
+    "foreground": "assets/foregrounds/0.png"
   },
   "1": {
     "title": "The level 2 title",
@@ -54,6 +55,7 @@
         "speed": 0.2,
         "type": "follow_camera"
       }
-    ]
+    ],
+    "foreground": "assets/foregrounds/1.png"
   }
 }

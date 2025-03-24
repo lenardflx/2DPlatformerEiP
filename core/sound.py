@@ -39,6 +39,11 @@ class SoundManager:
         if sound:
             sound.play()
 
+    def stop_sfx(self, key):
+        sound = self.load_sound(key)
+        if sound:
+            sound.stop()
+
     def set_sfx_volume(self, volume):
         self.sfx_volume = volume
         for sfx in self.loaded_sounds.values():

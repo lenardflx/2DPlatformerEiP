@@ -1,4 +1,3 @@
-# game/menu/menu.py
 import json
 import os
 import pygame
@@ -73,6 +72,7 @@ class Menu:
 
         if menu_state == MenuState.MAIN:
             self.back_redirect = MenuState.MAIN
+            self.last_frame = None
             self.current_page = MainMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager)
         elif menu_state == MenuState.LEVELS:
             self.current_page = LevelsMenu(
