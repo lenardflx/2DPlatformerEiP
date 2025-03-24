@@ -148,6 +148,25 @@ class Level(pygame.sprite.LayeredUpdates):
     def check_collision(self, entity):
         return any(tile.rect.colliderect(entity.rect) for tile in self.get_solid_tiles_near(entity))
 
+    def get_closest_pos(self, entity):
+        """Returns the closest position to entity."""
+        ex, ey = entity.rect.center
+        tile_x, tile_y = int(ex // self.tile_size), int(ey // self.tile_size)
+
+        return tile_x, tile_y
+    def distance_to(self, entity,grid_range=5):
+        with open(f"assets/levels/level_0.json") as f:
+            level_data = json.load(f)
+        pos=self.get_closest_pos(entity)
+        grid = level_data["tiles"]
+        for x in range(-grid_range, grid_range):
+            for y in range(-grid_range, grid_range):
+                if getattr(self.tile_grid[pos[0]+x][pos[1]+y], "solid", False):
+                    grid[pos[0]+x][pos[1]+y]=100+abs(x)+abs(y)
+                else:
+                    grid[pos[0]+x][pos[1]+y]=-1
+        print(grid)
+
     def update(self, dt, engine):
         """Updates tiles, enemies, and player."""
         self.updating_tiles.update(engine)
@@ -156,7 +175,7 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.update(self, dt)
 
         self.player.update(self, dt)
-
+        self.distance_to(self.player)
     def render(self, screen, camera):
         """Renders everything inside the level."""
         for tile in self.tiles:
