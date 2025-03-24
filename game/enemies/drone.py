@@ -12,9 +12,9 @@ class Drone(Entity):
         self.speed = 60
         self.damage = 1
         self.health = 6
-        self.kb_x = 3
-        self.kb_y = 2
-        self.detection_range = 12 * level.tile_size
+        self.kb_x = 2
+        self.kb_y = 1
+        self.detection_range = 8 * level.tile_size
 
         self.direction = pygame.Vector2(0, 0)
         self.smoothing = 0.2
@@ -35,6 +35,10 @@ class Drone(Entity):
 
         if self.charge_cooldown > 0:
             self.charge_cooldown -= 1
+
+        # Attack check
+        if self.rect.colliderect(self.player.rect):
+            self.attack()
 
         if self.in_charge:
             self.charge_duration -= 1
@@ -58,13 +62,10 @@ class Drone(Entity):
 
         super().update(level, dt)
 
-        # Attack check
-        if self.rect.colliderect(self.player.rect):
-            self.attack()
 
     def smart_chase(self, dt):
         """Drone tries to maintain high ground and attack if possible."""
-        player_head = pygame.Vector2(self.player.rect.centerx, self.player.rect.top)
+        player_head = pygame.Vector2(self.player.rect.centerx, self.player.rect.top + 1)
         drone_pos = pygame.Vector2(self.rect.centerx, self.rect.centery)
 
         to_target = (player_head + pygame.Vector2(0, self.overhead_offset)) - drone_pos
@@ -85,7 +86,8 @@ class Drone(Entity):
                 self.windup_timer = 0
 
                 charge_vector = (player_head - drone_pos).normalize()
-                self.velocity = charge_vector * (self.speed * 2)
+                print(charge_vector)
+                self.velocity = charge_vector * (self.speed * 2) * dt
         else:
             # Smooth flight above player
             if to_target.length_squared() > 4:
@@ -104,6 +106,23 @@ class Drone(Entity):
                 else:
                     self.velocity.y = 0
 
+            #Avoid Walls
+            if self.facing_right:
+                t0 = self.level.get_tile_at(self.rect.right + 16, self.rect.top) or self.level.get_tile_at(self.rect.right + 16, self.rect.bottom)
+                t1 = self.level.get_tile_at(self.rect.right + 16, self.rect.bottom + 16)
+                t2 = self.level.get_tile_at(self.rect.right + 16, self.rect.top - 16)
+            else:
+                t0 = self.level.get_tile_at(self.rect.left - 16, self.rect.top) or self.level.get_tile_at(self.rect.left - 16, self.rect.bottom)
+                t1 = self.level.get_tile_at(self.rect.left - 16, self.rect.bottom + 16)
+                t2 = self.level.get_tile_at(self.rect.left - 16, self.rect.top - 16)
+            if t0:
+                if not t1:
+                    self.velocity.y = 32 * dt
+                elif not t2:
+                    self.velocity.y = -32 * dt
+                else:
+                    self.state = "idle"
+                
     def attack(self):
         self.player.hit(self)
 
