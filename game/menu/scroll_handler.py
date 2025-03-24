@@ -1,7 +1,7 @@
 import pygame
 
 class ScrollHandler:
-    def __init__(self, screen_size, area_top=100, area_bottom_offset=100, scroll_speed=30, margin=40, fade_color=(0, 0, 0, 200)):
+    def __init__(self, screen_size, area_top=100, area_bottom_offset=100, scroll_speed=30, margin=40, fade_color=(0, 0, 0)):
         self.screen_size = screen_size
         self.scroll_area_top = area_top
         self.scroll_area_bottom = screen_size[1] - area_bottom_offset

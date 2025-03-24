@@ -50,9 +50,6 @@ class Menu:
         if engine.is_playing:
             self.last_frame = engine.scaled_surface.copy()
             engine.is_playing = False
-            self.back_redirect = MenuState.PAUSE
-        else:
-            self.back_redirect = MenuState.MAIN  # Fallback when opened from non-play mode
 
         self.set_active_page(menu_type)
 
@@ -74,12 +71,14 @@ class Menu:
         self.active_type = menu_state
 
         if menu_state == MenuState.MAIN:
+            self.back_redirect = MenuState.MAIN
             self.current_page = MainMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager)
         elif menu_state == MenuState.LEVELS:
             self.current_page = LevelsMenu(
                 self.screen_size, self.button_images, self.font_manager, self.sound_manager, self.levels_data
             )
         elif menu_state == MenuState.PAUSE:
+            self.back_redirect = MenuState.PAUSE
             self.current_page = PauseMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager)
         elif menu_state == MenuState.DEATH:
             self.current_page = DeathMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager)

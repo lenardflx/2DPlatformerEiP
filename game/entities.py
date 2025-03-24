@@ -24,6 +24,7 @@ class Entity(pygame.sprite.Sprite):
         self.sprite_data = None
         self.entity_size = [16, 16]
         self.scale = 1.0
+        self.tile_size = None
 
         self.load_sprite_metadata(sprite_path, json_path)  # loads size & scale
 

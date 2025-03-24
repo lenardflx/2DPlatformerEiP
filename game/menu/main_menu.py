@@ -1,5 +1,7 @@
 import pygame
 import sys
+
+from core.game_data import get_game_data
 from game.menu.menu_structure import MenuPage, Button
 from game.menu.menu_state import MenuState
 
@@ -10,9 +12,9 @@ class MainMenu(MenuPage):
         self.screen_size = screen_size
         self.cx, self.cy = screen_size[0] // 2, screen_size[1] // 2
         self.button_images = button_images
-        self.title = "Protocol: Disconnect"
+        self.title = get_game_data("game_title")
+        self.credits = f"Made by {get_game_data("contributors")}"
         self.title_color = (255, 255, 255)
-        self.credits = "Made by ..."
         self.background = pygame.image.load("assets/menu/menu_bg.png").convert()
 
         scale =  (int(self.background.get_width() * screen_size[1] / self.background.get_height()), screen_size[1])

@@ -1,7 +1,8 @@
 {
   "screen_size": [855,480],
   "fps": 60,
-  "game_title": "Sigmaboy",
+  "game_title": "Protocol: Disconnect",
+  "contributors": "xyz",
   "level_scale": 16,
   "background_scale": 4
 }
