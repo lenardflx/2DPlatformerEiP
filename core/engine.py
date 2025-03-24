@@ -107,7 +107,7 @@ class GameEngine:
 
     def load_level(self, level_id):
         """Loads a level by ID."""
-        self.level = Level(level_id, self.controls, self.sound_manager)
+        self.level = Level(level_id, self.controls, self.sound_manager, self)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
         self.show_level_title = True
         self.level_title_timer = 0

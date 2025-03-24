@@ -52,7 +52,6 @@ class Button:
             self.sound_manager.play_sfx("button_click")
         return is_clicked
 
-
 class MenuPage:
     def __init__(self, font_manager, sound_manager):
         self.buttons = []

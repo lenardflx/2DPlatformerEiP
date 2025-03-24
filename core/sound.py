@@ -24,7 +24,7 @@ class SoundManager:
 
     def set_music_volume(self, volume):
         self.music_volume = volume
-        pygame.mixer.music.set_volume(volume)
+        pygame.mixer.music.set_volume(volume * self.volume_factor_music)
 
     def load_sound(self, key):
         path = self.sfx_map[key]

@@ -1,9 +1,24 @@
 {
     "controls": {
-        "move_left": ["LEFT", "a"],
-        "move_right": ["RIGHT", "d"],
-        "jump": ["SPACE", "w"],
-        "menu": ["ESCAPE"],
-        "gravity_inverse": ["g"]
+        "move_left": [
+            "left",
+            "a"
+        ],
+        "move_right": [
+            "right",
+            "d"
+        ],
+        "jump": [
+            "space",
+            "w"
+        ],
+        "menu": [
+            "escape",
+            null
+        ],
+        "gravity_inverse": [
+            "g",
+            null
+        ]
     }
 }

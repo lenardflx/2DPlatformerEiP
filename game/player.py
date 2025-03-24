@@ -2,23 +2,32 @@ import pygame
 
 from game.entities import Entity
 import game.abilities as abilities
+from game.menu.menu_state import MenuState
+
 
 class Player(Entity):
     def __init__(self, x, y, sprite_path, json_path, controls, level, sound_manager):
         super().__init__(x, y, sprite_path, json_path, level, sound_manager)
         self.controls = controls
 
+
         # Player attributes
         self.max_health = 6
         self.health = self.max_health
         self.damage = 1
         self.coins = 0
-        self.speed = 100 * self.scale
+        self.base_speed = 100 * self.scale
+        self.speed = self.base_speed
         self.kb_x = 2
         self.kb_y = 1
 
-        # attack charge
+        # Charge Parameters
+        self.charge_speed = 0.3 * self.base_speed
         self.charge = 0
+        self.max_charge = 100
+        self.min_charge_display = 5
+        self.charge_bar_width = 8
+        self.charge_bar_height = 20
 
         # Jumping attributes
         self.jump_was_released = True
@@ -151,14 +160,16 @@ class Player(Entity):
             self.jump_anim_done = False  # Reset animation lock
 
         # Handle Attacking (LEFT-CLICK)
-        if pygame.mouse.get_pressed()[0] and not self.attack_cooldown:# Left mouse button
-            self.charge += 1 if self.charge <= 100 else 0
-        elif self.charge:
+        if pygame.mouse.get_pressed()[0] and not self.attack_cooldown:
+            self.charge = min(self.charge + 1, self.max_charge)
+            self.speed = self.charge_speed
+        elif self.charge > 0:
+            self.speed = self.base_speed
             self.attack_active = True
-            self.attack_cooldown = 20 + self.charge//2
-            self.damage = 1+ self.charge//25
+            self.attack_cooldown = 20 + self.charge // 2
+            self.damage = 1 + self.charge // 25
             self.charge = 0
-            self.sprite_index = 0  # Reset animation
+            self.sprite_index = 0
             new_state = "attack"
             self.perform_attack(level)
 
@@ -173,6 +184,11 @@ class Player(Entity):
             self.abilities["gravity_inverse"].activate()
 
         super().update(level, dt)  # Apply physics and collision
+
+        # Check if player center touches right screen edge
+        if self.rect.centerx >= level.width:
+            level.engine.menu.open_menu(MenuState.COMPLETE, level.engine)
+
         self.state = new_state  # Update state for animation
 
     def perform_attack(self, level):
@@ -191,6 +207,7 @@ class Player(Entity):
             if attack_rect.colliderect(enemy.rect):
                 enemy.hit(self)
 
+
     def hit(self, attacker, stun=30):
         """Handles player damage, knockback, and hit animation."""
         if self.immunity_frames == 0:
@@ -208,6 +225,19 @@ class Player(Entity):
         if self.flicker:
             return
         super().render(screen, camera)
+        self.draw_charge_bar(screen)
+
+    def draw_charge_bar(self, screen):
+        """Draws the player's charge bar beside the player, centered to their body height."""
+        if self.charge > self.min_charge_display:
+            x = self.rect.left - self.charge_bar_width - 5 if self.facing_right else self.rect.right + 5
+            y = self.rect.centery - self.charge_bar_height // 2
+            filled_height = self.charge / self.max_charge * self.charge_bar_height
+
+            pygame.draw.rect(screen, (16,8,36), (x, y, self.charge_bar_width, self.charge_bar_height))
+            # Draw the filled portion of the charge bar (green)
+            pygame.draw.rect(screen, (255,233,70),
+                             (x, y + self.charge_bar_height - filled_height, self.charge_bar_width, filled_height))
 
     def eliminate(self):
         """Handles player elimination (game over)."""

@@ -9,6 +9,7 @@ from game.menu.levels_menu import LevelsMenu
 from game.menu.pause_menu import PauseMenu
 from game.menu.death_menu import DeathMenu
 from game.menu.settings_menu import SettingsMenu
+from game.menu.win_menu import WinMenu
 
 
 class Menu:
@@ -86,6 +87,8 @@ class Menu:
             self.current_page = SettingsMenu(
                 self.screen_size, self.button_images, self.font_manager, self.controls, self.sound_manager
             )
+        elif menu_state == MenuState.COMPLETE:
+            self.current_page = WinMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager)
 
     def handle_event(self, event, engine):
         if self.active_type == MenuState.NONE:

@@ -3,14 +3,13 @@ import pygame
 import os
 import math
 
-from core.game_data import get_game_data
 from game.enemies.enemy_registry import ENEMY_CLASSES
 from game.tiles.basic_tile import Tile
 from game.tiles.tiles_register import TILES_CLASSES
 from game.player import Player  # Import Player
 
 class Level(pygame.sprite.LayeredUpdates):
-    def __init__(self, level_number, controls, sound_manager):
+    def __init__(self, level_number, controls, sound_manager, engine):
         super().__init__()
 
         # Load tile metadata
@@ -20,6 +19,7 @@ class Level(pygame.sprite.LayeredUpdates):
         self.tile_size = self.tile_data["tile_size"]
         self.tile_set = pygame.image.load(f"assets/tiles/level_{level_number}_set.png").convert_alpha()
 
+        self.engine = engine
         self.tile_grid = []  # 2D array for fast solid tile lookup
         self.grid_width = 0
         self.grid_height = 0
@@ -34,7 +34,7 @@ class Level(pygame.sprite.LayeredUpdates):
 
         self.gravity = 12
 
-        # Placeholder values for level sizaae
+        # Placeholder values for level size
         self.width = 0
         self.height = 0
 
@@ -174,7 +174,7 @@ class Level(pygame.sprite.LayeredUpdates):
         """Updates tiles, enemies, and player."""
         if self.c % 30 == 0:
             self.c = 0
-            self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
+            #self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
 
         self.c += 1
 
@@ -215,7 +215,7 @@ class Level(pygame.sprite.LayeredUpdates):
         x_low = math.floor(x / self.tile_size)
         y_low = math.floor(y / self.tile_size)
 
-        if (x_low < 0 or y_low < 0 or x_low >= self.grid_width or y_low >= self.grid_height):
+        if x_low < 0 or y_low < 0 or x_low >= self.grid_width or y_low >= self.grid_height:
            return
         if self.tile_grid[y_low][x_low]:
             return
