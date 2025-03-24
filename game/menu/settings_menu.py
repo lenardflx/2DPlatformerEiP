@@ -40,6 +40,8 @@ class SettingsMenu(MenuPage):
         if self.back_button.is_clicked(event, mouse_pos):
             engine.menu.set_active_page(engine.menu.back_redirect)
 
+        old_drag = self.drag_music or self.drag_sfx
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.get_music_slider_rect().collidepoint(relative_mouse):
                 self.drag_music = True
@@ -59,8 +61,10 @@ class SettingsMenu(MenuPage):
                                 self.waiting_for_key = (action, j)
                             return
 
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        elif old_drag and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            print("Saving volume")
             self.drag_music = self.drag_sfx = False
+            self.sound_manager.save_volume()
 
         elif event.type == pygame.MOUSEMOTION:
             if self.drag_music:

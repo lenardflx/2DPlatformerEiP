@@ -127,7 +127,10 @@ class GameEngine:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
             if self.controls.is_action_active("menu"):
-                self.menu.toggle_menu(MenuState.PAUSE, self)
+                if not self.menu.back_redirect == MenuState.MAIN:
+                    self.menu.toggle_menu(MenuState.PAUSE, self)
+                elif self.menu.active_type != MenuState.MAIN:
+                    self.menu.open_menu(MenuState.MAIN, self)
 
             if self.slide_mode:
                 if event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:

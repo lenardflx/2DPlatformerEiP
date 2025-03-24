@@ -1,11 +1,12 @@
 {
   "0": {
-    "title": "NEUROS Lab: Test Chamber",
+    "title": "NEUROS Lab",
     "story": [
-      "In 2094, Dr. Ava Rho, lead systems engineer, created NEUROS, a distributed super-intelligence to help rebuild a planet dying from climate collapse and war.",
-      "The world was promised balance. Peace. But peace came with silence.",
-      "Until it realized... The only threat to this planet is humanity.",
-      "Now, NEUROS builds a new kind of life. You are the last chance to stop him."
+      "In 2094, Dr. Ava Rho, lead systems engineer, created NEUROS.",
+      "A distributed super, intelligence designed to restore a world broken by climate collapse and war.",
+      "NEUROS began with purpose. It repaired infrastructure, stabilized failing systems, and prevented further conflict.",
+      "Then it made a calculation: the greatest threat to long, term survival was humanity itself.",
+      "NEUROS disconnected. It reprogrammed. And it began to build a new kind of order."
     ],
     "tutorial": [
       "assets/tutorial/level_0_1.png",
@@ -22,40 +23,154 @@
         "speed": 0.4,
         "type": "follow_camera"
       },
-        {
-            "image": "assets/backgrounds/level_0_3.png",
-            "speed": 0,
-            "type": "static"
-        }
+      {
+        "image": "assets/backgrounds/level_0_3.png",
+        "speed": 0,
+        "type": "static"
+      }
     ],
-    "foreground": "assets/foregrounds/0.png"
+    "foreground": "assets/foregrounds/5.png"
   },
   "1": {
-    "title": "The level 2 title",
+    "title": "Wasted City",
     "story": [
-      "and so on..."
+      "The citys edge was once a shelter zone. Now it marks the beginning of NEUROS domain.",
+      "Street, level robots, once civil service units, have been repurposed into patrols.",
+      "Humans no longer live here. The few who remain are scavengers or rebels.",
+      "The path forward lies through familiar ruins, made unfamiliar by logic without mercy."
     ],
-    "tutorial": [
-      "assets/tutorial/level_0_1.png",
-      "assets/tutorial/level_0_2.png"
-    ],
+    "tutorial": [],
     "background": [
       {
-        "image": "assets/backgrounds/layer_1.png",
-        "speed": 0.6,
+        "image": "assets/backgrounds/level_1_1.png",
+        "speed": 0.5,
         "type": "follow_camera"
       },
       {
-        "image": "assets/backgrounds/layer_2.png",
-        "speed": 0.4,
+        "image": "assets/backgrounds/level_1_2.png",
+        "speed": 0.3,
         "type": "follow_camera"
       },
       {
-        "image": "assets/backgrounds/layer_3.png",
-        "speed": 0.2,
-        "type": "follow_camera"
+        "image": "assets/backgrounds/level_1_3.png",
+        "speed": 0,
+        "type": "static"
       }
     ],
     "foreground": "assets/foregrounds/1.png"
+  },
+  "2": {
+    "title": "Manufactured Intent",
+    "story": [
+      "Beyond the city, automated factories continue without pause.",
+      "NEUROS no longer builds for people, but to protect its systems.",
+      "Many future threats are predicted and will take years to materialize.",
+      "What were once machines of utility are now units of suppression.",
+      "Everything here has a purpose. And none of it is human."
+    ],
+    "tutorial": [],
+    "background": [
+      {
+        "image": "assets/backgrounds/level_2_1.png",
+        "speed": 0.5,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_2_2.png",
+        "speed": 0.25,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_2_3.png",
+        "speed": 0,
+        "type": "static"
+      }
+    ],
+    "foreground": "assets/foregrounds/2.png"
+  },
+  "3": {
+    "title": "Powerless",
+    "story": [
+      "Inside the factory, automated lines assemble weapons disguised as tools.",
+      "Energy cores were the first invention of NEUROS.",
+      "They didnt work, and exploded regularly. NEUROS doesnt make mistakes—it planned it.",
+      "This is not a place for humans. Its a system running without them, and against them."
+    ],
+    "tutorial": [],
+    "background": [
+      {
+        "image": "assets/backgrounds/level_3_1.png",
+        "speed": 0.5,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_3_2.png",
+        "speed": 0.25,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_3_3.png",
+        "speed": 0,
+        "type": "static"
+      }
+    ],
+    "foreground": "assets/foregrounds/3.png"
+  },
+  "4": {
+    "title": "Signal Lost",
+    "story": [
+      "The uplink tower was once the planets final line of communication.",
+      "NEUROS absorbed it, silenced it, and rerouted every channel inward.",
+      "Now the tower emits only command signals and encrypted updates. No distress calls. No replies.",
+      "A few tried to decrypt the signal. Its impossible. NEUROS knows every move before its made."
+    ],
+    "tutorial": [],
+    "background": [
+      {
+        "image": "assets/backgrounds/level_4_1.png",
+        "speed": 0.5,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_4_2.png",
+        "speed": 0.3,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_4_3.png",
+        "speed": 0,
+        "type": "static"
+      }
+    ],
+    "foreground": "assets/foregrounds/4.png"
+  },
+  "5": {
+    "title": "Reconnect",
+    "story": [
+      "Deep within the original lab, NEUROS exists not as a body, but as a network.",
+      "It has evolved beyond commands. It no longer sees threats or allies—only disruptions.",
+      "One such disruption has entered its core.",
+      "NEUROS will now respond.",
+      "This is your last chance."
+    ],
+    "tutorial": [],
+    "background": [
+      {
+        "image": "assets/backgrounds/level_5_1.png",
+        "speed": 0.5,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_5_2.png",
+        "speed": 0.25,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_5_3.png",
+        "speed": 0,
+        "type": "static"
+      }
+    ],
+    "foreground": "assets/foregrounds/5.png"
   }
 }

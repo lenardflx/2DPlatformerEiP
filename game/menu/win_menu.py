@@ -71,6 +71,7 @@ class WinMenu(MenuPage):
         for button in self.buttons:
             if button.is_clicked(event, mouse_pos):
                 if button.name == "resume":
+                    engine.load_level(engine.next_level)
                     engine.is_playing = True
                     engine.menu.close_menu(engine)
                 elif button.name == "menu":

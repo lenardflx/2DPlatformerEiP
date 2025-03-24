@@ -57,6 +57,7 @@ class MainMenu(MenuPage):
         for button in self.buttons:
             if button.is_clicked(event, mouse_pos):
                 if button.name == "play":
+                    engine.menu.back_redirect = MenuState.PAUSE
                     engine.start_game()
                 elif button.name == "exit":
                     pygame.quit()
