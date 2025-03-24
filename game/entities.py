@@ -20,6 +20,7 @@ class Entity(pygame.sprite.Sprite):
         self.kb_y = 2
         self.max_health = 6
         self.health = self.max_health
+        self.apply_gravity = True
 
         self.sprite_data = None
         self.entity_size = [16, 16]
@@ -89,7 +90,8 @@ class Entity(pygame.sprite.Sprite):
         if self.stun > 0:
             self.stun -= 1
 
-        self.velocity.y += level.gravity * dt  # Apply gravity
+        if self.apply_gravity:
+            self.velocity.y += level.gravity * dt  # Apply gravity
         self.move(level)
         self.update_animation(dt)
 
