@@ -1,6 +1,7 @@
 import json
 import pygame
 import os
+import math
 
 from core.game_data import get_game_data
 from game.enemies.enemy_registry import ENEMY_CLASSES
@@ -22,6 +23,8 @@ class Level(pygame.sprite.LayeredUpdates):
         self.tile_grid = []  # 2D array for fast solid tile lookup
         self.grid_width = 0
         self.grid_height = 0
+        self.mp = []
+        self.c = 0
 
         self.tiles = pygame.sprite.Group()
         self.updating_tiles = pygame.sprite.Group()
@@ -150,6 +153,12 @@ class Level(pygame.sprite.LayeredUpdates):
 
     def update(self, dt, engine):
         """Updates tiles, enemies, and player."""
+        if self.c % 30 == 0:
+            self.c = 0
+            self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
+
+        self.c += 1
+
         self.updating_tiles.update(engine)
 
         for enemy in self.enemies:
@@ -164,3 +173,38 @@ class Level(pygame.sprite.LayeredUpdates):
         for enemy in self.enemies:
             enemy.render(screen, camera)
         self.player.render(screen,camera)
+        
+        #score_font = pygame.font.Font(None, 20)
+        #for x, row in enumerate(self.mp):
+        #    for y, col in enumerate(row):
+        #        x_new = self.tile_size * x
+        #        y_new = self.tile_size * y
+        #        score_surf = score_font.render(str(col), False, (0, 0, 0))
+        #        score_pos = [x_new, y_new]
+        #        screen.blit(score_surf, score_pos)
+
+    def setup_player_map(self, x, y):
+        self.mp = [[1000 for _ in range(self.grid_height)] for _ in range(self.grid_width)]
+        for i in range(0, 10):
+            self.create_player_map(0, x, y, i)
+
+    def create_player_map(self, index, x, y, max):
+        if index == max:
+            return
+        
+        x_low = math.floor(x / self.tile_size)
+        y_low = math.floor(y / self.tile_size)
+
+        if (x_low < 0 or y_low < 0 or x_low >= self.grid_width or y_low >= self.grid_height):
+           return
+        if self.tile_grid[y_low][x_low]:
+            return
+        
+        if self.mp[x_low][y_low] == 1000:
+            self.mp[x_low][y_low] = index
+
+        for c in [[-1, 0], [0, -1], [1, 0], [0, 1]]:
+            x_new = x_low + c[0]
+            y_new = y_low + c[1]
+            self.create_player_map(index + 1, self.tile_size * x_new, self.tile_size * y_new, max)
+

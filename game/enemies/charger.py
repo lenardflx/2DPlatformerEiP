@@ -46,9 +46,6 @@ class Charger(Entity):
         if self.charge_cooldown > 0:
             self.charge_cooldown -= 1
 
-        if self.stun > 0:
-            self.stun -= 1
-
         # Player detection
         distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
         player_visible = distance < self.detection_range and self.has_line_of_sight()
@@ -72,7 +69,7 @@ class Charger(Entity):
                         self.patrol_timer = random.randint(60, 120)
                         self.patrol_dir = 1 if self.facing_right else -1
                         self.patrol_speed_variation = random.uniform(0.8, 1.2)
-                        self.idle_timer = random.randint(0, 30)
+                        self.idle_timer = random.randint(30, 60)
 
             case "patrol":
                 self.set_state("run")
@@ -81,9 +78,10 @@ class Charger(Entity):
                 self.velocity.x = self.patrol_dir * speed
                 self.facing_right = self.patrol_dir > 0
 
-                if self.detect_wall_ahead():
+                if self.hit_edge:
                     self.patrol_dir *= -1
                     self.facing_right = not self.facing_right
+                    self.hit_edge = False
 
                 if player_visible and self.charge_cooldown <= 0:
                     self.ai_state = "attack"
@@ -180,10 +178,10 @@ class Charger(Entity):
                 return False
         return True
 
-    def detect_wall_ahead(self):
-        offset = self.rect.width if self.facing_right else -1
-        probe = self.rect.move(offset, 0)
-        return any(tile.rect.colliderect(probe) for tile in self.level.get_solid_tiles_near(self))
+    #def detect_wall_ahead(self):
+    #    offset = self.rect.width if self.facing_right else -1
+    #    probe = self.rect.move(offset, 0)
+    #    return any(tile.rect.colliderect(probe) for tile in self.level.get_solid_tiles_near(self))
 
     def face_player(self):
         self.facing_right = self.rect.centerx < self.player.rect.centerx
