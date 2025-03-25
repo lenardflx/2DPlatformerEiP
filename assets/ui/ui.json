@@ -2,9 +2,11 @@
     "heart_full": "heart_full.png",
     "heart_half": "heart_half.png",
     "heart_empty": "heart_empty.png",
-    "coin": "coin.png",
     "pause": "pause.png",
     "heart_size": 32,
-    "coin_size": 32,
-    "pause_size": 32
+    "pause_size": 32,
+    "abilities": {
+        "double_jump": "double_jump_ability.png",
+        "gravity_inverse": "gravity_ability.png"
+    }
 }
