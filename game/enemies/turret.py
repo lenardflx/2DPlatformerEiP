@@ -148,6 +148,8 @@ class Turret(Entity):
         """Optimized line-of-sight with fewer checks"""
         start = pygame.Vector2(self.rect.center)
         end = pygame.Vector2(self.player.rect.center)
+        if (end - start) == 0:
+            return False
         direction = (end - start).normalize()
         distance = start.distance_to(end)
         step_size = self.level.tile_size * 2  # Larger step size

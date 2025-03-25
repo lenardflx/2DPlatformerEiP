@@ -20,6 +20,12 @@ class UI:
         self.heart_empty = pygame.image.load(os.path.join("assets/ui", ui_data["heart_empty"])).convert_alpha()
         self.coin_icon = pygame.image.load(os.path.join("assets/ui", ui_data["coin"])).convert_alpha()
         self.pause_icon = pygame.image.load(os.path.join("assets/ui", ui_data["pause"])).convert_alpha()
+        self.ability_icons = {}
+        self.ability_size = 30
+        for key, path in ui_data["abilities"].items():
+            icon = pygame.image.load(os.path.join("assets/ui", path)).convert_alpha()
+            icon = pygame.transform.scale(icon, (self.ability_size,self.ability_size))
+            self.ability_icons[key] = icon
 
         # UI sizes
         self.heart_size = ui_data["heart_size"]
@@ -34,14 +40,18 @@ class UI:
         self.pause_icon = pygame.transform.scale(self.pause_icon, (self.pause_size, self.pause_size))
 
         # Default player stats
+        self.abilities = None
         self.health = 6
         self.max_health = 6
         self.coins = 0
+
+        self.player = None
 
     def update(self, player):
         """Updates UI values based on the player state."""
         self.health = max(0, min(player.health, self.max_health))
         self.coins = player.coins
+        self.abilities = player.abilities
 
     def render(self, screen):
         """Renders the UI elements on the screen (fixed position)."""
@@ -75,6 +85,31 @@ class UI:
 
         # Pause button
         screen.blit(self.pause_icon, (20, 20))
+
+        self.render_abilities(screen, self.abilities)
+
+    def render_abilities(self, screen, abilities):
+        """Render ability icons with cooldown overlay and glow if ready."""
+        x = 20  # Start from bottom-left
+        y = screen.get_height() - 40  # Leave some margin from bottom
+
+        for name, ability in abilities.items():
+            icon = self.ability_icons.get(name)
+            if icon is None:
+                continue
+
+            # Draw the icon
+            screen.blit(icon, (x, y))
+
+            # Draw cooldown overlay if on cooldown
+            if ability.current_cooldown > 0:
+                ratio = ability.current_cooldown / ability.cooldown
+                height = int(self.ability_size * ratio)
+                cooldown_overlay = pygame.Surface((self.ability_size, height), pygame.SRCALPHA)
+                cooldown_overlay.fill((0, 0, 0, 128))
+                screen.blit(cooldown_overlay, (x, y + (self.ability_size - height)))
+
+            x += 40
 
     def handle_event(self, event, engine):
         """Handles UI interactions (pause button)."""
