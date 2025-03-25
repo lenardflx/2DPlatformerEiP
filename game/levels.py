@@ -2,7 +2,9 @@ import json
 import pygame
 import os
 import math
-
+from collections import deque
+import numpy as np
+from heapq import heappush, heappop
 from game.enemies.enemy_registry import ENEMY_CLASSES
 from game.tiles.basic_tile import Tile
 from game.tiles.tiles_register import TILES_CLASSES
@@ -172,9 +174,8 @@ class Level(pygame.sprite.LayeredUpdates):
 
     def update(self, dt, engine):
         """Updates tiles, enemies, and player."""
-        if self.c % 30 == 0:
-            self.c = 0
-            self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
+
+        self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
 
         self.c += 1
 
@@ -204,33 +205,59 @@ class Level(pygame.sprite.LayeredUpdates):
                 screen.blit(score_surf, score_pos)
 
     def setup_player_map(self, x, y):
-        self.mp = [[1000 for _ in range(self.grid_height)] for _ in range(self.grid_width)]
-        for i in range(0, 10):
-            self.create_player_map(0, x, y, i)
+        # Use NumPy for faster array operations
+        self.mp = np.full((self.grid_width, self.grid_height), 1000, dtype=np.int16)
 
-    def create_player_map(self, index, x, y, max):
-        if index == max:
+        # Create player map with extended range
+        self.create_player_map(x, y, 50)  # Supporting up to 50 range
+
+    def create_player_map(self, x, y, max_distance):
+        # Convert initial coordinates to grid coordinates
+        start_x = math.floor(x / self.tile_size)
+        start_y = math.floor(y / self.tile_size)
+
+        # Quick validity checks
+        if (start_x < 0 or start_y < 0 or
+                start_x >= self.grid_width or start_y >= self.grid_height or
+                self.tile_grid[start_y][start_x]):
             return
-        
-        x_low = math.floor(x / self.tile_size)
-        y_low = math.floor(y / self.tile_size)
 
-        if x_low < 0 or y_low < 0 or x_low >= self.grid_width or y_low >= self.grid_height:
-           return
-        if self.tile_grid[y_low][x_low]:
-            return
-        
-        if self.mp[x_low][y_low] == 1000:
-            self.mp[x_low][y_low] = index
+        # Use a priority queue for more efficient exploration
+        pq = [(0, start_x, start_y)]
 
-        for c in [[-1, 0], [0, -1], [1, 0], [0, 1]]:
-            high = 0
-            tmp = [x_low, y_low]
-            x_new = x_low + c[0]
-            y_new = y_low + c[1]
-            if not (x_new < 0 or y_new < 0 or x_new >= self.grid_width or y_new >= self.grid_height):
-                if self.mp[x_new][y_new] >= high:
-                    tmp = [x_new, y_new]
-                    high = self.mp[tmp[0]][tmp[1]]
-            self.create_player_map(index + 1, self.tile_size * tmp[0], self.tile_size * tmp[1], max)
+        # Diagonal and cardinal directions for more natural movement
+        directions = [
+            (-1, 0), (1, 0), (0, -1), (0, 1),  # Cardinal
+            (-1, -1), (-1, 1), (1, -1), (1, 1)  # Diagonal
+        ]
 
+        # Track visited cells to prevent redundant processing
+        visited = np.zeros((self.grid_width, self.grid_height), dtype=bool)
+
+        while pq:
+            distance, x, y = heappop(pq)
+
+            # Skip if out of max distance or already processed
+            if distance >= max_distance or visited[x][y]:
+                continue
+
+            # Mark as visited and update distance map
+            visited[x][y] = True
+            self.mp[x][y] = min(self.mp[x][y], distance)
+
+            # Explore neighboring cells
+            for dx, dy in directions:
+                new_x, new_y = x + dx, y + dy
+
+                # Check new cell validity
+                if (0 <= new_x < self.grid_width and
+                        0 <= new_y < self.grid_height and
+                        not self.tile_grid[new_y][new_x] and
+                        not visited[new_x][new_y]):
+
+                    # Calculate new distance (with diagonal movement cost)
+                    new_distance = distance + (1.414 if dx and dy else 1)
+
+                    # Only add if within max distance
+                    if new_distance < max_distance:
+                        heappush(pq, (new_distance, new_x, new_y))
