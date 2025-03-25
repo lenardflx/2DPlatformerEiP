@@ -66,60 +66,67 @@ class Drone(Entity):
 
         super().update(level, dt)
 
-
     def smart_chase(self, dt):
-        """Drone tries to maintain high ground and attack if possible."""
-        player_head = pygame.Vector2(self.player.rect.centerx, self.player.rect.top)
-        drone_pos = pygame.Vector2(self.rect.centerx, self.rect.centery)
+        """
+        Move deeply into the next grid cell with the smallest number.
+        """
+        # Current grid position
+        current_grid_x = int(self.rect.centerx / 32)
+        current_grid_y = int(self.rect.centery / 32)
 
-        dist_to_player = drone_pos.distance_to(player_head)
+        # Check adjacent cells (including diagonals)
+        directions = [
+            (-1, -1), (0, -1), (1, -1),
+            (-1, 0), (1, 0),
+            (-1, 1), (0, 1), (1, 1)
+        ]
 
-        # Charge logic
-        vertical_aligned = abs(self.rect.centerx - self.player.rect.centerx) < 10
+        # Track the best (smallest) number and its location
+        best_value = float('inf')
+        best_target = None
 
-        self.should_charge = False # dist_to_player < 100 and vertical_aligned and self.charge_cooldown == 0
+        for dx, dy in directions:
+            new_x, new_y = current_grid_x + dx, current_grid_y + dy
 
-        if self.should_charge:
-            if self.windup_timer < 20:
-                self.windup_timer += 1
-                self.velocity *= 0.95  # pause before charge
-            else:
-                self.in_charge = True
-                self.charge_duration = 20
-                self.charge_cooldown = 90
-                self.windup_timer = 0
+            # Bounds and validity check
+            try:
+                cell_value = self.level.mp[new_x][new_y]
 
-                charge_vector = (player_head - drone_pos).normalize()
-                self.velocity = charge_vector * (self.speed * 2) * dt
+                # Find the smallest valid number
+                if cell_value is not None and cell_value < best_value:
+                    best_value = cell_value
+                    best_target = (new_x, new_y)
+            except (IndexError, TypeError):
+                continue
+
+        # Move towards the best target
+        if best_target:
+            target_grid_x, target_grid_y = best_target
+
+            # Target deep into the next grid cell
+            target_x = target_grid_x * 32 + 16 + (32 * 0.75 * (
+                1 if target_grid_x > current_grid_x else -1 if target_grid_x < current_grid_x else 0))
+            target_y = target_grid_y * 32 + 16 + (32 * 0.75 * (
+                1 if target_grid_y > current_grid_y else -1 if target_grid_y < current_grid_y else 0))
+
+            # Calculate direction vector
+            drone_pos = pygame.Vector2(self.rect.centerx, self.rect.centery)
+            target_pos = pygame.Vector2(target_x, target_y)
+
+            direction = (target_pos - drone_pos).normalize()
+
+            # Moderate speed movement
+            self.velocity = direction * self.speed * dt
+
+            # Force deep penetration into the next grid cell
+            if (abs(self.rect.centerx - target_x) < 10 and
+                    abs(self.rect.centery - target_y) < 10):
+                self.rect.centerx = target_x
+                self.rect.centery = target_y
         else:
-            # Get Closer To Player
-            closest = 1000
-            check = [[-1,0],[1,0],[0,-1],[0,1]]
-            x = int(self.rect.centerx / 32)
-            y = int(self.rect.centery / 32)
-            space = [x, y]
-            for c in check:
-                x_new = x + c[0]
-                y_new = y + c[1]
-                try:
-                    check = self.level.mp[x_new][y_new]
-                except:
-                    pass
-                if check is not None and check.size >0:
-                    if check < closest:
-                        closest = check
-                        space = [x_new * 32, y_new * 32]
-            if closest == 1000:
-                self.state = "idle"
-            else:
-                if space[0] > self.rect.centerx:
-                    self.velocity.x = self.speed * dt
-                elif space[0] < self.rect.centerx:
-                    self.velocity.x = -self.speed * dt
-                elif space[1] > self.rect.centery:
-                    self.velocity.y = self.speed * dt
-                elif space[1] < self.rect.centery:
-                    self.velocity.y = -self.speed * dt
+            # No valid movement found
+            self.state = "idle"
+            self.velocity = pygame.Vector2(0, 0)
 
 
     def attack(self):
