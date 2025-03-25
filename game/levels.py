@@ -194,18 +194,18 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.render(screen, camera)
         self.player.render(screen,camera)
         
-        #score_font = pygame.font.Font(None, 20)
-        #for x, row in enumerate(self.mp):
-        #    for y, col in enumerate(row):
-        #        x_new = self.tile_size * x
-        #        y_new = self.tile_size * y
-        #        score_surf = score_font.render(str(col), False, (0, 0, 0))
-        #        score_pos = [x_new, y_new]
-        #        screen.blit(score_surf, score_pos)
+        score_font = pygame.font.Font(None, 20)
+        for x, row in enumerate(self.mp):
+            for y, col in enumerate(row):
+                x_new = self.tile_size * x
+                y_new = self.tile_size * y
+                score_surf = score_font.render(str(col), False, (0, 0, 0))
+                score_pos = [x_new, y_new]
+                screen.blit(score_surf, score_pos)
 
     def setup_player_map(self, x, y):
         self.mp = [[1000 for _ in range(self.grid_height)] for _ in range(self.grid_width)]
-        for i in range(0, 9):
+        for i in range(0, 10):
             self.create_player_map(0, x, y, i)
 
     def create_player_map(self, index, x, y, max):
@@ -222,15 +222,15 @@ class Level(pygame.sprite.LayeredUpdates):
         
         if self.mp[x_low][y_low] == 1000:
             self.mp[x_low][y_low] = index
-        high = 1000
-        tmp = [x_low, y_low]
 
         for c in [[-1, 0], [0, -1], [1, 0], [0, 1]]:
+            high = 0
+            tmp = [x_low, y_low]
             x_new = x_low + c[0]
             y_new = y_low + c[1]
-            if not x_new < 0 or y_new < 0 or x_new >= self.grid_width or y_new >= self.grid_height:
-                if self.mp[x_new][y_new] > high:
-                    high = self.mp[x_new][y_new]
-                    tmp = [x_low, y_low]
-        self.create_player_map(index + 1, self.tile_size * tmp[0], self.tile_size * tmp[1], max)
+            if not (x_new < 0 or y_new < 0 or x_new >= self.grid_width or y_new >= self.grid_height):
+                if self.mp[x_new][y_new] >= high:
+                    tmp = [x_new, y_new]
+                    high = self.mp[tmp[0]][tmp[1]]
+            self.create_player_map(index + 1, self.tile_size * tmp[0], self.tile_size * tmp[1], max)
 

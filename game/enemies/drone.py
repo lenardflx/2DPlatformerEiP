@@ -105,9 +105,10 @@ class Drone(Entity):
                     check = self.level.mp[x_new][y_new]
                 except:
                     pass
-                if check < closest:
-                    closest = check
-                    space = [x_new * 32, y_new * 32]
+                if check != None and check != []:
+                    if check < closest:
+                        closest = check
+                        space = [x_new * 32, y_new * 32]
             if closest == 1000:
                 self.state = "idle"
             else:
