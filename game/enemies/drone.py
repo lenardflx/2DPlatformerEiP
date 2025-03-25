@@ -76,7 +76,7 @@ class Drone(Entity):
 
         # Charge logic
         vertical_aligned = abs(self.rect.centerx - self.player.rect.centerx) < 10
-
+        
         self.should_charge = dist_to_player < 100 and vertical_aligned and self.charge_cooldown == 0
 
         if self.should_charge:
@@ -105,7 +105,7 @@ class Drone(Entity):
                     check = self.level.mp[x_new][y_new]
                 except:
                     pass
-                if check != None and check.size > 0 :
+                if check != None and check != []:
                     if check < closest:
                         closest = check
                         space = [x_new * 32, y_new * 32]
