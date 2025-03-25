@@ -35,7 +35,7 @@ class Neuros(Entity):
         self.detection_range = 500
         self.death_executed = False
         self.apply_gravity = False
-        self.beam_duration = 0.5
+        self.beam_duration = 1.0
         self.beam_timer = 0
         self.beam_start = None
         self.beam_end = None
@@ -55,6 +55,7 @@ class Neuros(Entity):
         self.health = self.max_health
         self.speed = config["speed"]
         if self.phase == 3:
+            self.beam_duration = 0.75
             self.laser_damage = 2
 
     def update(self, level, dt):
@@ -270,7 +271,7 @@ class Neuros(Entity):
         
     def summon_drones(self):
         if len(self.minions) < 5:
-            pos = (self.rect.centerx + random.randint(-40, 40), self.rect.y)
+            pos = (self.rect.centerx + random.randint(-20, 20), self.rect.y)
             drone = Drone(pos[0], pos[1], "assets/characters/drone.png", "assets/characters/drone.json",
                           self.player, self.level, self.sound_manager)
             self.minions.append(drone)
@@ -279,7 +280,7 @@ class Neuros(Entity):
 
     def deploy_emp_radars(self):
         if len(self.minions) < 5:
-            pos = (self.rect.centerx + random.randint(-100, 100), self.rect.top - 40)
+            pos = (self.rect.centerx + random.randint(-40, 40), self.rect.top + 20)
             radar = EMP_Radar(pos[0], pos[1], self.level, self.player)
             self.minions.append(radar)
             self.level.enemies.add(radar)

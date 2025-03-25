@@ -176,7 +176,6 @@ class Level(pygame.sprite.LayeredUpdates):
 
         self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
 
-
         self.updating_tiles.update(engine)
 
         for enemy in self.enemies:
