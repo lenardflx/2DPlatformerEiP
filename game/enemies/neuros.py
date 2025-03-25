@@ -1,24 +1,11 @@
 import pygame
 import random
 
-from game.enemies import Drone
 from game.entities import Entity
+from game.enemies import Drone
+from game.enemies import EMP_Radar
 from game.enemies.enemy_registry import register_enemy
 from game.menu.menu_state import MenuState
-
-class EMPRadar(Entity):
-    def __init__(self, x, y, level):
-        super().__init__(x, y, "assets/characters/drone.png", "assets/characters/drone.json", level, None)
-        self.max_health = 30
-        self.health = self.max_health
-        self.level = level
-
-    def update(self, level, dt):
-        super().update(level, dt)
-
-    def eliminate(self):
-        super().eliminate()
-        self.level.player.abilities_blocked = False
 
 @register_enemy("neuros")
 class Neuros(Entity):
@@ -231,7 +218,7 @@ class Neuros(Entity):
     def deploy_emp_radars(self):
         if len(self.minions) < 3:
             pos = (self.rect.centerx + random.randint(-100, 100), self.rect.top - 40)
-            radar = EMPRadar(pos[0], pos[1], self.level)
+            radar = EMP_Radar(pos[0], pos[1], self.level)
             self.minions.append(radar)
             self.level.enemies.add(radar)
             self.player.abilities_blocked = True
