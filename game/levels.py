@@ -206,7 +206,7 @@ class Level(pygame.sprite.LayeredUpdates):
         self.mp = np.full((self.grid_width, self.grid_height), 1000, dtype=np.int16)
 
         # Create player map with extended range
-        self.create_player_map(x, y, 50)  # Supporting up to 50 range
+        self.create_player_map(x, y, 20)  # Supporting up to 50 range
 
     def create_player_map(self, x, y, max_distance):
         # Convert initial coordinates to grid coordinates

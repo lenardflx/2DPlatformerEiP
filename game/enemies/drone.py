@@ -14,7 +14,7 @@ class Drone(Entity):
         self.health = 6
         self.kb_x = 2
         self.kb_y = 1
-        self.detection_range = 8 * level.tile_size
+        self.detection_range = 12 * level.tile_size
 
         self.direction = pygame.Vector2(0, 0)
         self.smoothing = 0.2
@@ -69,15 +69,15 @@ class Drone(Entity):
 
     def smart_chase(self, dt):
         """Drone tries to maintain high ground and attack if possible."""
-        player_head = pygame.Vector2(self.player.rect.centerx, self.player.rect.top + 1)
+        player_head = pygame.Vector2(self.player.rect.centerx, self.player.rect.top)
         drone_pos = pygame.Vector2(self.rect.centerx, self.rect.centery)
 
         dist_to_player = drone_pos.distance_to(player_head)
 
         # Charge logic
         vertical_aligned = abs(self.rect.centerx - self.player.rect.centerx) < 10
-        
-        self.should_charge = dist_to_player < 100 and vertical_aligned and self.charge_cooldown == 0
+
+        self.should_charge = False # dist_to_player < 100 and vertical_aligned and self.charge_cooldown == 0
 
         if self.should_charge:
             if self.windup_timer < 20:
@@ -105,7 +105,7 @@ class Drone(Entity):
                     check = self.level.mp[x_new][y_new]
                 except:
                     pass
-                if check != None and check.size >0:
+                if check is not None and check.size >0:
                     if check < closest:
                         closest = check
                         space = [x_new * 32, y_new * 32]
@@ -120,6 +120,7 @@ class Drone(Entity):
                     self.velocity.y = self.speed * dt
                 elif space[1] < self.rect.centery:
                     self.velocity.y = -self.speed * dt
+
 
     def attack(self):
         self.player.hit(self)
