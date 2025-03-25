@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 from game.entities import Entity
 from game.enemies import Drone
@@ -34,8 +35,17 @@ class Neuros(Entity):
         self.detection_range = 500
         self.death_executed = False
         self.apply_gravity = False
+        self.beam_duration = 0.5
+        self.beam_timer = 0
+        self.beam_start = None
+        self.beam_end = None
         self.heal_cooldown = 0.0
         self.walking = 0
+        self.laser_damage = 1
+        self.damage = 0
+        self.firing_laser = False
+        self.kb_x = 1
+        self.kb_y = 1
         self.set_phase_stats(1)
 
     def set_phase_stats(self, phase):
@@ -43,6 +53,8 @@ class Neuros(Entity):
         self.max_health = config["health"]
         self.health = self.max_health
         self.speed = config["speed"]
+        if self.phase == 3:
+            self.laser_damage = 2
 
     def update(self, level, dt):
         if self.health <= 0:
@@ -72,9 +84,18 @@ class Neuros(Entity):
             self.walking -= dt
             if self.walking < 0:
                 self.walking = 0
+        if self.beam_timer > 0:
+            self.beam_timer -= dt
+            if self.beam_timer < 0:
+                self.beam_timer = 0
+        elif self.firing_laser:
+            self.shoot_lasers()
+            self.firing_laser = False
+            return
 
         if self.phase == 1:
-            self.phase_1(dt)
+            self.testphase(dt)
+            #self.phase_1(dt)
         elif self.phase == 2:
             self.phase_2(dt)
         elif self.phase == 3:
@@ -90,6 +111,9 @@ class Neuros(Entity):
         self.current_text = text
         self.text_timer = duration
 
+    def testphase(self, dt):
+        self.phase_1(dt)
+
     # === Phase 1 ===
     def phase_1(self, dt):
         rnd_phase = random.randint(0, 20)
@@ -101,10 +125,13 @@ class Neuros(Entity):
                 self.speak("Are you afraid of me, human?")
                 self.action_cooldown = 0.1
                 self.walking = 2.0
-            elif self.between(6, 16, rnd_phase):
+            elif self.between(6, 14, rnd_phase):
                 self.speak("")
                 self.action_cooldown = 0.1
                 self.walking = 1.5
+            elif self.between(15, 16, rnd_phase):
+                self.action_cooldown = 4.0
+                self.aim()
             elif self.between(17, 18, rnd_phase):
                 self.summon_drones()
                 self.action_cooldown = 4.5
@@ -201,7 +228,6 @@ class Neuros(Entity):
             self.speak("You are an annoyance. Termination protocol engaged.")
 
     ### Attacks ###
-
     def heal_self(self, amt):
         self.health += min((self.max_health - self.health), amt)
         self.speak("Defragmenting system. Optimization complete.")
@@ -218,15 +244,34 @@ class Neuros(Entity):
     def deploy_emp_radars(self):
         if len(self.minions) < 3:
             pos = (self.rect.centerx + random.randint(-100, 100), self.rect.top - 40)
-            radar = EMP_Radar(pos[0], pos[1], self.level)
+            radar = EMP_Radar(pos[0], pos[1], self.level, self.player)
             self.minions.append(radar)
             self.level.enemies.add(radar)
             self.player.abilities_blocked = True
 
             self.speak("EMP field active.")
 
+    def aim(self):
+        self.speak("Firing precision beam.")
+        self.firing_laser = True
+        self.beam_timer = self.beam_duration
+        self.beam_start = self.rect.center
+        self.beam_end = self.find_wall_in_direction()
+
     def shoot_lasers(self):
-        self.speak("Firing precision beams.")
+        if self.player.rect.clipline(self.beam_start, self.beam_end):
+            self.damage = self.laser_damage
+            self.player.hit(self)
+
+    def find_wall_in_direction(self):
+        x_rise = self.player.rect.centerx - self.beam_start[0]
+        y_rise = self.player.rect.centery - self.beam_start[1]
+        for i in range(0, 2000):
+            x = math.floor((self.beam_start[0] + x_rise * i * 0.1))
+            y = math.floor((self.beam_start[1] + y_rise * i * 0.1))
+            if self.level.get_tile_at(x,y):
+                return [x, y]
+        return self.player.rect.center
 
     def shield_self(self):
         if self.hits_taken >= 3 and not self.shielded:
@@ -285,6 +330,18 @@ class Neuros(Entity):
                 color=(255, 255, 255),
                 alpha=255
             )
+        
+        # Beam (pretty)
+        if self.firing_laser:
+            if self.between(0, 0.1, self.beam_timer) and self.beam_start and self.beam_end:
+                start = camera.apply(pygame.Rect(self.beam_start, (0, 0))).topleft
+                end = camera.apply(pygame.Rect(self.beam_end, (0, 0))).topleft
+                pygame.draw.line(screen, (40, 100, 255), start, end, 3)
+                pygame.draw.line(screen, (170, 210, 255), start, end, 1)
+            elif self.between(0.1, self.beam_duration, self.beam_timer) and self.beam_start and self.beam_end:
+                start = camera.apply(pygame.Rect(self.beam_start, (0, 0))).topleft
+                end = camera.apply(pygame.Rect(self.beam_end, (0, 0))).topleft
+                pygame.draw.line(screen, (0, 0, 0), start, end, 1)
 
     def between(self, x,y,z):
         return (x <= z <= y or y <= z <= x)
