@@ -177,7 +177,6 @@ class Level(pygame.sprite.LayeredUpdates):
 
         self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
 
-        self.c += 1
 
         self.updating_tiles.update(engine)
 
@@ -185,7 +184,6 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.update(self, dt)
 
         self.player.update(self, dt)
-        #self.distance_to(self.player)
 
     def render(self, screen, camera):
         """Renders everything inside the level."""
