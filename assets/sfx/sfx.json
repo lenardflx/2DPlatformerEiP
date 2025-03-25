@@ -4,5 +4,9 @@
   "basic_attack": "basic_attack.wav",
   "gravity_inverse": "gravity_inverse.wav",
   "menu_hover": "menu_hover.wav",
-  "button_click": "button_click.wav"
+  "button_click": "button_click.wav",
+  "star_1": "star_1.wav",
+  "star_2": "star_2.wav",
+  "star_3": "star_3.wav",
+  "error": "error.wav"
 }

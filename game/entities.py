@@ -128,6 +128,10 @@ class Entity(pygame.sprite.Sprite):
                         self.rect.left = tile.rect.right
                     self.velocity.x = 0
                     self.hit_edge = True
+            if self.rect.left < 0:
+                self.rect.left = 0
+                self.velocity.x = 0
+                self.hit_edge = True
 
         elif direction == "vertical":
             for tile in level.get_solid_tiles_near(self):

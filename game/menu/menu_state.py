@@ -7,3 +7,4 @@ class MenuState:
     SETTINGS = 4
     LEVELS = 5
     COMPLETE = 6
+    CREDITS = 7

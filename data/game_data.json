@@ -2,7 +2,44 @@
   "screen_size": [855,480],
   "fps": 60,
   "game_title": "Protocol: Disconnect",
-  "contributors": "xyz",
+  "contributors": "Lenard F., Christopher I., David S., Philipp S.",
   "level_scale": 16,
-  "background_scale": 4
+  "background_scale": 4,
+  "main_menu_background": [
+      {
+        "image": "assets/backgrounds/level_4_1.png",
+        "speed": 0.9,
+        "type": "scroll"
+      },
+      {
+        "image": "assets/backgrounds/level_4_2.png",
+        "speed": 0.7,
+        "type": "scroll"
+      },
+      {
+        "image": "assets/backgrounds/level_4_3.png",
+        "speed": 0.4,
+        "type": "scroll"
+      },
+        {
+            "image": "assets/backgrounds/clouds_1.png",
+            "speed": 0.2,
+            "type": "scroll"
+        },
+        {
+            "image": "assets/backgrounds/level_4_4.png",
+            "speed": 0,
+            "type": "static"
+        },
+              {
+            "image": "assets/backgrounds/clouds_1.png",
+            "speed": 0.1,
+            "type": "scroll"
+        },
+      {
+        "image": "assets/backgrounds/level_4_5.png",
+        "speed": 0,
+        "type": "static"
+      }
+    ]
 }

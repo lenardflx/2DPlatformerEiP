@@ -33,6 +33,8 @@ class Background:
                 screen.blit(scaled_image, (i * scaled_rect.width, 0))
 
         elif self.type == "follow_camera":
+            if not camera:
+                return
             x = -camera.camera.x * self.speed
             y = -camera.camera.y * self.speed
             for i in range(-1, screen_width // scaled_rect.width + 2):

@@ -40,24 +40,29 @@
       "The path forward lies through familiar ruins, made unfamiliar by logic without mercy."
     ],
     "tutorial": [
-            "assets/tutorial/level_0_1.png",
+      "assets/tutorial/level_0_1.png",
       "assets/tutorial/level_0_2.png"
     ],
     "background": [
       {
-        "image": "assets/backgrounds/level_0_1.png",
+        "image": "assets/backgrounds/level_1_1.png",
         "speed": 0.5,
         "type": "follow_camera"
       },
       {
-        "image": "assets/backgrounds/level_0_2.png",
+        "image": "assets/backgrounds/level_1_2.png",
         "speed": 0.3,
         "type": "follow_camera"
       },
       {
-        "image": "assets/backgrounds/level_0_3.png",
-        "speed": 0,
-        "type": "static"
+        "image": "assets/backgrounds/clouds_1.png",
+        "speed": 0.2,
+        "type": "scroll"
+      },
+      {
+        "image": "assets/backgrounds/level_1_3.png",
+        "speed": 0.2,
+        "type": "follow_camera"
       }
     ],
     "foreground": "assets/foregrounds/1.png"
@@ -75,18 +80,23 @@
     "background": [
       {
         "image": "assets/backgrounds/level_2_1.png",
-        "speed": 0.5,
+        "speed": 0.6,
         "type": "follow_camera"
       },
       {
         "image": "assets/backgrounds/level_2_2.png",
-        "speed": 0.25,
+        "speed": 0.4,
         "type": "follow_camera"
       },
       {
         "image": "assets/backgrounds/level_2_3.png",
-        "speed": 0,
-        "type": "static"
+        "speed": 0.2,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/clouds_1.png",
+        "speed": 0.3,
+        "type": "scroll"
       }
     ],
     "foreground": "assets/foregrounds/2.png"
@@ -103,13 +113,13 @@
     "background": [
       {
         "image": "assets/backgrounds/level_3_1.png",
-        "speed": 0.5,
-        "type": "follow_camera"
+        "speed": 0.4,
+        "type": "scroll"
       },
       {
         "image": "assets/backgrounds/level_3_2.png",
         "speed": 0.25,
-        "type": "follow_camera"
+        "type": "scroll"
       },
       {
         "image": "assets/backgrounds/level_3_3.png",
@@ -141,6 +151,26 @@
       },
       {
         "image": "assets/backgrounds/level_4_3.png",
+        "speed": 0.1,
+        "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/clouds_1.png",
+        "speed": 0.4,
+        "type": "scroll"
+      },
+      {
+        "image": "assets/backgrounds/level_4_4.png",
+        "speed": 0,
+        "type": "static"
+      },
+      {
+        "image": "assets/backgrounds/clouds_1.png",
+        "speed": 0.2,
+        "type": "scroll"
+      },
+      {
+        "image": "assets/backgrounds/level_4_5.png",
         "speed": 0,
         "type": "static"
       }
@@ -160,18 +190,18 @@
     "background": [
       {
         "image": "assets/backgrounds/level_5_1.png",
-        "speed": 0.5,
+        "speed": 0.6,
         "type": "follow_camera"
       },
       {
         "image": "assets/backgrounds/level_5_2.png",
-        "speed": 0.25,
+        "speed": 0.4,
         "type": "follow_camera"
       },
       {
         "image": "assets/backgrounds/level_5_3.png",
-        "speed": 0,
-        "type": "static"
+        "speed": 0.2,
+        "type": "follow_camera"
       }
     ],
     "foreground": "assets/foregrounds/5.png"

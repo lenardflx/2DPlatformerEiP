@@ -1,16 +1,6 @@
-=== MENU ===
-1. Create Background Image for Main Menu
-2. Implement Win Screen
-3. Implement UI
-4. Settings Menu beautify
-
 === SOUND ===
 3. Create (steal) sfx for all actions
 4. map all sfx to actions
-
-=== STORY ===
-1. Finish the story
-2. Create level design for the story
 
 === DESIGN ===
 1. Create Tilesets for all levels
@@ -29,7 +19,6 @@
 3. Other ideas?
 
 === ENEMIES ===
-1. Implement Turrets
 2. Implement Neuros
 3. Implement Heal Drone
 4. Other ideas?

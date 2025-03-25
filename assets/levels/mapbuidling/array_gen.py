@@ -3,7 +3,7 @@ import json
 with open("test.ldtk") as f:
     data = json.load(f)
 
-level_num = 0
+level_num = int(input("Enter level number: "))
 px_to_grid = 32
 width, height = 30, 15
 grid = [[0 for x in range(width)] for y in range(height)]

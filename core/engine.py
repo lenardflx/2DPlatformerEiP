@@ -36,6 +36,7 @@ class GameEngine:
         self.level = None
         self.current_level = None
         self.completed_levels = []
+        self.update_completed_levels()
 
         # Pre-Level Slides
         self.story_texts = []
@@ -74,6 +75,12 @@ class GameEngine:
         # Camera (init later on level load)
         self.camera = None
 
+    def update_completed_levels(self):
+        """Loads completed levels from player_progress.json."""
+        with open("data/player_progress.json", "r") as f:
+            data = json.load(f)
+        self.completed_levels = sorted([int(k) for k in data.keys()])
+
     def load_level_metadata(self):
         """Loads level metadata from assets/levels/levels.json."""
         with open("assets/levels/levels.json") as f:
@@ -82,16 +89,26 @@ class GameEngine:
 
     @property
     def next_level(self):
-        """Returns the next level ID based on the last completed level."""
-        if not self.completed_levels:
-            return 0
-        return (self.completed_levels[-1] + 1) % self.level_count
+        """Returns the next unfinished level or None if all are done."""
+        self.update_completed_levels()
+        completed = set(self.completed_levels)
+        for i in range(self.level_count):
+            if i not in completed:
+                return i
+        return None  # All levels completed
 
     def start_game(self):
-        """Starts the game from the first level."""
-        self.is_playing = True
+        """Starts the game from the next level or restarts if done."""
         self.menu.active_type = MenuState.NONE
-        self.load_levels_data(self.next_level)
+        next_level = self.next_level
+
+        if next_level is None:
+            # All levels complete — show credits
+            self.menu.open_menu(MenuState.CREDITS, self)
+            self.is_playing = False
+        else:
+            self.load_levels_data(next_level)
+            self.is_playing = True
 
     def load_levels_data(self, level_id):
         """Load story + tutorial slides before a level"""
@@ -111,7 +128,14 @@ class GameEngine:
         self.foreground.set_alpha(75)
 
     def load_level(self, level_id):
-        """Loads a level by ID."""
+        """Loads a level by ID. If level doesn't exist, go to credits or restart."""
+        if level_id >= self.level_count:
+            if self.menu.active_type == MenuState.MAIN:
+                self.load_levels_data(0)
+            else:
+                self.menu.open_menu(MenuState.CREDITS, self)
+            return
+
         self.level = Level(level_id, self.controls, self.sound_manager, self)
         self.camera = Camera(self.native_size[0], self.native_size[1], self.level.width, self.level.height)
         self.show_level_title = True

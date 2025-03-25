@@ -26,7 +26,7 @@ class Player(Entity):
         self.charge_speed = 0.3 * self.base_speed
         self.charge = 0
         self.max_charge = 100
-        self.min_charge_display = 5
+        self.min_charge_display = 10
         self.charge_bar_width = 8
         self.charge_bar_height = 20
 

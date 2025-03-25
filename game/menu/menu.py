@@ -2,6 +2,7 @@ import json
 import os
 import pygame
 
+from game.menu.credit_menu import CreditMenu
 from game.menu.menu_state import MenuState
 from game.menu.main_menu import MainMenu
 from game.menu.levels_menu import LevelsMenu
@@ -89,6 +90,8 @@ class Menu:
             )
         elif menu_state == MenuState.COMPLETE:
             self.current_page = WinMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager, level)
+        elif menu_state == MenuState.CREDITS:
+            self.current_page = CreditMenu(self.screen_size, self.font_manager, self.sound_manager,self)
 
     def handle_event(self, event, engine):
         if self.active_type == MenuState.NONE:

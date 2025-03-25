@@ -60,6 +60,8 @@ class UI:
         self.time_elapsed = time() - player.level.start_time
         self.total_enemies = player.level.enemies_count
         self.killed_enemies = player.level.enemies_count - len(player.level.enemies)
+        if self.killed_enemies < 0:
+            self.killed_enemies = 0
 
     def pause_hovering(self, sprites_list):
         out = sprites_list[self.pause_frame]
