@@ -2,7 +2,6 @@ import json
 import pygame
 import os
 import math
-from collections import deque
 import numpy as np
 from heapq import heappush, heappop
 from game.enemies.enemy_registry import ENEMY_CLASSES
