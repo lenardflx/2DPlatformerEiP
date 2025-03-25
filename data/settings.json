@@ -1,6 +1,6 @@
 {
     "volume": {
-        "music": 0.22777777777777777,
+        "music": 1,
         "sfx": 1
     },
     "controls": {
@@ -14,7 +14,7 @@
         ],
         "jump": [
             "space",
-            "w"
+            null
         ],
         "menu": [
             "escape",

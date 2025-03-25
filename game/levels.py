@@ -1,4 +1,6 @@
 import json
+from time import time
+
 import pygame
 import os
 import math
@@ -26,6 +28,8 @@ class Level(pygame.sprite.LayeredUpdates):
         self.grid_height = 0
         self.mp = []
         self.c = 0
+        self.time_to_finish = 0
+        self.start_time = 0
 
         self.tiles = pygame.sprite.Group()
         self.updating_tiles = pygame.sprite.Group()
@@ -40,10 +44,14 @@ class Level(pygame.sprite.LayeredUpdates):
         self.height = 0
 
         self.sound_manager = sound_manager
+        self.enemies_count = 0
+        self.id = None
         self.load_level(level_number, controls)
+
 
     def load_level(self, level_number, controls):
         """Loads level structure from assets/levels/level_<id>.json"""
+        self.id = level_number
         level_path = f"assets/levels/level_{level_number}.json"
         if not os.path.exists(level_path):
             raise FileNotFoundError(f"Level file {level_path} not found!")
@@ -61,7 +69,9 @@ class Level(pygame.sprite.LayeredUpdates):
         )
 
         # Load enemies from JSON
-        for enemy_data in level_data.get("enemies", []):
+        enemies = level_data.get("enemies", [])
+        self.enemies_count = len(enemies)
+        for enemy_data in enemies:
             enemy_type = enemy_data["type"]
             x, y = enemy_data["x"] * self.tile_size, enemy_data["y"] * self.tile_size
             if enemy_type in ENEMY_CLASSES:
@@ -72,6 +82,9 @@ class Level(pygame.sprite.LayeredUpdates):
                     self.player, self, self.sound_manager
                 )
                 self.enemies.add(enemy)
+
+        self.time_to_finish = level_data.get("time_to_finish", 0)
+        self.start_time = time()
 
         # Load tiles from JSON
         tile_map = level_data["tiles"]

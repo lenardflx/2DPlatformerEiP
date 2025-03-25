@@ -65,7 +65,7 @@ class GameEngine:
         self.font_manager = FontManager(self.native_size)
         self.menu = Menu(self.native_size, self.controls, self.levels_data, self.font_manager, self.sound_manager)
         self.menu.active_type = MenuState.MAIN
-        self.ui = UI()
+        self.ui = UI(self.font_manager, self.sound_manager)
 
         # Back-/Foregrounds (init later on level load)
         self.backgrounds = []

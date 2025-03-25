@@ -4,7 +4,8 @@
     "heart_empty": "heart_empty.png",
     "pause": "pause.png",
     "heart_size": 32,
-    "pause_size": 32,
+    "button_size": 32,
+    "skull_icon": "skull.png",
     "abilities": {
         "double_jump": "double_jump_ability.png",
         "gravity_inverse": "gravity_ability.png"

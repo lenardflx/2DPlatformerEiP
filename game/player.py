@@ -201,7 +201,7 @@ class Player(Entity):
 
         # Check if player center touches right screen edge
         if self.rect.centerx >= level.width:
-            level.engine.menu.open_menu(MenuState.COMPLETE, level.engine)
+            level.engine.menu.open_menu(MenuState.COMPLETE, level.engine, level)
 
         self.state = new_state  # Update state for animation
 
@@ -246,7 +246,7 @@ class Player(Entity):
         if self.charge > self.min_charge_display:
             pos = camera.apply(self)
             y = pos[1] - self.charge_bar_height + self.rect.height // 2
-            x = pos[0] - self.charge_bar_width - 5 if self.facing_right else pos[0] + 5
+            x = pos[0] - self.charge_bar_width - 5 if self.facing_right else pos[0] + self.rect.width + 5
             filled_height = self.charge / self.max_charge * self.charge_bar_height
 
             pygame.draw.rect(screen, (16,8,36), (x, y, self.charge_bar_width, self.charge_bar_height))

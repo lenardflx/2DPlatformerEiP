@@ -45,13 +45,13 @@ class Menu:
             }
         return buttons
 
-    def open_menu(self, menu_type, engine):
+    def open_menu(self, menu_type, engine, level=None):
         """Opens a menu, stores the current frame and pauses game if needed."""
         if engine.is_playing:
             self.last_frame = engine.scaled_surface.copy()
             engine.is_playing = False
 
-        self.set_active_page(menu_type)
+        self.set_active_page(menu_type, level)
 
     def close_menu(self, engine):
         """Closes the menu and resumes the game if it was paused."""
@@ -66,7 +66,7 @@ class Menu:
         else:
             self.close_menu(engine)
 
-    def set_active_page(self, menu_state):
+    def set_active_page(self, menu_state, level=None):
         """Sets the active page based on the given menu state. Assumes state logic is handled externally."""
         self.active_type = menu_state
 
@@ -88,7 +88,7 @@ class Menu:
                 self.screen_size, self.button_images, self.font_manager, self.controls, self.sound_manager
             )
         elif menu_state == MenuState.COMPLETE:
-            self.current_page = WinMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager)
+            self.current_page = WinMenu(self.screen_size, self.button_images, self.font_manager, self.sound_manager, level)
 
     def handle_event(self, event, engine):
         if self.active_type == MenuState.NONE:

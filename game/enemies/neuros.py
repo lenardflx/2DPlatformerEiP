@@ -342,7 +342,7 @@ class Neuros(Entity):
             self.death_executed = True
             for minion in self.minions:
                 minion.eliminate()
-            self.level.engine.menu.open_menu(MenuState.COMPLETE, self.level.engine)
+            self.level.engine.menu.open_menu(MenuState.COMPLETE, self.level.engine, self.level)
         super().eliminate()
 
     def render(self, screen, camera):

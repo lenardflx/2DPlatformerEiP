@@ -62,7 +62,6 @@ class SettingsMenu(MenuPage):
                             return
 
         elif old_drag and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            print("Saving volume")
             self.drag_music = self.drag_sfx = False
             self.sound_manager.save_volume()
 
