@@ -46,6 +46,8 @@ class GameEngine:
         self.slide_timer = 0
         self.slide_fade_duration = 30
         self.slide_display_duration = 180
+        self.timer = 0
+        self.slow = False
 
         # Title Fade
         self.show_level_title = False
@@ -155,6 +157,12 @@ class GameEngine:
 
     def update(self):
         """Updates all game objects and logic."""
+        self.timer += 1
+        if self.slow:
+            if self.timer % 2:
+                return
+        self.fps = get_game_data("fps")
+        self.dt = 1 / self.fps
         if self.slide_mode:
             self.slide_timer += 1
             total_time = self.slide_fade_duration * 2 + self.slide_display_duration

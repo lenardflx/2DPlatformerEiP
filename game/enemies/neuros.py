@@ -23,10 +23,11 @@ class Neuros(Entity):
 
         self.phase = 1
         self.shielded = False
+        self.slow_timer = 0
         self.hits_taken = 0
         self.speed = 0
         self.minions = []
-        self.timer = 0
+        self.shield_timer = 0
         self.action_cooldown = 0
         self.text_timer = 0
         self.text_duration = 3.0
@@ -39,13 +40,13 @@ class Neuros(Entity):
         self.beam_start = None
         self.beam_end = None
         self.heal_cooldown = 0.0
-        self.walking = 0
+        self.walking = 2.0
         self.laser_damage = 1
         self.damage = 0
         self.firing_laser = False
         self.kb_x = 1
         self.kb_y = 1
-        self.set_phase_stats(1)
+        self.set_phase_stats(self.phase)
 
     def set_phase_stats(self, phase):
         self.face_player()
@@ -71,14 +72,31 @@ class Neuros(Entity):
             self.action_cooldown -= dt
             if self.action_cooldown < 0:
                 self.action_cooldown = 0
+
         if self.heal_cooldown > 0:
             self.heal_cooldown -= dt
             if self.heal_cooldown < 0:
                 self.heal_cooldown = 0
+
         if self.walking > 0:
             self.walking -= dt
             if self.walking < 0:
                 self.walking = 0
+
+        if self.shield_timer > 0:
+            self.shield_timer -= dt
+            if self.shield_timer < 0:
+                self.shield_timer = 0
+        else:
+            self.shielded = False
+
+        if self.slow_timer > 0:
+            self.slow_timer -= dt
+            if self.slow_timer < 0:
+                self.slow_timer = 0
+        else:
+            self.level.engine.slow = False
+
         if self.beam_timer > 0:
             self.beam_timer -= dt
             if self.beam_timer < 0:
@@ -89,8 +107,8 @@ class Neuros(Entity):
             return
 
         if self.phase == 1:
-            self.testphase(dt)
-            #self.phase_1(dt)
+            #self.testphase(dt)
+            self.phase_1(dt)
         elif self.phase == 2:
             self.phase_2(dt)
         elif self.phase == 3:
@@ -107,38 +125,34 @@ class Neuros(Entity):
         self.text_timer = duration
 
     def testphase(self, dt):
-        if self.action_cooldown == 0:
-            self.world_hack()
-            self.action_cooldown = 4.0
-
-        #self.phase_1(dt)
+        self.phase_1(dt)
 
     # === Phase 1 ===
     def phase_1(self, dt):
         rnd_phase = random.randint(0, 100)
         if self.action_cooldown == 0 and self.walking == 0:
-            if self.between(0, 10, rnd_phase):
+            if self.between(0, 16, rnd_phase):
                 self.speak("Analyzing human behavior...")
                 self.face_player()
                 self.action_cooldown = 1.0
-            elif self.between(11, 13, rnd_phase):
+            elif self.between(17, 20, rnd_phase):
                 self.speak("Are you afraid of me, human?")
                 self.face_player()
                 self.action_cooldown = 0.1
                 self.walking = 2.0
-            elif self.between(14, 48, rnd_phase):
+            elif self.between(21, 56, rnd_phase):
                 self.speak("")
                 self.face_player()
                 self.action_cooldown = 0.1
-                self.walking = 1.5
-            elif self.between(49, 55, rnd_phase):
+                self.walking = 1.0
+            elif self.between(57, 72, rnd_phase):
                 self.action_cooldown = 4.0
                 self.face_player()
                 self.aim()
-            elif self.between(55, 65, rnd_phase):
+            elif self.between(73, 80, rnd_phase):
                 self.summon_drones()
                 self.action_cooldown = 4.5
-            elif self.between(66, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
+            elif self.between(81, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(3)
                 self.action_cooldown = 2.5
                 self.heal_cooldown = 10.0
@@ -147,74 +161,93 @@ class Neuros(Entity):
 
     # === Phase 2 ===
     def phase_2(self, dt):
-        rnd_phase = random.randint(0, 20)
+        rnd_phase = random.randint(0, 100)
         if self.action_cooldown == 0 and self.walking == 0:
-            if self.between(0, 3, rnd_phase):
+            if self.between(0, 12, rnd_phase):
                 self.speak("Analyzing human behavior...")
-                self.action_cooldown = 1.0
-            elif self.between(4, 4, rnd_phase):
+                self.action_cooldown = 0.8
+            elif self.between(13, 15, rnd_phase):
                 self.speak("Are you afraid of me, human?")
                 self.action_cooldown = 0.1
+                self.face_player()
                 self.walking = 2.0
-            elif self.between(5, 12, rnd_phase):
+            elif self.between(16, 48, rnd_phase):
                 self.speak("")
                 self.action_cooldown = 0.1
+                self.face_player()
                 self.walking = 1.5
-            elif self.between(13, 15, rnd_phase):
+            elif self.between(49, 56, rnd_phase):
                 self.summon_drones()
-                self.action_cooldown = 4.0
-            elif self.between(16, 16, rnd_phase):
+                self.action_cooldown = 3.5
+            elif self.between(57, 62, rnd_phase):
                 self.deploy_emp_radars()
-                self.action_cooldown = 5.0
-            elif self.between(17, 17, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
-                self.heal_self(5)
+                self.action_cooldown = 4.5
+            elif self.between(62, 67, rnd_phase):
+                self.shield_self()
                 self.action_cooldown = 4.0
-                self.heal_cooldown = 20.0
-            elif self.between(18, 20, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
+            elif self.between(68, 88, rnd_phase):
+                self.action_cooldown = 4.0
+                self.face_player()
+                self.aim()
+            elif self.between(89, 95, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(3)
                 self.action_cooldown = 2.0
-                self.heal_cooldown = 10.0
+                self.heal_cooldown = 8.0
+            elif self.between(96, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
+                self.heal_self(5)
+                self.action_cooldown = 4.0
+                self.heal_cooldown = 16.0
         if self.walking > 0:
             self.move_towards_player(dt)
 
     # === Phase 3 ===
     def phase_3(self, dt):
-        rnd_phase = random.randint(0, 20)
+        rnd_phase = random.randint(0, 100)
         if self.action_cooldown == 0 and self.walking == 0:
-            if self.between(0, 1, rnd_phase):
+            if self.between(0, 4, rnd_phase):
                 self.speak("Analyzing human behavior...")
                 self.action_cooldown = 0.8
-            elif self.between(2, 2, rnd_phase):
+            elif self.between(5, 6, rnd_phase):
                 self.speak("Are you afraid of me, human?")
                 self.action_cooldown = 0.1
+                self.face_player()
                 self.walking = 2.0
-            elif self.between(3, 10, rnd_phase):
+            elif self.between(7, 36, rnd_phase):
                 self.speak("")
                 self.action_cooldown = 0.1
-                self.walking = 1.5
-            elif self.between(11, 14, rnd_phase):
+                self.face_player()
+                self.walking = 1.2
+            elif self.between(37, 45, rnd_phase):
                 self.summon_drones()
-                self.action_cooldown = 3.5
-            elif self.between(15, 16, rnd_phase):
+                self.action_cooldown = 3.0
+            elif self.between(46, 50, rnd_phase):
                 self.deploy_emp_radars()
-                self.action_cooldown = 4.5
-            elif self.between(17, 17, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
-                self.heal_self(5)
-                self.action_cooldown = 4.0
-                self.heal_cooldown = 16.0
-            elif self.between(18, 20, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
-                self.heal_self(3)
+                self.action_cooldown = 3.0
+            elif self.between(51, 58, rnd_phase):
+                self.shield_self()
+                self.action_cooldown = 5.0
+            elif self.between(59, 75, rnd_phase):
+                self.face_player()
+                self.aim()
                 self.action_cooldown = 2.0
-                self.heal_cooldown = 8.0
+            elif self.between(76, 82, rnd_phase):
+                self.slow_time()
+                self.action_cooldown = 2.0
+            elif self.between(83, 88, rnd_phase):
+                self.world_hack()
+                self.action_cooldown = 2.5
+            elif self.between(89, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
+                self.heal_self(6)
+                self.heal_cooldown = 10.0
+                self.action_cooldown = 3.0
         if self.walking > 0:
             self.move_towards_player(dt)
 
     def move_towards_player(self, dt):
-        direction = self.player.rect.centerx - self.rect.centerx
-        if direction > 0:
-            self.velocity.x = self.speed * dt
-        elif direction < 0:
-            self.velocity.x = -self.speed * dt
+        if self.facing_right:
+            self.velocity.x += self.speed * dt
+        else:
+            self.velocity.x -= self.speed * dt
 
     def enter_next_phase(self):
         self.phase += 1
@@ -275,10 +308,9 @@ class Neuros(Entity):
         return self.player.rect.center
 
     def shield_self(self):
-        if self.hits_taken >= 3 and not self.shielded:
-            self.speak("Defensive matrix online.")
-            self.shielded = True
-            self.timer = 5.0
+        self.speak("Defensive matrix online.")
+        self.shielded = True
+        self.shield_timer = 5.0
 
     def world_hack(self):
         effect = random.choice(["gravity", "controls"])
@@ -293,15 +325,10 @@ class Neuros(Entity):
             self.speak("Reality matrix destabilized.")
             print("Visual glitch placeholder.")
 
-    def fast_dash(self):
-        direction = pygame.Vector2(self.player.rect.center) - self.rect.center
-        direction.normalize_ip()
-        self.velocity.x = direction * self.speed * 2
-
     def slow_time(self):
-        self.level.engine.fps = 30  # Should reset externally
+        self.level.engine.slow = True
         self.speak("Temporal manipulation active.")
-        self.timer = 3.0
+        self.slow_timer = 2.0
 
     def hit(self, attacker, stun = 0):
         if self.shielded:
