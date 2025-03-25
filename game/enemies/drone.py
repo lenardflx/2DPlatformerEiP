@@ -133,8 +133,7 @@ class Drone(Entity):
         self.player.hit(self)
 
     def eliminate(self):
-        print("Drone eliminated")
-        self.kill()
+        super().eliminate()
 
     def render(self, screen, camera):
         """Render the drone with visual rotation, but keep hitbox unchanged."""
