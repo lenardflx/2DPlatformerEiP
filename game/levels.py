@@ -174,7 +174,7 @@ class Level(pygame.sprite.LayeredUpdates):
         """Updates tiles, enemies, and player."""
         if self.c % 30 == 0:
             self.c = 0
-            #self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
+            self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
 
         self.c += 1
 
@@ -205,7 +205,7 @@ class Level(pygame.sprite.LayeredUpdates):
 
     def setup_player_map(self, x, y):
         self.mp = [[1000 for _ in range(self.grid_height)] for _ in range(self.grid_width)]
-        for i in range(0, 10):
+        for i in range(0, 9):
             self.create_player_map(0, x, y, i)
 
     def create_player_map(self, index, x, y, max):
@@ -222,9 +222,15 @@ class Level(pygame.sprite.LayeredUpdates):
         
         if self.mp[x_low][y_low] == 1000:
             self.mp[x_low][y_low] = index
+        high = 1000
+        tmp = [x_low, y_low]
 
         for c in [[-1, 0], [0, -1], [1, 0], [0, 1]]:
             x_new = x_low + c[0]
             y_new = y_low + c[1]
-            self.create_player_map(index + 1, self.tile_size * x_new, self.tile_size * y_new, max)
+            if not x_new < 0 or y_new < 0 or x_new >= self.grid_width or y_new >= self.grid_height:
+                if self.mp[x_new][y_new] > high:
+                    high = self.mp[x_new][y_new]
+                    tmp = [x_low, y_low]
+        self.create_player_map(index + 1, self.tile_size * tmp[0], self.tile_size * tmp[1], max)
 
