@@ -225,7 +225,7 @@ class Level(pygame.sprite.LayeredUpdates):
         # Diagonal and cardinal directions for more natural movement
         directions = [
             (-1, 0), (1, 0), (0, -1), (0, 1),  # Cardinal
-            (-1, -1), (-1, 1), (1, -1), (1, 1)  # Diagonal
+            #(-1, -1), (-1, 1), (1, -1), (1, 1)  # Diagonal
         ]
 
         # Track visited cells to prevent redundant processing
