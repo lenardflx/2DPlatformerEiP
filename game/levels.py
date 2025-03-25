@@ -194,14 +194,14 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.render(screen, camera)
         self.player.render(screen,camera)
         
-        score_font = pygame.font.Font(None, 20)
-        for x, row in enumerate(self.mp):
-            for y, col in enumerate(row):
-                x_new = self.tile_size * x
-                y_new = self.tile_size * y
-                score_surf = score_font.render(str(col), False, (0, 0, 0))
-                score_pos = [x_new, y_new]
-                screen.blit(score_surf, score_pos)
+        #score_font = pygame.font.Font(None, 20)
+        #for x, row in enumerate(self.mp):
+        #    for y, col in enumerate(row):
+        #        x_new = self.tile_size * x
+        #        y_new = self.tile_size * y
+        #        score_surf = score_font.render(str(col), False, (0, 0, 0))
+        #        score_pos = [x_new, y_new]
+        #        screen.blit(score_surf, score_pos)
 
     def setup_player_map(self, x, y):
         self.mp = [[1000 for _ in range(self.grid_height)] for _ in range(self.grid_width)]
