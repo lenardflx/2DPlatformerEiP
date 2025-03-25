@@ -10,7 +10,7 @@ class Ability:
         self.current_cooldown = self.cooldown
 
     def can_activate(self):
-        return self.current_cooldown <= 0 and self.player.abilities_blocked
+        return self.current_cooldown <= 0 and not self.player.abilities_blocked
 
     def update(self):
         if self.current_cooldown > 0:
