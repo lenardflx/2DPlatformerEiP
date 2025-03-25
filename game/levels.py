@@ -1,8 +1,12 @@
 import json
+from fcntl import FASYNC
+
 import pygame
 import os
+from collections import deque
 
 from core.game_data import get_game_data
+from game import tiles
 from game.enemies.enemy_registry import ENEMY_CLASSES
 from game.tiles.basic_tile import Tile
 from game.tiles.tiles_register import TILES_CLASSES
@@ -158,14 +162,62 @@ class Level(pygame.sprite.LayeredUpdates):
         with open(f"assets/levels/level_0.json") as f:
             level_data = json.load(f)
         pos=self.get_closest_pos(entity)
-        grid = level_data["tiles"]
-        for x in range(-grid_range, grid_range):
-            for y in range(-grid_range, grid_range):
-                if getattr(self.tile_grid[pos[0]+x][pos[1]+y], "solid", False):
-                    grid[pos[0]+x][pos[1]+y]=100+abs(x)+abs(y)
+        grid =[]
+        for y in range(self.grid_height):
+            grid_rows=[]
+
+            for x in range(self.grid_width):
+                tile=self.get_tile_at(x*self.tile_size, y*self.tile_size)
+
+                #print(tile.collision_type)
+                if tile is None:
+                    grid_rows.append(1)
+                elif  tile.collision_type == "solid":
+                    grid_rows.append(-1)
                 else:
-                    grid[pos[0]+x][pos[1]+y]=-1
+                    grid_rows.append(1)
+
+                grid.append(grid_rows)
         print(grid)
+        rows = len(grid)
+        cols = len(grid[0])
+        start_x, start_y = pos
+
+        print(start_x, start_y)
+        print(grid[start_y][start_x])
+        if grid[start_x][start_y] == -1:
+            return None  # Player is in a wall
+
+        distance_map = [[float('inf')] * cols for _ in range(rows)]  # Initialize with infinity
+        distance_map[start_y][start_x] = 0
+
+        queue = deque([(start_x, start_y)])
+        visited = set([(start_x, start_y)])
+
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Right, left, down, up
+
+        while queue:
+            x, y = queue.popleft()
+
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+
+                if 0 <= nx < cols and 0 <= ny < rows and grid[ny][nx] != -1 and (nx, ny) not in visited:
+                        distance_map[ny][nx] = distance_map[y][x] + 1
+                        queue.append((nx, ny))
+                        visited.add((nx, ny))
+
+            # Replace infinity with a large value, or -1, to indicate unreachable areas.
+        for r in range(rows):
+            for c in range(cols):
+                if distance_map[r][c] == float('inf'):
+                        distance_map[r][c] = -1
+
+        print (distance_map)
+
+
+
+
 
     def update(self, dt, engine):
         """Updates tiles, enemies, and player."""
@@ -175,7 +227,7 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.update(self, dt)
 
         self.player.update(self, dt)
-        #self.distance_to(self.player)
+        self.distance_to(self.player)
 
     def render(self, screen, camera):
         """Renders everything inside the level."""
