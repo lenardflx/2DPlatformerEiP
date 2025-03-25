@@ -206,6 +206,7 @@ class Entity(pygame.sprite.Sprite):
 
     def eliminate(self):
         """Removes the entity from the game."""
+        self.health = 0
         self.kill()
         print(f"{self.__class__.__name__} eliminated")
 

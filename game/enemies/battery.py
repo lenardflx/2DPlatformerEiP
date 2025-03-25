@@ -31,6 +31,7 @@ class Battery(Entity):
         self.patrol_timer = random.randint(60, 120)
         self.patrol_dir = random.choice([-1, 1])
 
+
     def update(self, level, dt):
         if self.stun > 0:
             self.stun -= 1
@@ -109,7 +110,7 @@ class Battery(Entity):
 
             if self.sprite_index >= len(self.sprites["explode"]) - 1:
                 self.eliminate()
-
+                
         super().update(level, dt)
 
     def explode(self):
@@ -119,7 +120,7 @@ class Battery(Entity):
             return
 
         for entity in [self.player] + list(self.level.enemies):
-            if entity == self:
+            if entity == self or type(entity).__name__ == "Neuros":
                 continue
             if pygame.Vector2(self.rect.center).distance_to(entity.rect.center) <= self.explosion_radius:
                 if hasattr(entity, "hit"):
@@ -136,4 +137,4 @@ class Battery(Entity):
         pass  # Overridden: explosion handles damage
 
     def eliminate(self):
-        self.kill()
+        super().eliminate()
