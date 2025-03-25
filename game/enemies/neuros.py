@@ -22,7 +22,6 @@ class Neuros(Entity):
         }
 
         self.phase = 1
-        self.ai_state = "sabotage"
         self.shielded = False
         self.hits_taken = 0
         self.speed = 0
@@ -49,6 +48,7 @@ class Neuros(Entity):
         self.set_phase_stats(1)
 
     def set_phase_stats(self, phase):
+        self.face_player()
         config = self.phase_configs[phase]
         self.max_health = config["health"]
         self.health = self.max_health
@@ -61,11 +61,6 @@ class Neuros(Entity):
             self.enter_next_phase()
 
         self.velocity.y = 0
-
-        if self.velocity.x > 0:
-            self.facing_right = True
-        elif self.velocity.x < 0:
-            self.facing_right = False
 
         super().update(level, dt)
 
@@ -112,30 +107,38 @@ class Neuros(Entity):
         self.text_timer = duration
 
     def testphase(self, dt):
-        self.phase_1(dt)
+        if self.action_cooldown == 0:
+            self.world_hack()
+            self.action_cooldown = 4.0
+
+        #self.phase_1(dt)
 
     # === Phase 1 ===
     def phase_1(self, dt):
-        rnd_phase = random.randint(0, 20)
+        rnd_phase = random.randint(0, 100)
         if self.action_cooldown == 0 and self.walking == 0:
-            if self.between(0, 4, rnd_phase):
+            if self.between(0, 10, rnd_phase):
                 self.speak("Analyzing human behavior...")
+                self.face_player()
                 self.action_cooldown = 1.0
-            elif self.between(5, 5, rnd_phase):
+            elif self.between(11, 13, rnd_phase):
                 self.speak("Are you afraid of me, human?")
+                self.face_player()
                 self.action_cooldown = 0.1
                 self.walking = 2.0
-            elif self.between(6, 14, rnd_phase):
+            elif self.between(14, 48, rnd_phase):
                 self.speak("")
+                self.face_player()
                 self.action_cooldown = 0.1
                 self.walking = 1.5
-            elif self.between(15, 16, rnd_phase):
+            elif self.between(49, 55, rnd_phase):
                 self.action_cooldown = 4.0
+                self.face_player()
                 self.aim()
-            elif self.between(17, 18, rnd_phase):
+            elif self.between(55, 65, rnd_phase):
                 self.summon_drones()
                 self.action_cooldown = 4.5
-            elif self.between(19, 20, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
+            elif self.between(66, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(3)
                 self.action_cooldown = 2.5
                 self.heal_cooldown = 10.0
@@ -229,8 +232,8 @@ class Neuros(Entity):
 
     ### Attacks ###
     def heal_self(self, amt):
-        self.health += min((self.max_health - self.health), amt)
         self.speak("Defragmenting system. Optimization complete.")
+        self.health += min((self.max_health - self.health), amt)
         
     def summon_drones(self):
         if len(self.minions) < 5:
@@ -242,13 +245,11 @@ class Neuros(Entity):
             self.speak("Deploying additional units.")
 
     def deploy_emp_radars(self):
-        if len(self.minions) < 3:
+        if len(self.minions) < 5:
             pos = (self.rect.centerx + random.randint(-100, 100), self.rect.top - 40)
             radar = EMP_Radar(pos[0], pos[1], self.level, self.player)
             self.minions.append(radar)
             self.level.enemies.add(radar)
-            self.player.abilities_blocked = True
-
             self.speak("EMP field active.")
 
     def aim(self):
@@ -275,13 +276,13 @@ class Neuros(Entity):
 
     def shield_self(self):
         if self.hits_taken >= 3 and not self.shielded:
-            self.shielded = True
             self.speak("Defensive matrix online.")
+            self.shielded = True
             self.timer = 5.0
-            self.ai_state = "shielded"
 
     def world_hack(self):
-        effect = random.choice(["gravity", "controls", "glitch"])
+        effect = random.choice(["gravity", "controls"])
+        #effect = random.choice(["gravity", "controls", "glitch"])
         if effect == "gravity":
             self.level.flip_gravity()
             self.speak("Gravity systems compromised.")
@@ -342,6 +343,9 @@ class Neuros(Entity):
                 start = camera.apply(pygame.Rect(self.beam_start, (0, 0))).topleft
                 end = camera.apply(pygame.Rect(self.beam_end, (0, 0))).topleft
                 pygame.draw.line(screen, (0, 0, 0), start, end, 1)
+
+    def face_player(self):
+        self.facing_right = self.rect.centerx < self.player.rect.centerx
 
     def between(self, x,y,z):
         return (x <= z <= y or y <= z <= x)

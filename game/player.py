@@ -10,7 +10,6 @@ class Player(Entity):
         super().__init__(x, y, sprite_path, json_path, level, sound_manager)
         self.controls = controls
 
-
         # Player attributes
         self.max_health = 6
         self.health = self.max_health
@@ -20,6 +19,8 @@ class Player(Entity):
         self.speed = self.base_speed
         self.kb_x = 2
         self.kb_y = 1
+        self.controls_inverted = False
+        self.invert_timer = 0
 
         # Charge Parameters
         self.charge_speed = 0.3 * self.base_speed
@@ -70,6 +71,13 @@ class Player(Entity):
             return
         self.player_dt = dt
 
+        if self.invert_timer > 0:
+            self.invert_timer -= dt
+            if self.invert_timer < 0:
+                self.invert_timer = 0
+        if self.invert_timer == 0:
+            self.controls_inverted = False
+
         if self.immunity_frames > 0:
             self.immunity_frames -= 1
             # Flicker AFTER the hit animation is done
@@ -97,8 +105,12 @@ class Player(Entity):
             self.velocity.x = 0
 
         # Handle movement
-        left = self.controls.is_action_active("move_left")
-        right = self.controls.is_action_active("move_right")
+        if not self.controls_inverted:
+            left = self.controls.is_action_active("move_left")
+            right = self.controls.is_action_active("move_right")
+        else:
+            left = self.controls.is_action_active("move_right")
+            right = self.controls.is_action_active("move_left")
 
         if self.stun == 0 and not self.attack_active:
             if left and right:
@@ -240,6 +252,10 @@ class Player(Entity):
             pygame.draw.rect(screen, (16,8,36), (x, y, self.charge_bar_width, self.charge_bar_height))
             pygame.draw.rect(screen, (255,233,70),
                              (x, y + self.charge_bar_height - filled_height, self.charge_bar_width, filled_height))
+
+    def invert_controls(self):
+        self.controls_inverted = not self.controls_inverted
+        self.invert_timer = 6
 
     def eliminate(self):
         """Handles player elimination (game over)."""
