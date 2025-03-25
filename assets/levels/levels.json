@@ -39,20 +39,23 @@
       "Humans no longer live here. The few who remain are scavengers or rebels.",
       "The path forward lies through familiar ruins, made unfamiliar by logic without mercy."
     ],
-    "tutorial": [],
+    "tutorial": [
+            "assets/tutorial/level_0_1.png",
+      "assets/tutorial/level_0_2.png"
+    ],
     "background": [
       {
-        "image": "assets/backgrounds/level_1_1.png",
+        "image": "assets/backgrounds/level_0_1.png",
         "speed": 0.5,
         "type": "follow_camera"
       },
       {
-        "image": "assets/backgrounds/level_1_2.png",
+        "image": "assets/backgrounds/level_0_2.png",
         "speed": 0.3,
         "type": "follow_camera"
       },
       {
-        "image": "assets/backgrounds/level_1_3.png",
+        "image": "assets/backgrounds/level_0_3.png",
         "speed": 0,
         "type": "static"
       }
