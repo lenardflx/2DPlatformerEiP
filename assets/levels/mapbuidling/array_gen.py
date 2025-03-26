@@ -5,16 +5,17 @@ with open("test.ldtk") as f:
 
 level_num = int(input("Enter level number: "))
 px_to_grid = 32
-width, height = 30, 15
-grid = [[0 for x in range(width)] for y in range(height)]
 
 for layer in data["levels"]:
     if layer["identifier"] == f"Level_{level_num}":
+        width, height = layer["pxWid"] // px_to_grid, layer["pxHei"] // px_to_grid
+        grid = [[0 for x in range(width)] for y in range(height)]
         for map_data in layer["layerInstances"]:
             if map_data["__identifier"] == "Tiles":
                 tilemap = map_data["gridTiles"]
             else:
                 entites = map_data["entityInstances"]
+        break
 
 # tiles
 for obj in tilemap:
@@ -30,7 +31,7 @@ for entity in entites:
         spawn = [x, y]
     else:
         entity_dict_list.append({
-            "type": entity["__identifier"],
+            "type": entity["__identifier"].lower(),
             "x": x,
             "y": y
         })
