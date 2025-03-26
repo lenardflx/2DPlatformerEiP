@@ -1,4 +1,5 @@
 import json
+from collections import deque
 from time import time
 
 import pygame
@@ -221,52 +222,33 @@ class Level(pygame.sprite.LayeredUpdates):
         self.create_player_map(x, y, 20)  # Supporting up to 50 range
 
     def create_player_map(self, x, y, max_distance):
-        # Convert initial coordinates to grid coordinates
         start_x = math.floor(x / self.tile_size)
         start_y = math.floor(y / self.tile_size)
 
-        # Quick validity checks
         if (start_x < 0 or start_y < 0 or
                 start_x >= self.grid_width or start_y >= self.grid_height or
                 self.tile_grid[start_y][start_x]):
             return
 
-        # Use a priority queue for more efficient exploration
-        pq = [(0, start_x, start_y)]
-
-        # Diagonal and cardinal directions for more natural movement
-        directions = [
-            (-1, 0), (1, 0), (0, -1), (0, 1),  # Cardinal
-            #(-1, -1), (-1, 1), (1, -1), (1, 1)  # Diagonal
-        ]
-
-        # Track visited cells to prevent redundant processing
+        queue = deque()
+        queue.append((start_x, start_y, 0))
         visited = np.zeros((self.grid_width, self.grid_height), dtype=bool)
 
-        while pq:
-            distance, x, y = heappop(pq)
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-            # Skip if out of max distance or already processed
-            if distance >= max_distance or visited[x][y]:
+        while queue:
+            x, y, dist = queue.popleft()
+
+            if dist >= max_distance or visited[x][y]:
                 continue
 
-            # Mark as visited and update distance map
             visited[x][y] = True
-            self.mp[x][y] = min(self.mp[x][y], distance)
+            self.mp[x][y] = min(self.mp[x][y], dist)
 
-            # Explore neighboring cells
             for dx, dy in directions:
-                new_x, new_y = x + dx, y + dy
-
-                # Check new cell validity
-                if (0 <= new_x < self.grid_width and
-                        0 <= new_y < self.grid_height and
-                        not self.tile_grid[new_y][new_x] and
-                        not visited[new_x][new_y]):
-
-                    # Calculate new distance (with diagonal movement cost)
-                    new_distance = distance + (1.414 if dx and dy else 1)
-
-                    # Only add if within max distance
-                    if new_distance < max_distance:
-                        heappush(pq, (new_distance, new_x, new_y))
+                nx, ny = x + dx, y + dy
+                if (0 <= nx < self.grid_width and
+                        0 <= ny < self.grid_height and
+                        not visited[nx][ny] and
+                        not self.tile_grid[ny][nx]):
+                    queue.append((nx, ny, dist + 1))

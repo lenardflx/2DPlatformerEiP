@@ -98,8 +98,25 @@ class GameEngine:
                 return i
         return None
 
+    def reset_game_state(self):
+        self.level = None
+        self.current_level = None
+        self.story_texts = []
+        self.story_index = 0
+        self.tutorial_images = []
+        self.tutorial_index = 0
+        self.slide_mode = None
+        self.slide_timer = 0
+        self.show_level_title = False
+        self.level_title = ""
+        self.level_title_timer = 0
+        self.backgrounds = []
+        self.foreground = None
+        self.camera = None
+
     def start_game(self, level_id):
         """Starts the game from the next level or restarts if done."""
+        self.reset_game_state()
         self.menu.active_type = MenuState.NONE
         self.menu.back_redirect = MenuState.PAUSE
         if level_id is None:
@@ -118,7 +135,13 @@ class GameEngine:
         self.tutorial_images = [pygame.image.load(path).convert_alpha() for path in level_data.get("tutorial", [])]
         self.tutorial_index = 0
 
-        self.slide_mode = "story" if self.story_texts else "tutorial"
+        if self.story_texts:
+            self.slide_mode = "story"
+        elif self.tutorial_images:
+            self.slide_mode = "tutorial"
+        else:
+            self.slide_mode = None
+            self.load_level(level_id)
 
         bg_data = self.levels_data.get(str(level_id), {}).get("background", [])
         self.backgrounds = [Background(layer) for layer in bg_data[::-1]]
@@ -230,6 +253,9 @@ class GameEngine:
             if self.tutorial_index >= len(self.tutorial_images):
                 self.slide_mode = None
                 self.load_level(self.current_level)
+        else:
+            self.slide_mode = None
+            self.load_level(self.current_level)
 
     def render(self):
         """Renders everything on a fixed surface and scales it while keeping the aspect ratio."""
@@ -240,6 +266,9 @@ class GameEngine:
         elif self.slide_mode == "tutorial":
             self.render_tutorial(self.scaled_surface)
         elif self.is_playing:
+            if not self.level:
+                self.load_level(self.current_level)
+
             for bg in self.backgrounds:
                 bg.render(self.scaled_surface, self.camera)
 

@@ -40,8 +40,8 @@
       "The path forward lies through familiar ruins, made unfamiliar by logic without mercy."
     ],
     "tutorial": [
-      "assets/tutorial/level_0_1.png",
-      "assets/tutorial/level_0_2.png"
+      "assets/tutorial/guard_intro.png",
+      "assets/tutorial/drone_intro.png"
     ],
     "background": [
       {
@@ -77,7 +77,8 @@
       "Everything here has a purpose. And none of it is human."
     ],
     "tutorial": [
-      "assets/tutorial/level_0_1.png"
+      "assets/tutorial/charger_intro.png",
+      "assets/tutorial/turret_intro.png"
     ],
     "background": [
       {
@@ -112,8 +113,7 @@
       "This is not a place for humans. Its a system running without them, and against them."
     ],
     "tutorial": [
-      "assets/tutorial/level_0_1.png",
-      "assets/tutorial/level_0_2.png"
+      "assets/tutorial/battery_intro.png"
     ],
     "background": [
       {
@@ -142,9 +142,7 @@
       "Now the tower emits only command signals and encrypted updates. No distress calls. No replies.",
       "A few tried to decrypt the signal. Its impossible. NEUROS knows every move before its made."
     ],
-    "tutorial": [
-      "assets/tutorial/level_0_1.png"
-    ],
+    "tutorial": [],
     "background": [
       {
         "image": "assets/backgrounds/level_4_1.png",
@@ -183,7 +181,9 @@
       "NEUROS will now respond.",
       "This is your last chance."
     ],
-    "tutorial": ["assets/tutorial/level_0_1.png"],
+    "tutorial": [
+      "assets/tutorial/neuros_intro.png"
+    ],
     "background": [
       {
         "image": "assets/backgrounds/level_5_1.png",

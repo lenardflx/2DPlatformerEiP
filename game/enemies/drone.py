@@ -67,68 +67,45 @@ class Drone(Entity):
 
         super().update(level, dt)
 
+    def flip_gravity(self):
+        pass
+
     def smart_chase(self, dt):
-        """
-        Move deeply into the next grid cell with the smallest number.
-        """
-        # Current grid position
-        current_grid_x = int(self.rect.centerx / 32)
-        current_grid_y = int(self.rect.centery / 32)
+        current_grid_x = self.rect.centerx // self.level.tile_size
+        current_grid_y = self.rect.centery // self.level.tile_size
 
-        # Check adjacent cells (including diagonals)
-        directions = [
-            (-1, -1), (0, -1), (1, -1),
-            (-1, 0), (0, 0), (1, 0),
-            (-1, 1), (0, 1), (1, 1)
-        ]
-
-        # Track the best (smallest) number and its location
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # no diagonals = cleaner pathing
         best_value = float('inf')
         best_target = None
 
         for dx, dy in directions:
-            new_x, new_y = current_grid_x + dx, current_grid_y + dy
+            gx, gy = current_grid_x + dx, current_grid_y + dy
 
-            # Bounds and validity check
-            try:
-                cell_value = self.level.mp[new_x][new_y]
+            if 0 <= gx < self.level.grid_width and 0 <= gy < self.level.grid_height:
+                val = self.level.mp[gx][gy]
+                if val < best_value:
+                    best_value = val
+                    best_target = (gx, gy)
 
-                # Find the smallest valid number
-                if cell_value is not None and cell_value < best_value:
-                    best_value = cell_value
-                    best_target = (new_x, new_y)
-            except (IndexError, TypeError):
-                continue
-
-        # Move towards the best target
         if best_target:
-            target_grid_x, target_grid_y = best_target
+            # Center of the target tile
+            tx, ty = best_target
+            target_x = tx * self.level.tile_size + self.level.tile_size // 2
+            target_y = ty * self.level.tile_size + self.level.tile_size // 2
 
-            # Target deep into the next grid cell
-            target_x = target_grid_x * 32 + 16 + (32 * 0.75 * (
-                1 if target_grid_x > current_grid_x else -1 if target_grid_x < current_grid_x else 0))
-            target_y = target_grid_y * 32 + 16 + (32 * 0.75 * (
-                1 if target_grid_y > current_grid_y else -1 if target_grid_y < current_grid_y else 0))
+            direction = pygame.Vector2(target_x - self.rect.centerx,
+                                       target_y - self.rect.centery)
 
-            # Calculate direction vector
-            drone_pos = pygame.Vector2(self.rect.centerx, self.rect.centery)
-            target_pos = pygame.Vector2(target_x, target_y)
+            if direction.length() > 1:
+                direction = direction.normalize()
+                self.velocity = direction * self.speed * dt
 
-            direction = (target_pos - drone_pos).normalize()
+            # If close enough to center, force snap to prevent stuck edge cases
+            if abs(self.rect.centerx - target_x) < 4 and abs(self.rect.centery - target_y) < 4:
+                self.rect.center = (target_x, target_y)
 
-            # Moderate speed movement
-            self.velocity = direction * self.speed * dt
-
-            # Force deep penetration into the next grid cell
-            if (abs(self.rect.centerx - target_x) < 10 and
-                    abs(self.rect.centery - target_y) < 10):
-                self.rect.centerx = target_x
-                self.rect.centery = target_y
         else:
-            # No valid movement found
-            self.state = "idle"
-            self.velocity = pygame.Vector2(0, 0)
-
+            self.velocity *= 0.5  # gently stop if no path
 
     def attack(self):
         self.player.hit(self)

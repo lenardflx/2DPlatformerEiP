@@ -107,6 +107,8 @@ class UI:
 
     def render_abilities(self, screen, abilities, screen_height):
         """Render ability icons with cooldown overlay and glow if ready."""
+        if not abilities:
+            return
         x = 20  # Start from bottom-left
         y = screen_height - 40  # Leave some margin from bottom
 
