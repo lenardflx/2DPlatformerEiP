@@ -10,7 +10,7 @@ class MovingPlatform(Tile):
         self.update_required = True  # Ensure the platform updates every frame
 
         self.speed = self.metadata.get("speed", 1)
-        self.range = self.metadata.get("range", 1)
+        self.range = self.metadata.get("range", float('inf'))
         self.direction = self.metadata.get("direction", "horizontal")
         self.movement_direction = self.metadata.get("movement_direction", 1)  # 1 = forward, -1 = reverse
         self.tile_size = tile_size  # Tile size reference for movement
@@ -102,7 +102,6 @@ class MovingPlatform(Tile):
                     entity.velocity.y = delta_y
                     entity.on_ground = True
                     continue
-
 
             # Check for wall collisions
             if self.colliding_from_side(entity, delta_x, delta_y):
