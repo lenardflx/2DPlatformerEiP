@@ -30,26 +30,53 @@
             "metadata": {
                 "speed": 1,
                 "direction": "horizontal",
-                "range": 3
+                "range": 768,
+                "movement_direction": 1
             }
         },
         "4": {
-            "index": 4,
-            "collision_type": "air",
-            "type": "decoration"
-        },
-        "5": {
-            "index": 5,
-            "collision_type": "air",
-            "type": "decoration"
-        },
-        "6": {
-            "index": 6,
-            "collision_type": "solid",
-            "type": "block",
+            "index": 3,
+            "collision_type": "platform",
+            "type": "moving_platform",
             "hitbox": {
                 "width": 1.0,
-                "height": 1.0
+                "height": 0.5
+            },
+            "metadata": {
+                "speed": 1,
+                "direction": "horizontal",
+                "range": 768,
+                "movement_direction": -1
+            }
+        },
+        "5": {
+            "index": 3,
+            "collision_type": "platform",
+            "type": "moving_platform",
+            "hitbox": {
+                "width": 1.0,
+                "height": 0.5
+            },
+            "metadata": {
+                "speed": 1,
+                "direction": "vertical",
+                "range": 336,
+                "movement_direction": 1
+            }
+        },
+        "6": {
+            "index": 3,
+            "collision_type": "platform",
+            "type": "moving_platform",
+            "hitbox": {
+                "width": 1.0,
+                "height": 0.5
+            },
+            "metadata": {
+                "speed": 1,
+                "direction": "vertical",
+                "range": 336,
+                "movement_direction": -1
             }
         },
         "7": {
