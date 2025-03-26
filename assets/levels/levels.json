@@ -142,7 +142,9 @@
       "Now the tower emits only command signals and encrypted updates. No distress calls. No replies.",
       "A few tried to decrypt the signal. Its impossible. NEUROS knows every move before its made."
     ],
-    "tutorial": [],
+    "tutorial": [
+      "assets/tutorial/level_0_1.png"
+    ],
     "background": [
       {
         "image": "assets/backgrounds/level_4_1.png",
@@ -165,16 +167,6 @@
         "type": "scroll"
       },
       {
-        "image": "assets/backgrounds/level_4_4.png",
-        "speed": 0,
-        "type": "static"
-      },
-      {
-        "image": "assets/backgrounds/clouds_1.png",
-        "speed": 0.2,
-        "type": "scroll"
-      },
-      {
         "image": "assets/backgrounds/level_4_5.png",
         "speed": 0,
         "type": "static"
@@ -191,7 +183,7 @@
       "NEUROS will now respond.",
       "This is your last chance."
     ],
-    "tutorial": [],
+    "tutorial": ["assets/tutorial/level_0_1.png"],
     "background": [
       {
         "image": "assets/backgrounds/level_5_1.png",
