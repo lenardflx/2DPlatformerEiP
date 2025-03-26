@@ -40,6 +40,7 @@ class Drone(Entity):
 
         # Attack check
         if self.rect.colliderect(self.player.rect):
+            self.sound_manager.play_sfx("drone_attack") # von Philipp: könnte falsch sein
             self.attack()
 
         if self.in_charge:
