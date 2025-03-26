@@ -283,10 +283,12 @@ class Neuros(Entity):
 
     ### Attacks ###
     def heal_self(self, amt):
+        self.set_state("heal")
         self.speak("Defragmenting system. Optimization complete.")
         self.health += min((self.max_health - self.health), amt)
         
     def summon_drones(self):
+        self.set_state("summon_enemy")
         if len(self.minions) < 5:
             pos = (self.rect.centerx + random.randint(-20, 20), self.rect.y)
             drone = Drone(pos[0], pos[1], "assets/characters/drone.png", "assets/characters/drone.json",
@@ -296,6 +298,7 @@ class Neuros(Entity):
             self.speak("Deploying additional unit.")
         
     def summon_batteries(self, amt):
+        self.set_state("summon_enemy")
         if len(self.minions) < 8:
             for a in range(amt):
                 pos = [self.rect.centerx + random.randint(-40, 40), self.rect.centery]
@@ -306,6 +309,7 @@ class Neuros(Entity):
                 self.speak("Deploying destruction units.")
 
     def deploy_emp_radars(self):
+        self.set_state("summon_enemy")
         if len(self.minions) < 6:
             pos = (self.rect.centerx + random.randint(-40, 40), self.rect.top + 20)
             radar = EMP_Radar(pos[0], pos[1], self.level, self.player)
@@ -321,6 +325,7 @@ class Neuros(Entity):
         self.beam_end = self.find_wall_in_direction()
 
     def shoot_lasers(self):
+        self.set_state("laser_attack")
         if self.player.rect.clipline(self.beam_start, self.beam_end):
             self.damage = self.laser_damage
             self.player.hit(self)
@@ -336,6 +341,7 @@ class Neuros(Entity):
         return self.player.rect.center
 
     def shield_self(self):
+        self.set_state("shield")
         self.speak("Defensive matrix online.")
         self.shielded = True
         self.shield_timer = 5.0
