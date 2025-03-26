@@ -1,0 +1,91 @@
+{
+    "tile_size": 32,
+    "tiles": {
+        "1": {
+            "index": 1,
+            "collision_type": "platform",
+            "type": "moving_platform",
+            "hitbox": {
+                "height": 0.5
+            },
+            "metadata": {
+                "speed": 1,
+                "direction": "horizontal"
+            }
+        },
+        "2": {
+            "index": 2,
+            "collision_type": "solid",
+            "type": "block"
+        },
+        "3": {
+            "index": 3,
+            "collision_type": "solid",
+            "type": "block"
+        },
+        "4": {
+            "index": 4,
+            "collision_type": "solid",
+            "type": "block"
+        },
+        "5": {
+            "index": 5,
+            "collision_type": "solid",
+            "type": "block",
+            "6": {
+                "index": 6,
+                "collision_type": "air",
+                "type": "decoration"
+            }
+        },
+        "6": {
+            "index": 6,
+            "collision_type": "air",
+            "type": "decoration"
+        },
+        "7": {
+            "index": 7,
+            "collision_type": "air",
+            "type": "decoration"
+        },
+        "8": {
+            "index": 8,
+            "collision_type": "air",
+            "type": "decoration"
+        },
+        "9": {
+            "index": 9,
+            "collision_type": "air",
+            "type": "decoration"
+        },
+        "10": {
+            "index": 10,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": {
+                "height": 0.5
+            }
+        },
+        "11": {
+            "index": 11,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": {
+                "height": 0.5
+            }
+        },
+        "12": {
+            "index": 12,
+            "collision_type": "solid",
+            "type": "block",
+            "hitbox": {
+                "height": 0.5
+            }
+        },
+        "13": {
+            "index": 13,
+            "collision_type": "air",
+            "type": "decoration"
+        }
+    }
+}

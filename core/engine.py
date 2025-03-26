@@ -97,17 +97,19 @@ class GameEngine:
                 return i
         return None  # All levels completed
 
-    def start_game(self):
+    def start_game(self, level_id=None):
         """Starts the game from the next level or restarts if done."""
         self.menu.active_type = MenuState.NONE
-        next_level = self.next_level
+        self.menu.back_redirect = MenuState.PAUSE
+        if level_id is None:
+            level_id = self.next_level
 
-        if next_level is None:
+        if level_id is None:
             # All levels complete — show credits
             self.menu.open_menu(MenuState.CREDITS, self)
             self.is_playing = False
         else:
-            self.load_levels_data(next_level)
+            self.load_levels_data(level_id)
             self.is_playing = True
 
     def load_levels_data(self, level_id):

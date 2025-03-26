@@ -86,4 +86,4 @@ class CreditMenu(MenuPage):
 
     def end_credits(self):
         self.credits_done = True
-        self.menu.open_menu(MenuState.MAIN, self.menu.engine)
+        pass

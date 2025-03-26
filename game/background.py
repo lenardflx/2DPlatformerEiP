@@ -36,7 +36,7 @@ class Background:
             if not camera:
                 return
             x = -camera.camera.x * self.speed
-            y = -camera.camera.y * self.speed
+            y = 0
             for i in range(-1, screen_width // scaled_rect.width + 2):
                 for j in range(-1, screen_height // scaled_rect.height + 2):
                     screen.blit(

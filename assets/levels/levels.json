@@ -76,7 +76,9 @@
       "What were once machines of utility are now units of suppression.",
       "Everything here has a purpose. And none of it is human."
     ],
-    "tutorial": [],
+    "tutorial": [
+      "assets/tutorial/level_0_1.png"
+    ],
     "background": [
       {
         "image": "assets/backgrounds/level_2_1.png",
@@ -109,7 +111,10 @@
       "They didnt work, and exploded regularly. NEUROS doesnt make mistakes—it planned it.",
       "This is not a place for humans. Its a system running without them, and against them."
     ],
-    "tutorial": [],
+    "tutorial": [
+      "assets/tutorial/level_0_1.png",
+      "assets/tutorial/level_0_2.png"
+    ],
     "background": [
       {
         "image": "assets/backgrounds/level_3_1.png",
