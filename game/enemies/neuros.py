@@ -132,7 +132,7 @@ class Neuros(Entity):
 
     def testphase(self, dt):
         if self.action_cooldown == 0:
-            self.summon_batteries(dt, 3)
+            self.summon_batteries(3)
             self.action_cooldown = 2.0
         #self.phase_1(dt)
 
@@ -155,15 +155,15 @@ class Neuros(Entity):
                 self.action_cooldown = 0.1
                 self.walking = 1.0
             elif self.between(57, 72, rnd_phase):
-                self.action_cooldown = 4.0
+                self.action_cooldown = 2.9
                 self.face_player()
                 self.aim()
             elif self.between(73, 78, rnd_phase):
                 self.summon_drones()
-                self.action_cooldown = 4.5
+                self.action_cooldown = 2.9
             elif self.between(79, 80, rnd_phase):
-                self.summon_batteries(dt, 1)
-                self.action_cooldown = 2.0
+                self.summon_batteries(1)
+                self.action_cooldown = 2.8
             elif self.between(81, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(3)
                 self.action_cooldown = 2.5
@@ -190,28 +190,28 @@ class Neuros(Entity):
                 self.walking = 1.5
             elif self.between(49, 52, rnd_phase):
                 self.summon_drones()
-                self.action_cooldown = 3.5
+                self.action_cooldown = 2.5
             elif self.between(53, 56, rnd_phase):
-                self.summon_batteries(dt, 2)
-                self.action_cooldown = 3.0
+                self.summon_batteries(2)
+                self.action_cooldown = 2.6
             elif self.between(57, 62, rnd_phase):
                 self.deploy_emp_radars()
-                self.action_cooldown = 4.5
+                self.action_cooldown = 2.2
             elif self.between(62, 67, rnd_phase):
                 self.shield_self()
-                self.action_cooldown = 4.0
+                self.action_cooldown = 3.2
             elif self.between(68, 88, rnd_phase):
-                self.action_cooldown = 4.0
+                self.action_cooldown = 2.2
                 self.face_player()
                 self.aim()
             elif self.between(89, 95, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(3)
-                self.action_cooldown = 2.0
-                self.heal_cooldown = 8.0
+                self.action_cooldown = 2.1
+                self.heal_cooldown = 6.4
             elif self.between(96, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(5)
-                self.action_cooldown = 4.0
-                self.heal_cooldown = 16.0
+                self.action_cooldown = 2.6
+                self.heal_cooldown = 14.0
         if self.walking > 0:
             self.move_towards_player(dt)
 
@@ -219,45 +219,45 @@ class Neuros(Entity):
     def phase_3(self, dt):
         rnd_phase = random.randint(0, 100)
         if self.action_cooldown == 0 and self.walking == 0:
-            if self.between(0, 4, rnd_phase):
+            if self.between(0, 3, rnd_phase):
                 self.speak("Analyzing human behavior...")
                 self.action_cooldown = 0.8
-            elif self.between(5, 6, rnd_phase):
+            elif self.between(4, 4, rnd_phase):
                 self.speak("Are you afraid of me, human?")
                 self.action_cooldown = 0.1
                 self.face_player()
-                self.walking = 2.0
-            elif self.between(7, 36, rnd_phase):
+                self.walking = 1.5
+            elif self.between(5, 20, rnd_phase):
                 self.speak("")
                 self.action_cooldown = 0.1
                 self.face_player()
-                self.walking = 1.2
-            elif self.between(37, 40, rnd_phase):
+                self.walking = 1.0
+            elif self.between(21, 32, rnd_phase):
                 self.summon_drones()
-                self.action_cooldown = 3.0
-            elif self.between(41, 46, rnd_phase):
-                self.summon_batteries(dt, 4)
-                self.action_cooldown = 4.0
-            elif self.between(47, 50, rnd_phase):
+                self.action_cooldown = 2.0
+            elif self.between(33, 38, rnd_phase):
+                self.summon_batteries(4)
+                self.action_cooldown = 2.5
+            elif self.between(39, 44, rnd_phase):
                 self.deploy_emp_radars()
-                self.action_cooldown = 3.0
-            elif self.between(51, 58, rnd_phase):
+                self.action_cooldown = 1.5
+            elif self.between(45, 49, rnd_phase):
                 self.shield_self()
-                self.action_cooldown = 5.0
-            elif self.between(59, 75, rnd_phase):
+                self.action_cooldown = 3.0
+            elif self.between(50, 78, rnd_phase):
                 self.face_player()
                 self.aim()
                 self.action_cooldown = 2.0
-            elif self.between(76, 82, rnd_phase):
+            elif self.between(79, 83, rnd_phase):
                 self.slow_time()
                 self.action_cooldown = 2.0
-            elif self.between(83, 88, rnd_phase):
+            elif self.between(84, 89, rnd_phase):
                 self.world_hack()
                 self.action_cooldown = 2.5
-            elif self.between(89, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
+            elif self.between(90, 100, rnd_phase) and self.heal_cooldown == 0 and self.health != self.max_health:
                 self.heal_self(6)
                 self.heal_cooldown = 10.0
-                self.action_cooldown = 3.0
+                self.action_cooldown = 1.5
         if self.walking > 0:
             self.move_towards_player(dt)
 
@@ -295,15 +295,15 @@ class Neuros(Entity):
             self.level.enemies.add(drone)
             self.speak("Deploying additional unit.")
         
-    def summon_batteries(self, dt, amt):
+    def summon_batteries(self, amt):
         if len(self.minions) < 8:
-            for a in range(0, amt + 1):
+            for a in range(amt):
                 pos = [self.rect.centerx + random.randint(-40, 40), self.rect.centery]
                 battery = Battery(pos[0], pos[1], "assets/characters/battery.png", "assets/characters/battery.json",
                                 self.player, self.level, self.sound_manager)
                 self.minions.append(battery)
                 self.level.enemies.add(battery)
-                self.speak("Deploying extermination units.")
+                self.speak("Deploying destruction units.")
 
     def deploy_emp_radars(self):
         if len(self.minions) < 6:
