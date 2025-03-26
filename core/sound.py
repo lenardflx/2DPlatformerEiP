@@ -39,12 +39,9 @@ class SoundManager:
     def play_sfx(self, key):
         sound = self.load_sound(key)
         if sound:
-            sound.play()
-
-    def stop_sfx(self, key):
-        sound = self.load_sound(key)
-        if sound:
-            sound.stop()
+            channel = pygame.mixer.find_channel()
+            if channel:
+                channel.play(sound)
 
     def set_sfx_volume(self, volume):
         self.sfx_volume = volume
