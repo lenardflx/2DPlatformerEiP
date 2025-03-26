@@ -13,10 +13,10 @@ class Turret(Entity):
 
         self.state = "idle"
         self.damage = 1
-        self.attack_range = 6 * level.tile_size
+        self.attack_range = 8 * level.tile_size
         self.cooldown = 90
         self.current_cooldown = 0
-        self.y_gun_offset = 4
+        self.y_gun_offset = 2
         self.beam_duration = 10
         self.beam_timer = 0
         self.beam_start = None
@@ -190,5 +190,6 @@ class Turret(Entity):
             start = camera.apply(pygame.Rect(self.beam_start, (0, 0))).center
             end = camera.apply(pygame.Rect(self.beam_end, (0, 0))).center
             pygame.draw.line(screen, (100, 150, 255), start, end, self.level.tile_size // 4)
+            pygame.draw.line(screen, (170, 200, 255), start, end, self.level.tile_size // 9)
 
         self.render_health_bar(screen, camera)

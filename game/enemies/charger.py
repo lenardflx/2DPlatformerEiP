@@ -68,6 +68,9 @@ class Charger(Entity):
                         self.ai_state = "patrol"
                         self.patrol_timer = random.randint(60, 120)
                         self.patrol_dir = 1 if self.facing_right else -1
+                        if not self.is_direction_safe(level, "right" if self.facing_right else "left"):
+                            self.patrol_dir *= -1
+                            self.facing_right = not self.facing_right
                         self.patrol_speed_variation = random.uniform(0.8, 1.2)
                         self.idle_timer = random.randint(30, 60)
 

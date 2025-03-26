@@ -129,9 +129,7 @@ class WinMenu(MenuPage):
         for button in self.buttons:
             if button.is_clicked(event, mouse_pos):
                 if button.name == "resume":
-                    engine.start_game()
-                    engine.is_playing = True
-                    engine.menu.close_menu(engine)
+                    engine.start_game(engine.next_level(engine.current_level))
                 elif button.name == "retry":
                     engine.load_level(engine.current_level)
                     engine.is_playing = True

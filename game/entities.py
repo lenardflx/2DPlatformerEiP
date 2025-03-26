@@ -50,6 +50,32 @@ class Entity(pygame.sprite.Sprite):
         # Actually load the sprites into memory
         self.load_sprites(sprite_path)
 
+    def is_direction_safe(self, level, direction: str):
+        """Checks if an AI can move in the given direction."""
+        buffer = 1
+        tile_size = level.tile_size
+
+        # Horizontal direction
+        dx = self.rect.width + buffer if direction == "right" else -buffer
+        front_x = self.rect.centerx + dx
+
+        # Check for wall ahead
+        wall_probe_y = self.rect.centery
+        front_tile = level.get_tile_at(front_x, wall_probe_y)
+        if front_tile and getattr(front_tile, "solid", False):
+            return False  # Wall ahead
+
+        # Check for drop ahead
+        foot_y = self.rect.top if self.is_flipped else self.rect.bottom
+        dy = -tile_size if self.is_flipped else tile_size
+        drop_probe_y = foot_y + dy
+
+        foot_tile = level.get_tile_at(front_x, drop_probe_y)
+        if not foot_tile or not getattr(foot_tile, "solid", False):
+            return False  # Drop ahead
+
+        return True
+
     def load_sprite_metadata(self, sprite_path, json_path):
         """Load metadata like entity_size and scale from the JSON config."""
         with open(json_path) as f:
@@ -205,7 +231,7 @@ class Entity(pygame.sprite.Sprite):
         y = base_pos[1] if self.is_flipped else base_pos[1] + self.render_offset[1]
 
         screen.blit(self.image, (x, y))
-        pygame.draw.rect(screen, (255, 0, 0), base_pos, 1) # Debug: show hitbox
+        # pygame.draw.rect(screen, (255, 0, 0), base_pos, 1) # Debug: show hitbox
         self.render_health_bar(screen,camera)
 
     def eliminate(self):

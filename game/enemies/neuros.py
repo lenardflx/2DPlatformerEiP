@@ -49,6 +49,11 @@ class Neuros(Entity):
         self.kb_y = 1
         self.set_phase_stats(self.phase)
 
+        self.hover_timer = 0.0
+        self.hover_amplitude = 5  # pixel height of wave
+        self.hover_speed = 5  # how fast the wave moves
+        self.base_y = y  # original Y-position
+
     def set_phase_stats(self, phase):
         self.face_player()
         config = self.phase_configs[phase]
@@ -62,6 +67,16 @@ class Neuros(Entity):
     def update(self, level, dt):
         if self.health <= 0:
             self.enter_next_phase()
+
+        frames = self.sprites.get(self.state, [])
+        if frames and self.sprite_index >= len(frames) - 1:
+            if self.state != "idle":
+                self.set_state("idle")
+
+        # Hovering effect using sine wave
+        self.hover_timer += dt * self.hover_speed
+        hover_offset = math.sin(self.hover_timer) * self.hover_amplitude
+        self.rect.y = self.base_y + hover_offset
 
         self.velocity.y = 0
 
@@ -135,6 +150,9 @@ class Neuros(Entity):
             self.summon_batteries(3)
             self.action_cooldown = 2.0
         #self.phase_1(dt)
+
+    def flip_gravity(self):
+        pass
 
     # === Phase 1 ===
     def phase_1(self, dt):

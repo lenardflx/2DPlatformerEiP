@@ -29,7 +29,8 @@
             },
             "metadata": {
                 "speed": 1,
-                "direction": "horizontal"
+                "direction": "horizontal",
+                "range": 120
             }
         },
         "4": {

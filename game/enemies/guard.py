@@ -15,7 +15,7 @@ class Guard(Entity):
         self.detection_range = 8  # Distance to start chasing the player
         self.kb_x = 3
         self.kb_y = 2
-        self.max_health =  4
+        self.max_health =  6
         self.health = self.max_health
 
         # AI flags
@@ -24,7 +24,8 @@ class Guard(Entity):
         self.obstacle = False
 
         # animations
-        self.state = "idle"
+        self.state = "run"
+        self.set_state("run")
         self.sprite_index = 0
         self.image = self.sprites[self.state][self.sprite_index] if self.sprites.get(self.state) else None
 
@@ -41,26 +42,23 @@ class Guard(Entity):
         if not self.stun:
             if distance_to_player < self.detection_range * self.level.tile_size:
                 self.chase_player(dt)
+                self.set_state("follow")
             else:
                 self.patrol(level, dt)
+                self.set_state("run")
 
         if self.on_ground:
             self.has_jumped = False
 
         # Jump over obstacles or gaps
-        new_state = "jump"
-
         if self.drop and not self.has_jumped:
             self.jump(dt, 15 * self.speed, 120, level.gravity >= 0)
             self.has_jumped = True
         elif self.obstacle and not self.has_jumped:
             self.jump(dt, 0, 200, level.gravity >= 0)
             self.has_jumped = True
-        else:
-            new_state = "run"
 
         super().update(level, dt)
-        self.state = new_state  # Update animation state
 
         # Attack player if touching them
         if self.rect.colliderect(self.player.rect):
@@ -68,18 +66,14 @@ class Guard(Entity):
 
     def patrol(self, level, dt):
         """Moves the enemy left and right, reversing direction on collisions."""
-
-        future_rect = self.rect.copy()
-
         if self.facing_right:
             self.velocity.x = self.speed * dt
-            future_rect = level.get_tile_at(future_rect.left + future_rect.width + 1, future_rect.top)
         else:
             self.velocity.x = -self.speed * dt
-            future_rect = level.get_tile_at(future_rect.left - 1, future_rect.top)
 
-        if future_rect:
+        if not self.is_direction_safe(level, "right" if self.facing_right else "left"):
             self.velocity.x *= -1
+            self.facing_right = not self.facing_right
 
     def chase_player(self, dt):
         """Moves toward the player if within detection range."""

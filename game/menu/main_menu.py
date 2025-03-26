@@ -67,7 +67,7 @@ class MainMenu(MenuPage):
         for button in self.buttons:
             if button.is_clicked(event, mouse_pos):
                 if button.name == "play":
-                    engine.start_game()
+                    engine.start_game(engine.next_level())
                 elif button.name == "exit":
                     pygame.quit()
                     sys.exit()

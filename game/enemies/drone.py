@@ -148,6 +148,7 @@ class Drone(Entity):
 
         # Draw rotated image
         screen.blit(rotated_image, rotated_rect.topleft)
+        self.render_health_bar(screen, camera)
 
         # Optional: Draw hitbox (collision box)
-        pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)
+        # pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)

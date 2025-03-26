@@ -87,30 +87,26 @@ class GameEngine:
             self.levels_data = json.load(f)
         self.level_count = len(self.levels_data)
 
-    @property
-    def next_level(self):
+    def next_level(self, level_id=None):
         """Returns the next unfinished level or None if all are done."""
+        if level_id is not None:
+            return (level_id + 1) if level_id < self.level_count else None
         self.update_completed_levels()
         completed = set(self.completed_levels)
         for i in range(self.level_count):
             if i not in completed:
                 return i
-        return None  # All levels completed
+        return None
 
-    def start_game(self, level_id=None):
+    def start_game(self, level_id):
         """Starts the game from the next level or restarts if done."""
         self.menu.active_type = MenuState.NONE
         self.menu.back_redirect = MenuState.PAUSE
         if level_id is None:
-            level_id = self.next_level
-
-        if level_id is None:
-            # All levels complete — show credits
             self.menu.open_menu(MenuState.CREDITS, self)
-            self.is_playing = False
-        else:
-            self.load_levels_data(level_id)
-            self.is_playing = True
+            return
+        self.load_levels_data(level_id)
+        self.is_playing = True
 
     def load_levels_data(self, level_id):
         """Load story + tutorial slides before a level"""
@@ -155,10 +151,18 @@ class GameEngine:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
             if self.controls.is_action_active("menu"):
-                if not self.menu.back_redirect == MenuState.MAIN:
-                    self.menu.toggle_menu(MenuState.PAUSE, self)
-                elif self.menu.active_type != MenuState.MAIN:
-                    self.menu.open_menu(MenuState.MAIN, self)
+                new = None
+                if self.menu.active_type in [MenuState.NONE, MenuState.PAUSE]:
+                    new = lambda e: e.menu.toggle_menu(MenuState.PAUSE, e)
+                elif self.menu.active_type == MenuState.LEVELS:
+                    new = lambda e: e.menu.open_menu(MenuState.MAIN, e)
+                elif self.menu.active_type == MenuState.SETTINGS:
+                    if self.menu.back_redirect == MenuState.MAIN:
+                        new = lambda e: e.menu.open_menu(MenuState.MAIN, e)
+                    else:
+                        new = lambda e: e.menu.open_menu(MenuState.PAUSE, e)
+                if new:
+                    new(self)
 
             if self.slide_mode:
                 if event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
