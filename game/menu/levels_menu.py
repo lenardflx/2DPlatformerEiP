@@ -60,7 +60,7 @@ class LevelsMenu(MenuPage):
                     self.sound_manager.play_sfx("error")
                     return
                 self.sound_manager.play_sfx("button_click")
-                engine.start_game()
+                engine.start_game(level_id)
                 engine.load_levels_data(level_id)
 
     def update(self, mouse_pos):
