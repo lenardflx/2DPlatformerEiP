@@ -111,6 +111,7 @@ class Turret(Entity):
             self.rotation_angle += rotation_step
 
     def shoot(self):
+        self.sound_manager.play_sfx("laser_gun")
         center = pygame.Vector2(self.rect.center)
         angle_rad = math.radians(self.rotation_angle)
 

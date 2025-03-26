@@ -8,5 +8,6 @@
   "star_1": "star_1.wav",
   "star_2": "star_2.wav",
   "star_3": "star_3.wav",
-  "error": "error.wav"
+  "error": "error.wav",
+  "laser_gun": "laser_gun.wav"
 }
