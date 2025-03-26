@@ -356,7 +356,7 @@ class Neuros(Entity):
     def slow_time(self):
         self.level.engine.slow = True
         self.speak("Temporal manipulation active.")
-        self.slow_timer = 2.0
+        self.slow_timer = 2.0   #4 seconds due to slowdown 
 
     def hit(self, attacker, stun = 0):
         if self.shielded:

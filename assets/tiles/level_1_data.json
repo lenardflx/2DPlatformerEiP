@@ -30,7 +30,7 @@
             "metadata": {
                 "speed": 1,
                 "direction": "horizontal",
-                "range": 768,
+                "range": 640,
                 "movement_direction": 1
             }
         },
@@ -45,7 +45,7 @@
             "metadata": {
                 "speed": 1,
                 "direction": "horizontal",
-                "range": 768,
+                "range": 640,
                 "movement_direction": -1
             }
         },
