@@ -78,7 +78,7 @@ class Drone(Entity):
         # Check adjacent cells (including diagonals)
         directions = [
             (-1, -1), (0, -1), (1, -1),
-            (-1, 0), (1, 0),
+            (-1, 0), (0, 0), (1, 0),
             (-1, 1), (0, 1), (1, 1)
         ]
 

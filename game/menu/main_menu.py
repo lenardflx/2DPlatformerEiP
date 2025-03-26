@@ -1,5 +1,3 @@
-from tkinter import Image
-
 import pygame
 import sys
 
