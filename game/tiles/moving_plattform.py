@@ -20,7 +20,6 @@ class MovingPlatform(Tile):
 
     def update(self, engine):
         """Moves the platform and interacts with the player + enemies."""
-        print(self.range)
         level = engine.level
         player = level.player
 
