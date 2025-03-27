@@ -170,8 +170,8 @@ class Level(pygame.sprite.LayeredUpdates):
         """Returns the closest position to entity."""
         ex, ey = entity.rect.center
         tile_x, tile_y = int(ex // self.tile_size), int(ey // self.tile_size)
-
         return tile_x, tile_y
+    
     def distance_to(self, entity,grid_range=5):
         with open(f"assets/levels/level_0.json") as f:
             level_data = json.load(f)
@@ -205,7 +205,7 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.render(screen, camera)
         self.player.render(screen,camera)
 
-        #self.draw_debug_mp(screen, camera)
+        self.draw_debug_mp(screen, camera)
 
     def draw_debug_mp(self, screen, camera):
         if self.mp is None:
