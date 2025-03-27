@@ -57,8 +57,8 @@ class Turret(Entity):
         if self.health <= 0:
             self.eliminate()
             return
-
-        self.facing_right = self.player.rect.x >= self.rect.x
+        
+        self.facing_right = not (self.rotation_angle > 90 and self.rotation_angle < 270)
 
         distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
         in_range = distance <= self.attack_range and self.line_of_sight()
@@ -70,6 +70,9 @@ class Turret(Entity):
         elif self.state == "shoot":
             self.shoot()
             self.beam_timer = self.beam_duration
+            self.set_state("shooting")
+
+        elif self.state == "shooting":
             if self.sprite_index >= len(self.sprites["shoot"]) - 1:
                 self.current_cooldown = self.cooldown
                 self.set_state("await")
@@ -98,6 +101,7 @@ class Turret(Entity):
     def rotate_towards_player(self):
         dx = self.player.rect.centerx - self.rect.centerx
         dy = self.player.rect.centery - self.rect.centery
+        
         target_angle = math.degrees(math.atan2(-dy, dx)) % 360
 
         current = self.rotation_angle % 360
@@ -177,10 +181,15 @@ class Turret(Entity):
         # Draw rotated gun using cached sprite
         frame_idx = self.sprite_index
         state = self.state
-        rotated = self.get_cached_sprite(state, frame_idx, self.rotation_angle)
+
+        angle = self.rotation_angle
+        if angle > 90 and angle < 270:
+            angle = (450 - (angle - 90)) % 360
+
+        rotated = self.get_cached_sprite(state, frame_idx, angle)
 
         if not self.facing_right:
-            rotated = pygame.transform.flip(rotated, False, True)
+            rotated = pygame.transform.flip(rotated, True, False)
 
         rotated_rect = rotated.get_rect(center=camera.apply(self.rect).center)
         screen.blit(rotated, rotated_rect)
