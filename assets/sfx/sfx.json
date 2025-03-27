@@ -13,5 +13,6 @@
   "drone_attack": "drone_attack_surrr.wav",
   "guard_attack": "guard_attack.wav",
   "boss_shield": "boss_shield.wav",
-  "boss_healing": "boss_healing.wav"
+  "boss_healing": "boss_healing.wav",
+  "charger_attack": "charger_attack.wav"
 }
