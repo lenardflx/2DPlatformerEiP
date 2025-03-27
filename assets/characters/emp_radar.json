@@ -1,0 +1,9 @@
+{
+    "tile_size": 32,
+    "animations": {
+        "idle": ["0,0","1,0","2,0","3,0"]
+
+    },
+    "entity_size": [28,30],
+    "entity_scale": 1.6
+}

@@ -1,27 +1,3 @@
-=== SOUND ===
-3. Create (steal) sfx for all actions
-4. map all sfx to actions
-
-=== DESIGN ===
-1. Create Tilesets for all levels
-2. Create Sprites for Neuros
-3. Create Sprites for Turrets
-4. Create Sprites for the Heal Drone
-
-=== LEVELS ===
-1. Create Tilemaps for all levels
-2. Store Completed Levels in game_data.json
-3. Implement Star System for levels and add to Level Select
-
-=== TILES ===
-1. Implement EMP Field
-2. Implement Shield Generator
-3. Other ideas?
-
-=== ENEMIES ===
-2. Implement Neuros
-3. Implement Heal Drone
-4. Other ideas?
-
-NEUROS:
-Glitch Effekt implementieren
+- tutorial slide
+- all sfx
+- charger jitter

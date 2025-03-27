@@ -46,7 +46,7 @@ class GameEngine:
         self.slide_mode = None
         self.slide_timer = 0
         self.slide_fade_duration = 30
-        self.slide_display_duration = 180
+        self.slide_display_duration = 200
         self.timer = 0
         self.slow = False
 

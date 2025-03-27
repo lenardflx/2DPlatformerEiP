@@ -329,6 +329,7 @@ class Neuros(Entity):
 
     def deploy_emp_radars(self):
         self.set_state("summon_enemy")
+        self.sound_manager.play_sfx("glitch")
         if len(self.minions) < 6:
             pos = (self.rect.centerx + random.randint(-40, 40), self.rect.top + 20)
             radar = EMP_Radar(pos[0], pos[1], self.level, self.player)
@@ -345,6 +346,7 @@ class Neuros(Entity):
 
     def shoot_lasers(self):
         self.set_state("laser_attack")
+        self.sound_manager.play_sfx("laser_gun")
         if self.player.rect.clipline(self.beam_start, self.beam_end):
             self.damage = self.laser_damage
             self.player.hit(self)
@@ -380,6 +382,7 @@ class Neuros(Entity):
             print("Visual glitch placeholder.")
 
     def slow_time(self):
+        self.sound_manager.play_sfx("glitch")
         self.level.engine.slow = True
         self.speak("Temporal manipulation active.")
         self.slow_timer = 2.0   #4 seconds due to slowdown 
@@ -398,8 +401,8 @@ class Neuros(Entity):
             self.level.engine.menu.open_menu(MenuState.COMPLETE, self.level.engine, self.level)
         super().eliminate()
 
-    def render(self, screen, camera):
-        super().render(screen, camera)
+    def render(self, screen, camera, debug_overlay=False):
+        super().render(screen, camera, debug_overlay)
         if self.current_text:
             font = self.level.engine.font_manager
             pos = camera.apply(self)

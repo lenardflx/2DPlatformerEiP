@@ -213,10 +213,11 @@ class Level(pygame.sprite.LayeredUpdates):
                 screen.blit(tile.image, camera.apply(tile).topleft)
         for enemy in self.enemies:
             if camera_rect.colliderect(enemy.rect):
-                enemy.render(screen, camera)
-        self.player.render(screen,camera)
+                enemy.render(screen, camera, self.engine.debug_overlay)
+        self.player.render(screen,camera, self.engine.debug_overlay)
 
-        #self.draw_debug_mp(screen, camera)
+        if self.engine.debug_overlay:
+            self.draw_debug_mp(screen, camera)
 
     def draw_debug_mp(self, screen, camera):
         if self.mp is None:
@@ -239,8 +240,6 @@ class Level(pygame.sprite.LayeredUpdates):
                     pygame.draw.rect(screen, (255, 0, 0), (*pos, tile_size, tile_size), 1)
                 elif (x, y) == player_tile:
                     pygame.draw.rect(screen, (0, 255, 0), (*pos, tile_size, tile_size), 1)
-                else:
-                    pygame.draw.rect(screen, (0, 0, 255), (*pos, tile_size, tile_size), 1)
 
                 val = self.mp[x][y]
                 if val < 999:

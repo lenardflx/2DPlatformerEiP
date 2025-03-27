@@ -8,6 +8,7 @@
     "skull_icon": "skull.png",
     "abilities": {
         "double_jump": "double_jump_ability.png",
-        "gravity_inverse": "gravity_ability.png"
+        "gravity_inverse": "gravity_ability.png",
+        "heal": "heal_ability.png"
     }
 }

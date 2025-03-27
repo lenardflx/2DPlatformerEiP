@@ -1,6 +1,6 @@
 {
     "volume": {
-        "music": 1,
+        "music": 0.21666666666666667,
         "sfx": 1
     },
     "controls": {
@@ -21,7 +21,11 @@
             "backspace"
         ],
         "gravity_inverse": [
-            "g",
+            "e",
+            "g"
+        ],
+        "heal": [
+            "q",
             null
         ],
         "debug": [

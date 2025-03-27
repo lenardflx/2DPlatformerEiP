@@ -39,9 +39,18 @@
             "type": "decoration"
         },
         "5": {
-            "index": 5,
-            "collision_type": "air",
-            "type": "decoration"
+            "index": 3,
+            "collision_type": "platform",
+            "type": "moving_platform",
+            "hitbox": {
+                "width": 1.0,
+                "height": 0.5
+            },
+            "metadata": {
+                "speed": 1,
+                "direction": "vertical",
+                "range": 30
+            }
         },
         "6": {
             "index": 6,

@@ -56,6 +56,7 @@ class Player(Entity):
         self.abilities = {
             "double_jump": abilities.DoubleJumpAbility(level, self),
             "gravity_inverse": abilities.GravityInverseAbility(level, self),
+            "heal": abilities.HealAbility(level, self)
         }
 
         # Death animation state
@@ -205,6 +206,10 @@ class Player(Entity):
         if self.controls.is_action_active("gravity_inverse"):
             self.abilities["gravity_inverse"].activate()
 
+        # Heal Ability
+        if self.controls.is_action_active("heal"):
+            self.abilities["heal"].activate()
+
         super().update(level, dt)  # Apply physics and collision
 
         # Check if player center touches right screen edge
@@ -218,15 +223,17 @@ class Player(Entity):
         self.sound_manager.play_sfx("basic_attack")
 
         attack_width = self.rect.width * 0.75
-        attack_height = self.rect.height * 0.5
+        attack_height = self.rect.height * 0.75
         attack_x = self.rect.right if self.facing_right else self.rect.left - attack_width
         attack_y = self.rect.top
 
         attack_rect = pygame.Rect(attack_x, attack_y, attack_width, attack_height)
 
+        total_hitbox = self.rect.union(attack_rect) # Combine player and attack hitbox
+
         # Check collision with enemies
         for enemy in level.enemies:
-            if attack_rect.colliderect(enemy.rect):
+            if total_hitbox.colliderect(enemy.rect):
                 enemy.hit(self)
 
 
@@ -242,7 +249,7 @@ class Player(Entity):
             self.damage_anim_active = True
             self.sprite_index = 0  # Start damage animation
 
-    def render(self, screen, camera):
+    def render(self, screen, camera, debug_overlay=False):
         """Renders the player on the screen."""
         if self.is_dying:
             frame = self.death_frames[self.death_index]
@@ -251,7 +258,7 @@ class Player(Entity):
             return
         if self.flicker:
             return
-        super().render(screen, camera)
+        super().render(screen, camera, debug_overlay)
         self.draw_charge_bar(screen, camera)
 
     def draw_charge_bar(self, screen, camera):
@@ -272,5 +279,6 @@ class Player(Entity):
 
     def eliminate(self):
         """Handles player elimination (game over)."""
+        self.sound_manager.play_sfx("glitch")
         self.health = 0
         super().eliminate()

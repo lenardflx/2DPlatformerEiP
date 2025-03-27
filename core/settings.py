@@ -20,7 +20,8 @@ class Settings:
                 "move_right": [pygame.K_RIGHT, pygame.K_d],
                 "jump": [pygame.K_SPACE, pygame.K_w],
                 "menu": [pygame.K_ESCAPE, None],
-                "gravity_inverse": [pygame.K_g, None],
+                "gravity_inverse": [pygame.K_e, pygame.K_g],
+                "heal": [pygame.K_q, None],
                 "debug": [pygame.K_F3, None]
             },
             "volume": {

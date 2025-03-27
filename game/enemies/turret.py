@@ -54,6 +54,15 @@ class Turret(Entity):
         pass
 
     def update(self, level, dt):
+        if self.is_dying:
+            self.time_accumulator += dt
+            if self.time_accumulator >= self.animation_speed:
+                self.time_accumulator = 0
+                self.sprite_index += 1
+                if self.sprite_index >= len(self.death_frames):
+                    self.kill()
+            return
+
         if self.health <= 0:
             self.eliminate()
             return
@@ -170,7 +179,18 @@ class Turret(Entity):
                 return False
         return True
 
-    def render(self, screen, camera):
+    def render(self, screen, camera, debug_overlay=False):
+        if self.is_dying:
+            frame = self.death_frames[self.sprite_index % len(self.death_frames)]
+            if not self.facing_right:
+                frame = pygame.transform.flip(frame, True, False)
+            if self.is_flipped:
+                frame = pygame.transform.flip(frame, False, True)
+
+            render_pos = camera.apply(self)
+            screen.blit(frame, (render_pos[0] + self.render_offset[0], render_pos[1] + self.render_offset[1]))
+            return
+
         base_pos = camera.apply(self)
 
         # Draw base
@@ -202,3 +222,6 @@ class Turret(Entity):
             pygame.draw.line(screen, (170, 200, 255), start, end, self.level.tile_size // 9)
 
         self.render_health_bar(screen, camera)
+
+        if debug_overlay:
+            pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)

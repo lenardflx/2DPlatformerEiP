@@ -114,11 +114,11 @@ class WinMenu(MenuPage):
         # Score Info
         info_y = self.star_y + self.star_size
         spacing = 24
-        self.font_manager.render(surface, f"Your Time: {self.time_taken}s", (self.cx, info_y), 22, (255, 255, 255), align_center=True)
-        self.font_manager.render(surface, f"Goal Time: {self.time_goal}s", (self.cx, info_y + spacing), 20, (180, 180, 180), align_center=True)
+        self.font_manager.render(surface, f"Your Time: {self.time_taken}", (self.cx, info_y), 22, (255, 255, 255), align_center=True)
+        self.font_manager.render(surface, f"Goal Time: {self.time_goal}", (self.cx, info_y + spacing), 20, (180, 180, 180), align_center=True)
 
         if self.best_time is not None:
-            self.font_manager.render(surface, f"Best Time: {self.best_time}s", (self.cx, info_y + spacing * 2), 20, (200, 255, 200), align_center=True)
+            self.font_manager.render(surface, f"Best Time: {self.best_time}", (self.cx, info_y + spacing * 2), 20, (200, 255, 200), align_center=True)
         if self.new_highscore:
             self.font_manager.render(surface, "New Highscore!", (self.cx, info_y + spacing * 3), 24, (255, 255, 0), align_center=True)
 

@@ -30,7 +30,10 @@ class LevelsMenu(MenuPage):
 
     def get_unlocked_levels(self):
         unlocked = set()
-        for key in self.progress.keys():
+        levels = [int(key) for key in self.progress.keys() if key.isnumeric()]
+        if not levels:
+            levels = [-1]
+        for key in levels:
             try:
                 level_id = int(key)
                 unlocked.add(level_id)

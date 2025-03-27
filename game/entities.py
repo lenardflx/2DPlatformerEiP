@@ -237,7 +237,7 @@ class Entity(pygame.sprite.Sprite):
         self.state = new_state
         self.sprite_index = 0  # Reset animation frame
 
-    def render(self, screen, camera):
+    def render(self, screen, camera, debug_overlay=False):
         """Renders the entity sprite with gravity-aware offset."""
         if self.is_dying:
             frame = self.death_frames[self.sprite_index % len(self.death_frames)]
@@ -257,7 +257,8 @@ class Entity(pygame.sprite.Sprite):
         y = base_pos[1] if self.is_flipped else base_pos[1] + self.render_offset[1]
 
         screen.blit(self.image, (x, y))
-        # pygame.draw.rect(screen, (255, 0, 0), base_pos, 1) # Debug: show hitbox
+        if debug_overlay:
+            pygame.draw.rect(screen, (255, 0, 0), self.rect, 1)
         self.render_health_bar(screen,camera)
 
     def eliminate(self):

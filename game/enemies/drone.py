@@ -33,37 +33,37 @@ class Drone(Entity):
         self.attack_range = 20
 
     def update(self, level, dt):
-        distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
+        if not self.is_dying:
+            distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
 
-        if self.charge_cooldown > 0:
-            self.charge_cooldown -= 1
+            if self.charge_cooldown > 0:
+                self.charge_cooldown -= 1
 
-        # Attack check
-        if self.rect.colliderect(self.player.rect):
-            self.sound_manager.play_sfx("drone_attack") # von Philipp: könnte falsch sein
-            self.attack()
+            # Attack check
+            if self.rect.colliderect(self.player.rect):
+                self.attack()
 
-        if self.in_charge:
-            self.charge_duration -= 1
-            if self.charge_duration <= 0:
-                self.in_charge = False
-                self.velocity = pygame.Vector2(0, 0)
+            if self.in_charge:
+                self.charge_duration -= 1
+                if self.charge_duration <= 0:
+                    self.in_charge = False
+                    self.velocity = pygame.Vector2(0, 0)
+                else:
+                    self.velocity.y += 0.25 * self.speed * dt
+            elif distance < self.detection_range and not self.stun:
+                self.smart_chase(dt)
+                self.set_state("run")
             else:
-                self.velocity.y += 0.25 * self.speed * dt
-        elif distance < self.detection_range and not self.stun:
-            self.smart_chase(dt)
-            self.set_state("run")
-        else:
-            self.velocity *= 0.9  # slow down
-            self.set_state("idle")
+                self.velocity *= 0.9  # slow down
+                self.set_state("idle")
 
-        # Rotation toward player (limited to slight tilts)
-        dx = self.player.rect.centerx - self.rect.centerx
-        max_angle = 20
-        self.rotation_angle = max(-max_angle, min(max_angle, dx * 0.1))
+            # Rotation toward player (limited to slight tilts)
+            dx = self.player.rect.centerx - self.rect.centerx
+            max_angle = 20
+            self.rotation_angle = max(-max_angle, min(max_angle, dx * 0.1))
 
-        # Directional flip (for animation)
-        self.facing_right = dx >= 0
+            # Directional flip (for animation)
+            self.facing_right = dx >= 0
 
         super().update(level, dt)
 
@@ -77,9 +77,9 @@ class Drone(Entity):
         best_target = None
 
         wall = False
-        for index, dir in enumerate(directions):
-            gx = (self.rect.centerx // 32) + dir[0]
-            gy = (self.rect.centery // 32) + dir[1]
+        for index, direc in enumerate(directions):
+            gx = (self.rect.centerx // 32) + direc[0]
+            gy = (self.rect.centery // 32) + direc[1]
 
             if 0 <= gx < self.level.grid_width and 0 <= gy < self.level.grid_height:
                 if self.level.mp[gx][gy] == 1000:
@@ -89,7 +89,7 @@ class Drone(Entity):
         if wall:
             corner = self.rect.topleft
             tmp = 0
-            corners = [(self.rect.topleft), (self.rect.topright), (self.rect.bottomleft), (self.rect.bottomright)]
+            corners = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
             
             for c in corners:
                 x = c[0] // self.level.tile_size
@@ -101,7 +101,7 @@ class Drone(Entity):
         else:
             corner = self.rect.topleft
             tmp = 1000
-            corners = [(self.rect.topleft), (self.rect.topright), (self.rect.bottomleft), (self.rect.bottomright)]
+            corners = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
             
             for c in corners:
                 x = c[0] // self.level.tile_size
@@ -111,10 +111,10 @@ class Drone(Entity):
                     tmp = self.level.mp[x][y]
                     corner = [x, y]
 
-        for index, dir in enumerate(directions):
-            dx = dir[0]
-            dy = dir[1]
-            cnr = dir[2]
+        for index, direc in enumerate(directions):
+            dx = direc[0]
+            dy = direc[1]
+            cnr = direc[2]
             
             gx = corner[0] + dx
             gy = corner[1] + dy
@@ -147,12 +147,16 @@ class Drone(Entity):
             self.velocity *= 0.5  # gently stop if no path
 
     def attack(self):
+        """Handles enemy attacking logic."""
+        if self.player.immunity_frames:
+            return
+        self.sound_manager.play_sfx("drone_attack")
         self.player.hit(self)
 
     def eliminate(self):
         super().eliminate()
 
-    def render(self, screen, camera):
+    def render(self, screen, camera, debug_overlay=False):
         """Render the drone with visual rotation, but keep hitbox unchanged."""
         if self.is_dying:
             frame = self.death_frames[self.sprite_index % len(self.death_frames)]
@@ -178,4 +182,5 @@ class Drone(Entity):
         self.render_health_bar(screen, camera)
 
         # Optional: Draw hitbox (collision box)
-        # pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)
+        if debug_overlay:
+            pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)
