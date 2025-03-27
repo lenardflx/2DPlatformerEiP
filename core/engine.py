@@ -90,7 +90,7 @@ class GameEngine:
     def next_level(self, level_id=None):
         """Returns the next unfinished level or None if all are done."""
         if level_id is not None:
-            return (level_id + 1) if level_id < self.level_count else None
+            return (level_id + 1) if level_id+1 < self.level_count else None
         self.update_completed_levels()
         completed = set(self.completed_levels)
         for i in range(self.level_count):
@@ -120,8 +120,7 @@ class GameEngine:
         self.menu.active_type = MenuState.NONE
         self.menu.back_redirect = MenuState.PAUSE
         if level_id is None:
-            self.menu.open_menu(MenuState.CREDITS, self)
-            return
+            level_id = 0
         self.load_levels_data(level_id)
         self.is_playing = True
 

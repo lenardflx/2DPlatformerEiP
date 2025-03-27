@@ -27,7 +27,7 @@ class Level(pygame.sprite.LayeredUpdates):
         self.tile_grid = []  # 2D array for fast solid tile lookup
         self.grid_width = 0
         self.grid_height = 0
-        self.mp = []
+        self.mp = None
         self.c = 0
         self.time_to_finish = 0
         self.start_time = 0
@@ -205,9 +205,11 @@ class Level(pygame.sprite.LayeredUpdates):
             enemy.render(screen, camera)
         self.player.render(screen,camera)
 
-        self.draw_debug_mp(screen, camera)
+        #self.draw_debug_mp(screen, camera)
 
     def draw_debug_mp(self, screen, camera):
+        if self.mp is None:
+            return
         tile_size = self.tile_size
         font = pygame.font.Font(None, 18)
 
