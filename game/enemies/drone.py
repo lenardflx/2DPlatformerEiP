@@ -71,17 +71,38 @@ class Drone(Entity):
         pass
 
     def smart_chase(self, dt):
-        current_grid_x = self.rect.centerx // self.level.tile_size
-        current_grid_y = self.rect.centery // self.level.tile_size
 
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # no diagonals = cleaner pathing
+        directions = [(-1, 0, 0), (-1, -1, 1), (0, -1, 0), (1, -1, 1), (1, 0, 0), (1, 1, 1), (0, 1, 0), (-1, 1, 1)]
         best_value = float('inf')
         best_target = None
 
-        for dx, dy in directions:
-            gx, gy = current_grid_x + dx, current_grid_y + dy
+        corner = self.rect.topleft
+        tmp = 0
+        corners = [(self.rect.topleft), (self.rect.topright), (self.rect.bottomleft), (self.rect.bottomright)]
+        
+        for c in corners:
+            x = c[0] // self.level.tile_size
+            y = c[1] // self.level.tile_size
+
+            if self.level.mp[x][y] > tmp and self.level.mp[x][y] != 1000:
+                tmp = self.level.mp[x][y]
+                corner = [x, y]
+
+        for index, dir in enumerate(directions):
+            dx = dir[0]
+            dy = dir[1]
+            cnr = dir[2]
+            
+            gx = corner[0] + dx
+            gy = corner[1] + dy
 
             if 0 <= gx < self.level.grid_width and 0 <= gy < self.level.grid_height:
+                if cnr == 1:    #Falls diagonal
+                    if (self.level.mp[corner[0] + directions[(index-1)%8][0]][corner[1] + directions[(index-1)%8][1]] == 1000
+                    or
+                    self.level.mp[corner[0] + directions[(index+1)%8][0]][corner[1] + directions[(index+1)%8][1]] == 1000):
+                        continue
+                    
                 val = self.level.mp[gx][gy]
                 if val < best_value:
                     best_value = val
@@ -89,21 +110,16 @@ class Drone(Entity):
 
         if best_target:
             # Center of the target tile
-            tx, ty = best_target
+            tx = best_target[0]
+            ty = best_target[1]
             target_x = tx * self.level.tile_size + self.level.tile_size // 2
             target_y = ty * self.level.tile_size + self.level.tile_size // 2
 
-            direction = pygame.Vector2(target_x - self.rect.centerx,
-                                       target_y - self.rect.centery)
+            direction = pygame.Vector2(target_x - self.rect.centerx, target_y - self.rect.centery)
 
             if direction.length() > 1:
                 direction = direction.normalize()
                 self.velocity = direction * self.speed * dt
-
-            # If close enough to center, force snap to prevent stuck edge cases
-            if abs(self.rect.centerx - target_x) < 4 and abs(self.rect.centery - target_y) < 4:
-                self.rect.center = (target_x, target_y)
-
         else:
             self.velocity *= 0.5  # gently stop if no path
 

@@ -183,7 +183,6 @@ class Level(pygame.sprite.LayeredUpdates):
                     grid[pos[0]+x][pos[1]+y]=100+abs(x)+abs(y)
                 else:
                     grid[pos[0]+x][pos[1]+y]=-1
-        print(grid)
 
     def update(self, dt, engine):
         """Updates tiles, enemies, and player."""
@@ -210,7 +209,7 @@ class Level(pygame.sprite.LayeredUpdates):
         #    for y, col in enumerate(row):
         #        x_new = self.tile_size * x
         #        y_new = self.tile_size * y
-        #        score_surf = score_font.render(str(col), False, (0, 0, 0))
+        #        score_surf = score_font.render(str(x) + str(y), False, (0, 0, 0))
         #        score_pos = [x_new, y_new]
         #        screen.blit(score_surf, score_pos)
 
