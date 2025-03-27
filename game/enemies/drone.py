@@ -76,17 +76,40 @@ class Drone(Entity):
         best_value = float('inf')
         best_target = None
 
-        corner = self.rect.topleft
-        tmp = 0
-        corners = [(self.rect.topleft), (self.rect.topright), (self.rect.bottomleft), (self.rect.bottomright)]
-        
-        for c in corners:
-            x = c[0] // self.level.tile_size
-            y = c[1] // self.level.tile_size
+        wall = False
+        for index, dir in enumerate(directions):
+            gx = (self.rect.centerx // 32) + dir[0]
+            gy = (self.rect.centery // 32) + dir[1]
 
-            if self.level.mp[x][y] > tmp and self.level.mp[x][y] != 1000:
-                tmp = self.level.mp[x][y]
-                corner = [x, y]
+            if 0 <= gx < self.level.grid_width and 0 <= gy < self.level.grid_height:
+                if self.level.mp[gx][gy] == 1000:
+                    wall = True
+                    break
+        
+        if wall:
+            corner = self.rect.topleft
+            tmp = 0
+            corners = [(self.rect.topleft), (self.rect.topright), (self.rect.bottomleft), (self.rect.bottomright)]
+            
+            for c in corners:
+                x = c[0] // self.level.tile_size
+                y = c[1] // self.level.tile_size
+
+                if self.level.mp[x][y] > tmp and self.level.mp[x][y] != 1000:
+                    tmp = self.level.mp[x][y]
+                    corner = [x, y]
+        else:
+            corner = self.rect.topleft
+            tmp = 1000
+            corners = [(self.rect.topleft), (self.rect.topright), (self.rect.bottomleft), (self.rect.bottomright)]
+            
+            for c in corners:
+                x = c[0] // self.level.tile_size
+                y = c[1] // self.level.tile_size
+
+                if self.level.mp[x][y] < tmp and self.level.mp[x][y] != 1000:
+                    tmp = self.level.mp[x][y]
+                    corner = [x, y]
 
         for index, dir in enumerate(directions):
             dx = dir[0]
