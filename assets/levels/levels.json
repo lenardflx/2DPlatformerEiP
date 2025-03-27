@@ -10,7 +10,8 @@
     ],
     "tutorial": [
       "assets/tutorial/controls.png",
-      "assets/tutorial/level_0_2.png"
+      "assets/tutorial/abilities.png",
+      "assets/tutorial/objective.png"
     ],
     "background": [
       {
@@ -182,6 +183,7 @@
       "This is your last chance."
     ],
     "tutorial": [
+      "assets/tutorial/emp_radar_intro.png",
       "assets/tutorial/neuros_intro.png"
     ],
     "background": [

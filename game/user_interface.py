@@ -85,7 +85,7 @@ class UI:
         """Pause button input handling."""
         if event.type == pygame.MOUSEBUTTONDOWN:
             pause_rect = pygame.Rect(20, 20, self.button_size, self.button_size)
-            if pause_rect.collidepoint(event.pos):
+            if pause_rect.collidepoint(engine.get_scaled_mouse()):
                 engine.menu.toggle_menu(MenuState.PAUSE, engine)
                 self.sound_manager.play_sfx("button_click")
 

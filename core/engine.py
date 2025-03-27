@@ -241,9 +241,13 @@ class GameEngine:
         self.timer += 1
         self.fps = get_game_data("fps")
         self.dt = 1 / self.fps
+
         if self.slide_mode:
             self.slide_timer += 1
-            total_time = self.slide_fade_duration * 2 + self.slide_display_duration
+
+            multiplier = 2 if self.slide_mode == "tutorial" else 1
+            total_time = self.slide_fade_duration * 2 + self.slide_display_duration * multiplier
+
             if self.slide_timer >= total_time:
                 self.slide_timer = 0
                 self.next_slide()
@@ -337,12 +341,17 @@ class GameEngine:
     def render_tutorial(self, screen):
         screen.fill((0, 0, 0))
         if self.tutorial_index < len(self.tutorial_images):
+            multiplier = 2 if self.slide_mode == "tutorial" else 1
+            display_time = self.slide_display_duration * multiplier
+            fade_duration = self.slide_fade_duration
+
             alpha = self.font_manager.fade_alpha(
                 self.slide_timer,
-                self.slide_fade_duration,
-                self.slide_display_duration,
-                self.slide_fade_duration
+                fade_duration,
+                display_time,
+                fade_duration
             )
+
             img = self.tutorial_images[self.tutorial_index].copy()
             img.set_alpha(alpha)
             rect = img.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))

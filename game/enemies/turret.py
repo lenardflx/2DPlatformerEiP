@@ -67,7 +67,7 @@ class Turret(Entity):
             self.eliminate()
             return
         
-        self.facing_right = not (self.rotation_angle > 90 and self.rotation_angle < 270)
+        self.facing_right = not (90 < self.rotation_angle < 270)
 
         distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
         in_range = distance <= self.attack_range and self.line_of_sight()

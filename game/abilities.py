@@ -45,7 +45,9 @@ class HealAbility(Ability):
     def activate(self):
         if not self.can_activate():
             return False
+        if self.player.health == self.player.max_health:
+            return False
+        self.player.health = self.player.health + 1
         self.sound_manager.play_sfx("heal")
-        self.player.health = min(self.player.health + 1, self.player.max_health)
         self.current_cooldown = self.cooldown
         return True

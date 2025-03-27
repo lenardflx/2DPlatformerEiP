@@ -37,7 +37,9 @@ class Charger(Entity):
         self.patrol_speed_variation = random.uniform(0.8, 1.2)
 
     def update(self, level, dt):
-        
+        if self.is_dying:
+            super().update(level, dt)
+            return
         if self.velocity.x > 0:
             self.facing_right = True
         elif self.velocity.x < 0:
@@ -194,6 +196,5 @@ class Charger(Entity):
             self.sound_manager.play_sfx("charger_attack")
             self.player.hit(self)
 
-    def hit(self, attacker, stun = 0):
-        if self.stun != 0:
-            super().hit(attacker, 0)
+    def hit(self, attacker, stun=0):
+        super().hit(attacker, stun if self.stun == 0 else 0)

@@ -33,6 +33,9 @@ class Battery(Entity):
 
 
     def update(self, level, dt):
+        if self.is_dying:
+            super().update(level, dt)
+            return
         if self.stun > 0:
             self.stun -= 1
             self.velocity.x = 0

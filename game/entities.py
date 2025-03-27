@@ -53,30 +53,34 @@ class Entity(pygame.sprite.Sprite):
         self.load_sprites(sprite_path)
 
     def is_direction_safe(self, level, direction: str):
-        """Checks if an AI can move in the given direction."""
-        buffer = 1
+        """Checks if an AI can move safely in the given direction without falling or hitting a wall."""
         tile_size = level.tile_size
+        buffer = 4  # besser als 1 Pixel, verhindert Kantenprobleme
 
-        # Horizontal direction
-        dx = self.rect.width + buffer if direction == "right" else -buffer
-        front_x = self.rect.centerx + dx
+        # --- 1. Berechne horizontale Vorwärtsposition ---
+        if direction == "right":
+            front_x = self.rect.right + buffer
+        else:
+            front_x = self.rect.left - buffer
 
-        # Check for wall ahead
-        wall_probe_y = self.rect.centery
-        front_tile = level.get_tile_at(front_x, wall_probe_y)
-        if front_tile and getattr(front_tile, "solid", False):
-            return False  # Wall ahead
+        # --- 2. Wandprüfung auf Höhe der Mitte ---
+        mid_y = self.rect.centery
+        wall_tile = level.get_tile_at(int(front_x), int(mid_y))
+        if wall_tile and getattr(wall_tile, "solid", False):
+            return False  # Wand voraus
 
-        # Check for drop ahead
-        foot_y = self.rect.top if self.is_flipped else self.rect.bottom
-        dy = -tile_size if self.is_flipped else tile_size
-        drop_probe_y = foot_y + dy
+        # --- 3. Bodenprüfung: prüfe 1–2 Blöcke unter dem Fußniveau ---
+        foot_y = self.rect.bottom
+        ground_hits = 0
 
-        foot_tile = level.get_tile_at(front_x, drop_probe_y)
-        if not foot_tile or not getattr(foot_tile, "solid", False):
-            return False  # Drop ahead
+        for i in range(1, 3):  # Prüfe 1 bis 2 Blöcke unterhalb
+            probe_y = foot_y + i * tile_size
+            tile = level.get_tile_at(int(front_x), int(probe_y))
+            if tile and getattr(tile, "solid", False):
+                ground_hits += 1
 
-        return True
+        # --- 4. Entscheide basierend auf Treffer ---
+        return ground_hits > 0
 
     def load_sprite_metadata(self, sprite_path, json_path):
         """Load metadata like entity_size and scale from the JSON config."""
