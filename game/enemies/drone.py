@@ -71,41 +71,78 @@ class Drone(Entity):
         pass
 
     def smart_chase(self, dt):
-        current_grid_x = self.rect.centerx // self.level.tile_size
-        current_grid_y = self.rect.centery // self.level.tile_size
+        tile_size = self.level.tile_size
+        grid_x = self.rect.centerx // tile_size
+        grid_y = self.rect.centery // tile_size
+        current_pos = pygame.Vector2(self.rect.center)
 
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # no diagonals = cleaner pathing
-        best_value = float('inf')
-        best_target = None
+        # Initialize movement tracking
+        if not hasattr(self, "target_tile"):
+            self.target_tile = (grid_x, grid_y)
+            self.target_pos = pygame.Vector2(
+                self.target_tile[0] * tile_size + tile_size // 2,
+                self.target_tile[1] * tile_size + tile_size // 2
+            )
+            self.stuck_counter = 0
+            self.prev_pos = current_pos
+
+        # Step 1: move toward target tile center
+        to_target = self.target_pos - current_pos
+        if to_target.length_squared() > 4:  # allow ~2px tolerance
+            self.velocity = to_target.normalize() * self.speed * dt
+            return
+
+        # Snap into place
+        self.rect.center = (int(self.target_pos.x), int(self.target_pos.y))
+        self.velocity = pygame.Vector2(0, 0)
+
+        # Step 2: select next tile from current location
+        grid_x = self.rect.centerx // tile_size
+        grid_y = self.rect.centery // tile_size
+        current_val = self.level.mp[grid_x][grid_y]
+
+        directions = [
+            (-1, 0), (1, 0), (0, -1), (0, 1),
+            (-1, -1), (-1, 1), (1, -1), (1, 1)
+        ]
+
+        best_tile = None
+        best_value = float("inf")
 
         for dx, dy in directions:
-            gx, gy = current_grid_x + dx, current_grid_y + dy
+            nx, ny = grid_x + dx, grid_y + dy
+            if not (0 <= nx < self.level.grid_width and 0 <= ny < self.level.grid_height):
+                continue
+            val = self.level.mp[nx][ny]
+            if val >= best_value or val != current_val - 1:
+                continue
 
-            if 0 <= gx < self.level.grid_width and 0 <= gy < self.level.grid_height:
-                val = self.level.mp[gx][gy]
-                if val < best_value:
-                    best_value = val
-                    best_target = (gx, gy)
+            # Prevent diagonal corner clipping
+            if dx != 0 and dy != 0:
+                if (self.level.tile_grid[grid_y][ny] or self.level.tile_grid[ny][grid_x]):
+                    continue
 
-        if best_target:
-            # Center of the target tile
-            tx, ty = best_target
-            target_x = tx * self.level.tile_size + self.level.tile_size // 2
-            target_y = ty * self.level.tile_size + self.level.tile_size // 2
+            best_tile = (nx, ny)
+            best_value = val
 
-            direction = pygame.Vector2(target_x - self.rect.centerx,
-                                       target_y - self.rect.centery)
+        # Step 3: set new target tile
+        if best_tile:
+            self.target_tile = best_tile
+            self.target_pos = pygame.Vector2(
+                best_tile[0] * tile_size + tile_size // 2,
+                best_tile[1] * tile_size + tile_size // 2
+            )
 
-            if direction.length() > 1:
-                direction = direction.normalize()
-                self.velocity = direction * self.speed * dt
-
-            # If close enough to center, force snap to prevent stuck edge cases
-            if abs(self.rect.centerx - target_x) < 4 and abs(self.rect.centery - target_y) < 4:
-                self.rect.center = (target_x, target_y)
-
+        # Step 4: stuck logic
+        if current_pos.distance_to(self.prev_pos) < 0.5:
+            self.stuck_counter += 1
         else:
-            self.velocity *= 0.5  # gently stop if no path
+            self.stuck_counter = 0
+        self.prev_pos = current_pos
+
+        if self.stuck_counter > 30:
+            nudge = pygame.Vector2(1 if self.facing_right else -1, 0)
+            self.velocity += nudge * 0.2 * self.speed * dt
 
     def attack(self):
         self.player.hit(self)
@@ -128,4 +165,4 @@ class Drone(Entity):
         self.render_health_bar(screen, camera)
 
         # Optional: Draw hitbox (collision box)
-        # pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)
+        pygame.draw.rect(screen, (255, 0, 0), camera.apply(self), 1)

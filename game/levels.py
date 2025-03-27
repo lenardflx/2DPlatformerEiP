@@ -204,15 +204,35 @@ class Level(pygame.sprite.LayeredUpdates):
         for enemy in self.enemies:
             enemy.render(screen, camera)
         self.player.render(screen,camera)
-        
-        #score_font = pygame.font.Font(None, 20)
-        #for x, row in enumerate(self.mp):
-        #    for y, col in enumerate(row):
-        #        x_new = self.tile_size * x
-        #        y_new = self.tile_size * y
-        #        score_surf = score_font.render(str(col), False, (0, 0, 0))
-        #        score_pos = [x_new, y_new]
-        #        screen.blit(score_surf, score_pos)
+
+        self.draw_debug_mp(screen, camera)
+
+    def draw_debug_mp(self, screen, camera):
+        tile_size = self.tile_size
+        font = pygame.font.Font(None, 18)
+
+        player_tile = (
+            self.player.rect.centerx // tile_size,
+            self.player.rect.centery // tile_size
+        )
+
+        for x in range(self.grid_width):
+            for y in range(self.grid_height):
+                screen_x = x * tile_size
+                screen_y = y * tile_size
+                pos = camera.apply(pygame.Rect(screen_x, screen_y, tile_size, tile_size)).topleft
+
+                if self.tile_grid[y][x]:  # Wall tile
+                    pygame.draw.rect(screen, (255, 0, 0), (*pos, tile_size, tile_size), 1)
+                elif (x, y) == player_tile:
+                    pygame.draw.rect(screen, (0, 255, 0), (*pos, tile_size, tile_size), 1)
+                else:
+                    pygame.draw.rect(screen, (0, 0, 255), (*pos, tile_size, tile_size), 1)
+
+                val = self.mp[x][y]
+                if val < 999:
+                    text = font.render(str(val), True, (0, 0, 0))
+                    screen.blit(text, pos)
 
     def setup_player_map(self, x, y):
         # Use NumPy for faster array operations
