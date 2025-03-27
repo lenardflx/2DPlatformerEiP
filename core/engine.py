@@ -75,6 +75,24 @@ class GameEngine:
         # Camera (init later on level load)
         self.camera = None
 
+        # Bottleneck Timings
+        self.logic_time = 0
+        self.render_time = 0
+        self.debug_overlay = False
+        self.is_debug_pressed = False
+
+    def render_debug_overlay(self, surface):
+        """Draw FPS and frame timing on screen."""
+        fps_text = f"FPS: {int(self.clock.get_fps())}"
+        logic_text = f"Logic: {self.logic_time} ms"
+        render_text = f"Render: {self.render_time} ms"
+
+        texts = [fps_text, logic_text, render_text]
+        y = 5
+        for text in texts:
+            self.font_manager.render(self.scaled_surface, text, (5, y), 18)
+            y += 20
+
     def update_completed_levels(self):
         """Loads completed levels from player_progress.json."""
         with open("data/player_progress.json", "r") as f:
@@ -131,7 +149,7 @@ class GameEngine:
 
         self.story_texts = level_data.get("story", [])
         self.story_index = 0
-        self.tutorial_images = [pygame.image.load(path).convert_alpha() for path in level_data.get("tutorial", [])]
+        self.tutorial_images = [pygame.image.load(path).convert() for path in level_data.get("tutorial", [])]
         self.tutorial_index = 0
 
         if self.story_texts:
@@ -186,6 +204,12 @@ class GameEngine:
                 if new:
                     new(self)
 
+            if self.controls.is_action_active("debug") and not self.is_debug_pressed:
+                self.debug_overlay = not self.debug_overlay
+                self.is_debug_pressed = True
+            else:
+                self.is_debug_pressed = False
+
             if self.slide_mode:
                 if event.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
                     self.next_slide()
@@ -209,10 +233,12 @@ class GameEngine:
 
     def update(self):
         """Updates all game objects and logic."""
+        start = pygame.time.get_ticks()
         self.timer += 1
         if self.slow:
             if self.timer % 2:
                 return
+        self.timer += 1
         self.fps = get_game_data("fps")
         self.dt = 1 / self.fps
         if self.slide_mode:
@@ -233,13 +259,11 @@ class GameEngine:
             self.ui.update(self.level.player)
             self.level.check_touch(self.level.player, self)
 
-            if self.level.player.show_death_screen:
-                self.menu.open_menu(MenuState.DEATH, self)
-
             if self.show_level_title:
                 self.level_title_timer += 1
                 if self.level_title_timer >= self.level_title_duration:
                     self.show_level_title = False
+        self.logic_time = pygame.time.get_ticks() - start
 
     def next_slide(self):
         """Progresses to the next slide in the current slide mode."""
@@ -258,6 +282,7 @@ class GameEngine:
 
     def render(self):
         """Renders everything on a fixed surface and scales it while keeping the aspect ratio."""
+        start = pygame.time.get_ticks()
         self.scaled_surface.fill((0, 0, 0))
 
         if self.slide_mode == "story":
@@ -281,8 +306,13 @@ class GameEngine:
         else:
             self.menu.render(self.scaled_surface, self)
 
+        if self.debug_overlay:
+            self.render_debug_overlay(self.scaled_surface)
+
         self.scale_and_center()
         pygame.display.flip()
+
+        self.render_time = pygame.time.get_ticks() - start
 
     def render_story(self, screen):
         screen.fill((0, 0, 0))

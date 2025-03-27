@@ -1,7 +1,6 @@
 import json
-
 import pygame
-
+from game.enemies.death_animation import get_death_frames
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, x, y, sprite_path, json_path, level, sound_manager):
@@ -28,6 +27,9 @@ class Entity(pygame.sprite.Sprite):
         self.tile_size = None
 
         self.load_sprite_metadata(sprite_path, json_path)  # loads size & scale
+
+        self.death_frames = get_death_frames(tile_size=self.tile_size, scale=self.scale)
+        self.is_dying = False
 
         # Calculate scaled hitbox size
         width = self.entity_size[0] * self.scale
@@ -109,6 +111,15 @@ class Entity(pygame.sprite.Sprite):
 
     def update(self, level, dt):
         """Handles entity movement, physics, and animations."""
+        if self.is_dying:
+            self.time_accumulator += dt
+            if self.time_accumulator >= self.animation_speed:
+                self.time_accumulator = 0
+                self.sprite_index += 1
+                if self.sprite_index >= len(self.death_frames):
+                    self.kill()
+            return
+
         if self.health <= 0:
             self.eliminate()
             return
@@ -228,6 +239,19 @@ class Entity(pygame.sprite.Sprite):
 
     def render(self, screen, camera):
         """Renders the entity sprite with gravity-aware offset."""
+        if self.is_dying:
+            frame = self.death_frames[self.sprite_index % len(self.death_frames)]
+            if not self.facing_right:
+                frame = pygame.transform.flip(frame, True, False)
+            if self.is_flipped:
+                frame = pygame.transform.flip(frame, False, True)
+
+            base_pos = camera.apply(self)
+            x = base_pos[0] + self.render_offset[0]
+            y = base_pos[1] if self.is_flipped else base_pos[1] + self.render_offset[1]
+            screen.blit(frame, (x, y))
+            return
+
         base_pos = camera.apply(self)
         x = base_pos[0] + self.render_offset[0]
         y = base_pos[1] if self.is_flipped else base_pos[1] + self.render_offset[1]
@@ -237,10 +261,13 @@ class Entity(pygame.sprite.Sprite):
         self.render_health_bar(screen,camera)
 
     def eliminate(self):
-        """Removes the entity from the game."""
-        self.health = 0
-        self.kill()
-        print(f"{self.__class__.__name__} eliminated")
+        if not self.is_dying:
+            self.health = 0
+            self.velocity.x = 0
+            self.velocity.y = 0
+            self.sprite_index = 0
+            self.state = "death"
+            self.is_dying = True
 
     def render_health_bar(self, screen, camera):
         if self.health == self.max_health:

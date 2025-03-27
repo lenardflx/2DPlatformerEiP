@@ -28,5 +28,6 @@
     "enemies": [
         {"type": "drone", "x": 17, "y": 22}
     ],
-    "spawn": [4, 22]
+    "spawn": [4, 22],
+    "time_to_finish": 999999
 }

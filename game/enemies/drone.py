@@ -30,7 +30,7 @@ class Drone(Entity):
 
         # Behavior tweaks
         self.overhead_offset = -40  # Hover height above player
-        self.attack_range = 30      # Vertical trigger range to drop
+        self.attack_range = 20
 
     def update(self, level, dt):
         distance = pygame.Vector2(self.rect.center).distance_to(self.player.rect.center)
@@ -154,6 +154,17 @@ class Drone(Entity):
 
     def render(self, screen, camera):
         """Render the drone with visual rotation, but keep hitbox unchanged."""
+        if self.is_dying:
+            frame = self.death_frames[self.sprite_index % len(self.death_frames)]
+            if not self.facing_right:
+                frame = pygame.transform.flip(frame, True, False)
+            if self.is_flipped:
+                frame = pygame.transform.flip(frame, False, True)
+
+            render_pos = camera.apply(self)
+            screen.blit(frame, (render_pos[0] + self.render_offset[0], render_pos[1] + self.render_offset[1]))
+            return
+
         render_pos = camera.apply(self)
         image = self.image
 

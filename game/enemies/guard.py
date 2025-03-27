@@ -31,7 +31,6 @@ class Guard(Entity):
 
     def update(self, level, dt):
         """Handles enemy movement and AI behavior."""
-
         if self.velocity.x > 0:
             self.facing_right = True
         elif self.velocity.x < 0:
@@ -62,7 +61,6 @@ class Guard(Entity):
 
         # Attack player if touching them
         if self.rect.colliderect(self.player.rect):
-            self.sound_manager.play_sfx("guard_attack") # Philippcode
             self.attack()
 
     def patrol(self, level, dt):
@@ -85,6 +83,9 @@ class Guard(Entity):
 
     def attack(self):
         """Handles enemy attacking logic."""
+        if self.player.immunity_frames:
+            return
+        self.sound_manager.play_sfx("guard_attack")  # Philippcode
         self.player.hit(self)
 
     def jump(self, dt, x_vel, y_vel, sgn):

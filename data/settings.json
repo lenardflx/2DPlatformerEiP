@@ -23,6 +23,10 @@
         "gravity_inverse": [
             "g",
             null
+        ],
+        "debug": [
+            "9",
+            null
         ]
     }
 }

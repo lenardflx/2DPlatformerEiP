@@ -137,4 +137,4 @@ class Battery(Entity):
         pass  # Overridden: explosion handles damage
 
     def eliminate(self):
-        super().eliminate()
+        self.kill()

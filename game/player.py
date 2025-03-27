@@ -1,5 +1,6 @@
 import pygame
 
+from game.enemies.death_animation import get_death_frames
 from game.entities import Entity
 import game.abilities as abilities
 from game.menu.menu_state import MenuState
@@ -57,18 +58,25 @@ class Player(Entity):
             "gravity_inverse": abilities.GravityInverseAbility(level, self),
         }
 
-        # Death Screen
-        self.show_death_screen = False
-        self.death_screen_cooldown = 50
+        # Death animation state
+        self.is_dying = False
+        self.death_timer = 0
+        self.death_index = 0
+        self.death_frames = get_death_frames(tile_size=self.tile_size, scale=self.scale)
 
     def update(self, level, dt):
         """Handles player movement, physics, and animations."""
-        if self.health <= 0:
-            self.eliminate()
-            self.death_screen_cooldown -= 1
-            if self.death_screen_cooldown <= 0:
-                self.show_death_screen = True
+        if self.is_dying:
+            self.death_timer += dt
+            if self.death_timer >= self.animation_speed:
+                self.death_timer -= self.animation_speed  # use -= instead of =0 to preserve leftover time
+                if self.death_index < len(self.death_frames) - 1:
+                    self.death_index += 1
+                    self.image = self.death_frames[self.death_index]
+                else:
+                    level.engine.menu.open_menu(MenuState.DEATH, level.engine, level)
             return
+
         self.player_dt = dt
 
         if self.invert_timer > 0:
@@ -225,7 +233,7 @@ class Player(Entity):
     def hit(self, attacker, stun=30):
         """Handles player damage, knockback, and hit animation."""
         if self.immunity_frames == 0:
-            self.immunity_frames = 40
+            self.immunity_frames = 80
 
             super().hit(attacker, stun)
 
@@ -236,6 +244,11 @@ class Player(Entity):
 
     def render(self, screen, camera):
         """Renders the player on the screen."""
+        if self.is_dying:
+            frame = self.death_frames[self.death_index]
+            pos = camera.apply(self)
+            screen.blit(frame, pos)  # Optional: add offset if needed
+            return
         if self.flicker:
             return
         super().render(screen, camera)
@@ -260,3 +273,4 @@ class Player(Entity):
     def eliminate(self):
         """Handles player elimination (game over)."""
         self.health = 0
+        super().eliminate()

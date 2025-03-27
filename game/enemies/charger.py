@@ -122,7 +122,6 @@ class Charger(Entity):
                     aligned = (self.facing_right and self.player.rect.centerx > self.rect.centerx) or \
                               (not self.facing_right and self.player.rect.centerx < self.rect.centerx)
                     if aligned:
-                        self.sound_manager.play_sfx("charger_attack")
                         self.attack()
 
                 if self.charge_timer <= 0:
@@ -192,6 +191,7 @@ class Charger(Entity):
 
     def attack(self):
         if self.stun == 0:
+            self.sound_manager.play_sfx("charger_attack")
             self.player.hit(self)
 
     def hit(self, attacker, stun = 0):

@@ -25,6 +25,7 @@ class Level(pygame.sprite.LayeredUpdates):
 
         self.engine = engine
         self.tile_grid = []  # 2D array for fast solid tile lookup
+        self.last_player_tile = None
         self.grid_width = 0
         self.grid_height = 0
         self.mp = None
@@ -188,24 +189,34 @@ class Level(pygame.sprite.LayeredUpdates):
     def update(self, dt, engine):
         """Updates tiles, enemies, and player."""
 
-        self.setup_player_map(self.player.rect.centerx, self.player.rect.centery)
+        current_tile = (
+            self.player.rect.centerx // self.tile_size,
+            self.player.rect.centery // self.tile_size
+        )
+        if self.last_player_tile != current_tile:
+            self.last_player_tile = current_tile
+            self.setup_player_map(*self.player.rect.center)
 
         self.updating_tiles.update(engine)
 
         for enemy in self.enemies:
-            enemy.update(self, dt)
+            if engine.camera.camera.colliderect(enemy.rect.inflate(100, 100)):  # slightly bigger area to preload
+                enemy.update(self, dt)
 
         self.player.update(self, dt)
 
     def render(self, screen, camera):
         """Renders everything inside the level."""
+        camera_rect = camera.camera
         for tile in self.tiles:
-            screen.blit(tile.image, camera.apply(tile).topleft)
+            if camera_rect.colliderect(tile.rect):
+                screen.blit(tile.image, camera.apply(tile).topleft)
         for enemy in self.enemies:
-            enemy.render(screen, camera)
+            if camera_rect.colliderect(enemy.rect):
+                enemy.render(screen, camera)
         self.player.render(screen,camera)
 
-        self.draw_debug_mp(screen, camera)
+        #self.draw_debug_mp(screen, camera)
 
     def draw_debug_mp(self, screen, camera):
         if self.mp is None:
@@ -241,7 +252,7 @@ class Level(pygame.sprite.LayeredUpdates):
         self.mp = np.full((self.grid_width, self.grid_height), 1000, dtype=np.int16)
 
         # Create player map with extended range
-        self.create_player_map(x, y, 20)  # Supporting up to 50 range
+        self.create_player_map(x, y, 20)
 
     def create_player_map(self, x, y, max_distance):
         start_x = math.floor(x / self.tile_size)
