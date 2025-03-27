@@ -62,6 +62,7 @@ class Guard(Entity):
 
         # Attack player if touching them
         if self.rect.colliderect(self.player.rect):
+            self.sound_manager.play_sfx("guard_attack") # Philippcode
             self.attack()
 
     def patrol(self, level, dt):
