@@ -12,5 +12,6 @@
   "laser_gun": "laser_gun.wav",
   "drone_attack": "drone_attack_surrr.wav",
   "guard_attack": "guard_attack.wav",
-  "boss_shield": "boss_shield.wav"
+  "boss_shield": "boss_shield.wav",
+  "boss_healing": "boss_healing.wav"
 }

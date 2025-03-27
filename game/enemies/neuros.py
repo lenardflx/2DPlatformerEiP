@@ -160,7 +160,6 @@ class Neuros(Entity):
         if self.action_cooldown == 0 and self.walking == 0:
             if self.between(0, 16, rnd_phase):
                 self.speak("Analyzing human behavior...")
-                self.shield_self()
                 self.face_player()
                 self.action_cooldown = 1.0
             elif self.between(17, 20, rnd_phase):
@@ -304,6 +303,7 @@ class Neuros(Entity):
     def heal_self(self, amt):
         self.set_state("heal")
         self.speak("Defragmenting system. Optimization complete.")
+        self.sound_manager.play_sfx("boss_healing")
         self.health += min((self.max_health - self.health), amt)
         
     def summon_drones(self):
