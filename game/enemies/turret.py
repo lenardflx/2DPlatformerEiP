@@ -96,7 +96,7 @@ class Turret(Entity):
             self.beam_timer -= 1
 
         self.velocity = pygame.Vector2(0, 0)
-        self.update_animation(dt)
+        self.update_animation(dt, use_flip=False)
 
     def rotate_towards_player(self):
         dx = self.player.rect.centerx - self.rect.centerx

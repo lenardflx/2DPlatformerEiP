@@ -189,7 +189,7 @@ class Entity(pygame.sprite.Sprite):
                 self.on_ground = True
                 return
 
-    def update_animation(self, dt):
+    def update_animation(self, dt, use_flip=True):
         """Updates the entity's animation safely and efficiently."""
         frames = self.sprites.get(self.state, [])
         if not frames:
@@ -209,6 +209,8 @@ class Entity(pygame.sprite.Sprite):
                 self.sprite_index = (self.sprite_index + 1) % len(frames)  # Loop animation
 
         # Apply flipped transformations
+        if not use_flip:
+            return
         self.image = frames[self.sprite_index]
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)

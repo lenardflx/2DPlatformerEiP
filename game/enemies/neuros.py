@@ -416,8 +416,8 @@ class Neuros(Entity):
             if self.between(0, 0.1, self.beam_timer) and self.beam_start and self.beam_end:
                 start = camera.apply(pygame.Rect(self.beam_start, (0, 0))).topleft
                 end = camera.apply(pygame.Rect(self.beam_end, (0, 0))).topleft
-                pygame.draw.line(screen, (40, 100, 255), start, end, 3)
-                pygame.draw.line(screen, (170, 210, 255), start, end, 1)
+                pygame.draw.line(screen, (100, 150, 255), start, end, self.level.tile_size // 4)
+                pygame.draw.line(screen, (170, 200, 255), start, end, self.level.tile_size // 9)
             elif self.between(0.1, self.beam_duration, self.beam_timer) and self.beam_start and self.beam_end:
                 start = camera.apply(pygame.Rect(self.beam_start, (0, 0))).topleft
                 end = camera.apply(pygame.Rect(self.beam_end, (0, 0))).topleft
@@ -426,5 +426,6 @@ class Neuros(Entity):
     def face_player(self):
         self.facing_right = self.rect.centerx < self.player.rect.centerx
 
-    def between(self, x,y,z):
-        return (x <= z <= y or y <= z <= x)
+    @staticmethod
+    def between(x, y, z):
+        return x <= z <= y or y <= z <= x
