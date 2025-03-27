@@ -6,7 +6,7 @@ from game.entities import Entity
 @register_enemy("emp_radar")
 class EMP_Radar(Entity):
     def __init__(self, x, y, level, player):
-        super().__init__(x, y, "assets/characters/drone.png", "assets/characters/drone.json", level, None)
+        super().__init__(x, y, "assets/characters/EMP.png", "assets/characters/EMP.json", level, None)
         self.max_health = 1
         self.health = self.max_health
         self.level = level
