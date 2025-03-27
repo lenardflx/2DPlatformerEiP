@@ -60,6 +60,11 @@
         },
         "11": {
             "index": 11,
+            "collision_type": "solid",
+            "type": "block"
+        },
+        "12": {
+            "index": 12,
             "collision_type": "painful",
             "type": "spike",
             "hitbox": {
@@ -67,8 +72,8 @@
                 "offset_y": 0.5
             }
         },
-        "12": {
-            "index": 12,
+        "13": {
+            "index": 13,
             "collision_type": "painful",
             "type": "spike",
             "hitbox": {
