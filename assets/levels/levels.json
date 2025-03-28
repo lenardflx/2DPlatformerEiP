@@ -20,6 +20,11 @@
         "type": "follow_camera"
       },
       {
+        "image": "assets/backgrounds/level_0_grad.png",
+        "speed": 0,
+        "type": "static"
+      },
+      {
         "image": "assets/backgrounds/level_0_2.png",
         "speed": 0.4,
         "type": "follow_camera"
@@ -49,6 +54,11 @@
         "image": "assets/backgrounds/level_1_1.png",
         "speed": 0.5,
         "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_1_grad.png",
+        "speed": 0,
+        "type": "static"
       },
       {
         "image": "assets/backgrounds/level_1_2.png",
@@ -88,6 +98,11 @@
         "type": "follow_camera"
       },
       {
+        "image": "assets/backgrounds/level_2_grad.png",
+        "speed": 0,
+        "type": "static"
+      },
+      {
         "image": "assets/backgrounds/level_2_2.png",
         "speed": 0.4,
         "type": "follow_camera"
@@ -123,6 +138,11 @@
         "type": "scroll"
       },
       {
+        "image": "assets/backgrounds/level_3_grad.png",
+        "speed": 0,
+        "type": "static"
+      },
+      {
         "image": "assets/backgrounds/level_3_2.png",
         "speed": 0.25,
         "type": "scroll"
@@ -149,6 +169,11 @@
         "image": "assets/backgrounds/level_4_1.png",
         "speed": 0.5,
         "type": "follow_camera"
+      },
+      {
+        "image": "assets/backgrounds/level_4_grad.png",
+        "speed": 0,
+        "type": "static"
       },
       {
         "image": "assets/backgrounds/level_4_2.png",
@@ -191,6 +216,11 @@
         "image": "assets/backgrounds/level_5_1.png",
         "speed": 0.6,
         "type": "follow_camera"
+      },
+            {
+        "image": "assets/backgrounds/level_5_grad.png",
+        "speed": 0,
+        "type": "static"
       },
       {
         "image": "assets/backgrounds/level_5_2.png",
