@@ -72,7 +72,7 @@ class Battery(Entity):
             self.velocity.x = self.patrol_dir * self.speed * dt
             self.patrol_timer -= 1
 
-            if self.detect_wall_ahead():
+            if not self.is_direction_safe(level, "right" if self.facing_right else "left"):
                 self.patrol_dir *= -1
                 self.facing_right = not self.facing_right
 

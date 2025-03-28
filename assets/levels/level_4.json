@@ -80,5 +80,6 @@
         {"type": "drone", "x": 21, "y": 12},
         {"type": "drone", "x": 18, "y": 47}
     ],
-    "spawn": [3, 55]
+    "spawn": [3, 55],
+    "time_to_finish": 140
 }

@@ -53,5 +53,6 @@
         {"type": "battery", "x": 6, "y": 9},
         {"type": "drone", "x": 46, "y": 10}
     ],
-    "spawn": [2, 28]
+    "spawn": [2, 28],
+    "time_to_finish": 150
 }

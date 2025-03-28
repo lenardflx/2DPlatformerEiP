@@ -19,5 +19,6 @@
     "enemies": [
         {"type": "neuros", "x": 22, "y": 5}
     ],
-    "spawn": [5, 12]
+    "spawn": [5, 12],
+    "time_to_finish": 260
 }

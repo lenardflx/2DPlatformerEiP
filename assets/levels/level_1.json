@@ -33,5 +33,5 @@
         {"type": "drone", "x": 55, "y": 9}
     ],
     "spawn": [2, 14],
-    "time_to_finish": 50
+    "time_to_finish": 75
 }

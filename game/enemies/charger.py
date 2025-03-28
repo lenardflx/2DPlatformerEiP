@@ -192,7 +192,7 @@ class Charger(Entity):
         self.facing_right = self.rect.centerx < self.player.rect.centerx
 
     def attack(self):
-        if self.stun == 0:
+        if self.stun == 0 and not self.player.immunity_frames:
             self.sound_manager.play_sfx("charger_attack")
             self.player.hit(self)
 

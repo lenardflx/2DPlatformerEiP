@@ -38,5 +38,6 @@
         {"type": "charger", "x": 24, "y": 4},
         {"type": "turret", "x": 3, "y": 5}
     ],
-    "spawn": [1, 20]
+    "spawn": [1, 20],
+    "time_to_finish": 120
 }

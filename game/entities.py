@@ -70,17 +70,17 @@ class Entity(pygame.sprite.Sprite):
             return False  # Wand voraus
 
         # --- 3. Bodenprüfung: prüfe 1–2 Blöcke unter dem Fußniveau ---
-        foot_y = self.rect.bottom
-        ground_hits = 0
+        foot_y = self.rect.centery
+        is_ground = False
 
         for i in range(1, 3):  # Prüfe 1 bis 2 Blöcke unterhalb
-            probe_y = foot_y + i * tile_size
+            offset = i * tile_size
+            probe_y = foot_y + offset * (-1 if self.is_flipped else 1)
             tile = level.get_tile_at(int(front_x), int(probe_y))
             if tile and getattr(tile, "solid", False):
-                ground_hits += 1
-
-        # --- 4. Entscheide basierend auf Treffer ---
-        return ground_hits > 0
+                is_ground = True
+                break
+        return is_ground
 
     def load_sprite_metadata(self, sprite_path, json_path):
         """Load metadata like entity_size and scale from the JSON config."""
