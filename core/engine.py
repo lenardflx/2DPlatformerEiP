@@ -71,6 +71,7 @@ class GameEngine:
         # Back-/Foregrounds (init later on level load)
         self.backgrounds = []
         self.foreground = None
+        self.show_foreground = False
 
         # Camera (init later on level load)
         self.camera = None
@@ -306,7 +307,8 @@ class GameEngine:
             if self.show_level_title:
                 self.render_level_title(self.scaled_surface)
 
-            self.scaled_surface.blit(self.foreground, (0, 0))
+            if self.show_foreground:
+                self.scaled_surface.blit(self.foreground, (0, 0))
         else:
             self.menu.render(self.scaled_surface, self)
 
